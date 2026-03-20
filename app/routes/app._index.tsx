@@ -379,18 +379,53 @@ export default function Index() {
                         />
                       </Box>
                       <Box minWidth="200px">
-                        <TextField
-                          label="Banner Color"
-                          name="color"
-                          value={config.settings.color}
-                          onChange={(v) => updateSettings({ color: v })}
-                          autoComplete="off"
-                          helpText={
-                            shopBrandColor
+                        <BlockStack gap="200">
+                          <Text as="span" variant="bodyMd" fontWeight="medium">
+                            Banner Color
+                          </Text>
+                          <InlineStack gap="200" blockAlign="center">
+                            <label htmlFor="banner-color-picker" style={{ lineHeight: 0 }}>
+                              <input
+                                id="banner-color-picker"
+                                type="color"
+                                value={
+                                  /^#[0-9A-Fa-f]{6}$/.test(config.settings.color)
+                                    ? config.settings.color
+                                    : "#1a1a1a"
+                                }
+                                onChange={(e) =>
+                                  updateSettings({ color: e.target.value })
+                                }
+                                aria-label="Banner color"
+                                style={{
+                                  width: 44,
+                                  height: 36,
+                                  padding: 2,
+                                  border: "1px solid var(--p-color-border)",
+                                  borderRadius: "var(--p-border-radius-200)",
+                                  cursor: "pointer",
+                                  backgroundColor: "transparent",
+                                }}
+                              />
+                            </label>
+                            <Box minWidth="110px">
+                              <TextField
+                                labelHidden
+                                label="Hex"
+                                name="color"
+                                value={config.settings.color}
+                                onChange={(v) => updateSettings({ color: v })}
+                                autoComplete="off"
+                                placeholder="#1a1a1a"
+                              />
+                            </Box>
+                          </InlineStack>
+                          <Text as="p" variant="bodySm" tone="subdued">
+                            {shopBrandColor
                               ? "Prefilled from your shop brand settings when empty."
-                              : "CSS color, e.g. #1a1a1a"
-                          }
-                        />
+                              : "Pick a color or enter hex (e.g. #1a1a1a)"}
+                          </Text>
+                        </BlockStack>
                       </Box>
                     </InlineStack>
                     <TextField
