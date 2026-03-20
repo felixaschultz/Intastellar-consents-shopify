@@ -1,0 +1,9 @@
+# Learn more: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
+
+api_version = "2025-01"
+
+[[extensions]]
+uid = "590fdfd9-5c27-045e-9e1b-ba27ca14306d7d3f825b"
+type = "theme"
+name = "Intastellar Consents"
+handle = "intastellar-consents-banner"

@@ -1,0 +1,22 @@
+{% comment %}
+  Intastellar Consents: window.INTA from app installation metafields, then uc.js (blocking).
+  target "compliance_head" is Shopify's earliest head injection for app embeds (before other head embeds).
+  Docs: https://developers.intastellarsolutions.com/cookie-solutions/docs/js-docs
+{% endcomment %}
+{% assign inta_config = app.metafields.intastellar_consents.banner_config %}
+{% if inta_config != blank %}
+  <script>
+    window.INTA = {{ inta_config.value | json }};
+  </script>
+{% endif %}
+{% comment %}theme-check-disable RemoteAsset, ParserBlockingScript{% endcomment %}
+<script src="https://consents.cdn.intastellarsolutions.com/uc.js"></script>
+{% comment %}theme-check-enable RemoteAsset, ParserBlockingScript{% endcomment %}
+
+{% schema %}
+{
+  "name": "Intastellar Consents",
+  "target": "compliance_head",
+  "settings": []
+}
+{% endschema %}
