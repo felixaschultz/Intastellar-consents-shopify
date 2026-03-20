@@ -23,6 +23,7 @@ import {
   saveAppInstallationIntaConfig,
   type IntaConfig,
 } from "../lib/intastellar-metafields.server";
+import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
 
 const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js";
 const DOCS_URL =
@@ -84,11 +85,29 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 
   const config = await loadAppInstallationIntaConfig(admin, shopCtx);
+  let shopLogoUrl: string | null = null;
+  let shopBrandColor: string | null = null;
+  try {
+    const assets = await fetchShopBrandAssets(
+      admin,
+      shopNode.myshopifyDomain as string,
+    );
+    shopLogoUrl = assets.logo;
+    shopBrandColor = assets.color;
+  } catch {
+    /* storefront tokens may be unavailable; ignore */
+    console.error("Failed to fetch shop brand assets");
+  }
 
   const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents`;
 
+
+  console.log("shopLogoUrl", shopLogoUrl);
+  console.log("shopBrandColor", shopBrandColor);
   return {
     config,
+    shopLogoUrl,
+    shopBrandColor,
     shop: {
       myshopifyDomain: shopNode.myshopifyDomain as string,
       name: shopCtx.name,
@@ -186,12 +205,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Index() {
   const {
     config: initial,
+    shopLogoUrl,
+    shopBrandColor,
     themeEditorEmbedUrl,
     shop,
   } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
 
-  const [config, setConfig] = useState<IntaConfig>(initial);
+  const initialConfig = useMemo((): IntaConfig => {
+    const patched = { ...initial, settings: { ...initial.settings } };
+    if (!patched.settings.logo && shopLogoUrl) patched.settings.logo = shopLogoUrl;
+    if (!patched.settings.color && shopBrandColor) patched.settings.color = shopBrandColor;
+    return patched;
+  }, [initial, shopLogoUrl, shopBrandColor]);
+
+  const [config, setConfig] = useState<IntaConfig>(initialConfig);
   const [requiredCookiesRaw, setRequiredCookiesRaw] = useState(() =>
     initial.settings.requiredCookies.length
       ? JSON.stringify(initial.settings.requiredCookies)
@@ -228,7 +256,9 @@ export default function Index() {
           : "",
       );
     }
-  }, [fetcher.data]);
+  },
+    [fetcher.data]
+  );
 
   const previewConfig = useMemo(
     (): IntaConfig => ({
@@ -257,7 +287,7 @@ export default function Index() {
     fetcher.data && "ok" in fetcher.data && fetcher.data.ok === true;
 
   return (
-    <Page>
+    <Page fullWidth>
       <TitleBar title="Intastellar Consents" />
       <BlockStack gap="500">
         <Banner tone="info">
@@ -290,7 +320,7 @@ export default function Index() {
         ) : null}
 
         <Layout>
-          <Layout.Section>
+          <Layout.Section variant="oneThird">
             <Card>
               <BlockStack gap="400">
                 <Text as="h2" variant="headingMd">
@@ -347,7 +377,11 @@ export default function Index() {
                           value={config.settings.color}
                           onChange={(v) => updateSettings({ color: v })}
                           autoComplete="off"
-                          helpText="CSS color, e.g. #1a1a1a"
+                          helpText={
+                            shopBrandColor
+                              ? "Prefilled from your shop brand settings when empty."
+                              : "CSS color, e.g. #1a1a1a"
+                          }
                         />
                       </Box>
                     </InlineStack>
@@ -357,6 +391,11 @@ export default function Index() {
                       value={config.settings.logo}
                       onChange={(v) => updateSettings({ logo: v })}
                       autoComplete="off"
+                      helpText={
+                        shopLogoUrl
+                          ? "Prefilled from your shop brand settings when empty."
+                          : undefined
+                      }
                     />
                     <Box minWidth="200px">
                         <Select
@@ -438,7 +477,7 @@ export default function Index() {
                     sandbox="allow-scripts allow-same-origin allow-forms"
                     style={{
                       width: "100%",
-                      height: "420px",
+                      height: "720px",
                       border: "none",
                       display: "block",
                     }}
