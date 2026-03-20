@@ -358,14 +358,23 @@ export default function Index() {
                       onChange={(v) => updateSettings({ logo: v })}
                       autoComplete="off"
                     />
-                    <TextField
-                      label="Layout (settings.design)"
-                      name="design"
-                      value={config.settings.design}
-                      onChange={(v) => updateSettings({ design: v })}
-                      autoComplete="off"
-                      helpText="e.g. overlay (see Intastellar docs for supported values)"
-                    />
+                    <Box minWidth="200px">
+                        <Select
+                          label="Banner Layout"
+                          name="arrange"
+                          options={[
+                            { label: "Overlay", value: "overlay" },
+                            { label: "Full width banner", value: "banner" },
+                            { label: "Banner", value: "bannerV2"}
+                          ]}
+                          value={config.settings.design}
+                          onChange={(v) =>
+                            updateSettings({
+                              design: v,
+                            })
+                          }
+                        />
+                    </Box>
                     <TextField
                       label="Google Analytics / gtag ID (settings.gtagId)"
                       name="gtagId"
