@@ -25,7 +25,7 @@ a {
 }
 
 .index {
-  height: 90vh;
+  min-height: 90vh;
   width: 100%;
   text-align: center;
 }
