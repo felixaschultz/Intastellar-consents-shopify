@@ -93,13 +93,12 @@ export default function Auth() {
                 type="text"
                 name="shop"
                 label="Shop domain"
-                helpText="e.g. your-store.myshopify.com or your custom domain (e.g. yourstore.com)"
                 value={shop}
                 onChange={setShop}
                 autoComplete="on"
                 error={errors.shop}
               />
-              <Button submit>Log in</Button>
+              <button className={styles.button} type="submit">Log in</button>
             </Form>
           </section>
           <section className={styles.appScreen}>
