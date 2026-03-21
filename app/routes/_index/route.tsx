@@ -113,9 +113,8 @@ export default function App() {
               <Form className={styles.form} method="post" /* action="/auth/login" */>
                 <label className={styles.label}>
                   <span>Shop domain</span>
-                  <input className={[styles.input, errors?.shop ? styles.error : ""].join(" ")} type="text" name="shop" />
+                  <input placeholder="e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)" className={[styles.input, errors?.shop ? styles.error : ""].join(" ")} type="text" name="shop" />
                   {errors?.shop ? <span className={[styles.errorText, styles.helpText].join(" ")}>{errors.shop}</span> : <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span> }
-
                 </label>
                 <button className={styles.button} type="submit">
                   Log in
