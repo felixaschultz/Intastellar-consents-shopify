@@ -1,6 +1,13 @@
 name = "remix"
 roles = ["frontend", "backend"]
 webhooks_path = "/webhooks/app/uninstalled"
+application_url = "https://app.consentsmanagement.com"
+redirect_urls = [
+  "https://app.consentsmanagement.com/auth/callback",
+  "https://app.consentsmanagement.com/auth/shopify/callback",
+]
+scopes = "read_checkout_branding_settings,read_themes"
+api_version = "2024-10"
 
 [commands]
 predev = "npx prisma generate"
