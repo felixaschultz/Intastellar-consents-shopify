@@ -78,7 +78,7 @@ export default function App() {
         <header>
           <Link className={styles.logoLink} to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
             <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
-            <span className={styles.comingSoon}>Coming soon</span>
+            <span className={styles.comingSoon}>Coming Soon to App Store</span>
           </Link>
         </header>
         <div className={styles.content}>
