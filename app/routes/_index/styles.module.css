@@ -334,4 +334,8 @@ a {
   .label{
     max-width: 72%;
   }
+
+  .footerLogoImage{
+    width: 300px;
+  }
 }
