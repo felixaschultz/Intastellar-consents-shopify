@@ -266,7 +266,7 @@ a {
   }
 
   .clientLogos{
-    gap: 2rem;
+    gap: 6px;
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
