@@ -10,6 +10,7 @@ import {
   Text,
   TextField,
   Image,
+  BlockStack,
 } from "@shopify/polaris";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
@@ -70,7 +71,103 @@ export default function Auth() {
 
   return (
     <PolarisAppProvider i18n={loaderData.polarisTranslations}>
-      <Page>
+      <div className={styles.index}>
+        <header>
+          <Link className={styles.logoLink} to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
+            <span className={styles.comingSoon}>Coming Soon</span>
+          </Link>
+        </header>
+        <h1 className={styles.heading}>
+          Consent management for your Shopify store - for free
+        </h1>
+        <div className={styles.content}>
+          <section>
+            <BlockStack gap="200">
+              <Text as="p" variant="bodyMd">
+                Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
+              </Text>
+            </BlockStack>
+            <Form className={styles.form} method="post" action="/auth/login">
+              <TextField
+                type="text"
+                name="shop"
+                label="Shop domain"
+                helpText="e.g. your-store.myshopify.com or your custom domain (e.g. yourstore.com)"
+                value={shop}
+                onChange={setShop}
+                autoComplete="on"
+                error={errors.shop}
+              />
+              <Button submit>Log in</Button>
+            </Form>
+          </section>
+          <section className={styles.appScreen}>
+            <Image source={
+              appScreen
+            } alt="Intastellar Consents" className={styles.featuresImage} />
+            <Text as="p" variant="bodyMd">
+              Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
+              <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
+            </Text>
+          </section>
+        </div>
+        <BlockStack gap="200">
+            <ul className={styles.list}>
+              {/* Add the features of the Intastellar Consents app here */}
+              <li>
+                GDPR, CCPA & DMA compliant
+              </li>
+              <li>
+                Hosted securely in the EU
+              </li>
+              <li>
+                Google Consent Mode (incl. Advanced)
+              </li>
+              <li>
+                Shopify Customer Privacy API
+              </li>
+            </ul>
+        </BlockStack>
+        <BlockStack gap="200">
+            <div className={styles.stats}>
+              <div className={styles.stat}>
+                <span className={styles.statNumber}>276K+</span>
+                <span className={styles.statLabel}>Consent decisions processed</span>
+                <span className={styles.statDescription}>— Across live websites</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statNumber}>65%</span>
+                <span className={styles.statLabel}>Average consent acceptance rate</span>
+                <span className={styles.statDescription}>— With clear, compliant UX</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statNumber}>149</span>
+                <span className={styles.statLabel}>Countries</span>
+                <span className={styles.statDescription}>— Region-aware consent handling</span>
+              </div>
+            </div>
+        </BlockStack>
+        <div className={styles.clientLogos}>
+          <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord" className={styles.clientLogo} />
+          <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
+          <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://inta.dev/waterless/wordpress/wp-content/uploads/2025/09/cropped-waterless-logo-2.png" alt="Waterless" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+        </div>
+      </div>
+      <footer className={styles.footer}>
+        <BlockStack gap="200">
+          <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
+          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
+          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
+          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+          <Text as="p" variant="bodyMd">
+            &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
+          </Text>
+        </BlockStack>
+      </footer>
+      {/* <Page>
         <Link to="/">
           <Image source={logo} alt="Intastellar Consents" className={styles.loginLogoImage} />
         </Link>
@@ -94,15 +191,18 @@ export default function Auth() {
             </FormLayout>
           </Form>
         </Card>
-      </Page>
-      <footer className={styles.footer}>
-          <Text as="p" variant="bodyMd">
-            &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
-          </Text>
-          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> |
-          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> |
-          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+        <footer className={styles.footer}>
+          <BlockStack gap="200">
+            <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
+            <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
+            <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
+            <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+            <Text as="p" variant="bodyMd">
+              &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
+            </Text>
+          </BlockStack>
         </footer>
+      </Page> */}
     </PolarisAppProvider>
   );
 }
