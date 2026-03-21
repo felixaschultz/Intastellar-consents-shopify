@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import {
   AppProvider as PolarisAppProvider,
   Button,
@@ -9,15 +9,18 @@ import {
   Page,
   Text,
   TextField,
+  Image,
 } from "@shopify/polaris";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
-
+import styles from "../_index/styles.module.css";
 import { login } from "../../shopify.server";
+
+import logo from "../../assets/combined-intastellar-shopify.svg";
 
 import { loginErrorMessage } from "./error.server";
 
-export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
+export const links = () => [{ rel: "stylesheet", href: polarisStyles }, { rel: "stylesheet", href: styles }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const errors = loginErrorMessage(await login(request));
@@ -42,6 +45,9 @@ export default function Auth() {
   return (
     <PolarisAppProvider i18n={loaderData.polarisTranslations}>
       <Page>
+        <Link to="/">
+          <Image source={logo} alt="Intastellar Consents" className={styles.loginLogoImage} />
+        </Link>
         <Card>
           <Form method="post">
             <FormLayout>
@@ -63,6 +69,14 @@ export default function Auth() {
           </Form>
         </Card>
       </Page>
+      <footer className={styles.footer}>
+          <Text as="p" variant="bodyMd">
+            &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
+          </Text>
+          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> |
+          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> |
+          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+        </footer>
     </PolarisAppProvider>
   );
 }

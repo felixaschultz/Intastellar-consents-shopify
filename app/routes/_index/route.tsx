@@ -91,18 +91,20 @@ export default function App() {
               </button>
             </Form>
           )}
-          <ul className={styles.list}>
-            {/* Add the features of the Intastellar Consents app here */}
-            <li>
-              GDPR, CCPA & DMA compliant
-            </li>
-            <li>
-              Hosted securely in the EU
-            </li>
-            <li>
-              Google Consent Mode (incl. Advanced)
-            </li>
-          </ul>
+          <BlockStack gap="200">
+            <ul className={styles.list}>
+              {/* Add the features of the Intastellar Consents app here */}
+              <li>
+                GDPR, CCPA & DMA compliant
+              </li>
+              <li>
+                Hosted securely in the EU
+              </li>
+              <li>
+                Google Consent Mode (incl. Advanced)
+              </li>
+            </ul>
+          </BlockStack>
           <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           <Text as="p" variant="bodyMd">
             Wanna access your users consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform</Link>.

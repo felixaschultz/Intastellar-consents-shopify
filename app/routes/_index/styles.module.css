@@ -17,6 +17,11 @@ body{
 a {
   color: #c09f53;
   text-decoration: none;
+  display: inline-block;
+  margin: 0 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .index {
@@ -37,8 +42,16 @@ a {
   height: auto;
 }
 
+.loginLogoImage {
+  width: 500px;
+  padding: 15px;
+  height: auto;
+  margin: auto;
+}
+
 .featuresImage{
   width: 450px;
+  margin: auto;
 }
 
 .text {
@@ -98,12 +111,15 @@ a {
   padding-top: 3rem;
   margin: 0;
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 2rem;
 }
 
 .list > li {
   max-width: 20rem;
   text-align: left;
+  text-align: center;
 }
 
 .footer {
