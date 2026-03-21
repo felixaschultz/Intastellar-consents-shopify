@@ -6,6 +6,7 @@ import { login } from "../../shopify.server";
 
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
+import appScreen from "../../assets/app-screen.png";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -86,7 +87,7 @@ export default function App() {
               <Form className={styles.form} method="post" action="/auth/login">
                 <label className={styles.label}>
                   <span>Shop domain</span>
-                  <input disabled className={styles.input} type="text" name="shop" />
+                  <input className={styles.input} type="text" name="shop" />
                   <span>e.g: my-shop-domain.myshopify.com</span>
                 </label>
                 <button className={styles.button} type="submit">
@@ -115,7 +116,7 @@ export default function App() {
             Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
           </Text>
           <Image source={
-            "https://www.intastellarsolutions.com/assets/gdprcookiebanner/consents-website-banner.png"
+            appScreen
           } alt="Intastellar Consents" className={styles.featuresImage} />
           </section>
         </div>
