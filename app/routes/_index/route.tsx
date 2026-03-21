@@ -22,12 +22,20 @@ export const meta = () => {
   return [
     { title: "Intastellar Consents: Consent management for your Shopify store" },
     { description: "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place." },
+    { property: "og:image", content: appScreen },
+    { property: "og:title", content: "Intastellar Consents: Consent management for your Shopify store" },
+    { property: "og:description", content: "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place." },
+    { property: "og:url", content: "https://www.intastellarsolutions.com/solutions/cookie-consents" },
+    { property: "og:type", content: "website" },
+    { property: "og:site_name", content: "Intastellar Consents" },
+    { property: "og:locale", content: "en_US" },
+    { property: "og:locale:alternate", content: "en_US" },
   ];
 };
 
 // Replace favicon with the logo
 
-export const head = () => {
+export const links = () => {
   /* 
   Use these links to replace the favicon:
   <link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="apple-touch-icon" sizes="57x57" href="https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-57x57.png">
