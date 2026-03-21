@@ -128,6 +128,12 @@ export default function App() {
             </Text>
           </section>
         </div>
+        <div className={styles.clientLogos}>
+          <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord" className={styles.clientLogo} />
+          <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
+          <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://inta.dev/waterless/wordpress/wp-content/uploads/2025/09/cropped-waterless-logo-2.png" alt="Waterless" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+        </div>
       </div>
       <footer className={styles.footer}>
         <BlockStack gap="200">

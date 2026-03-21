@@ -196,6 +196,26 @@ a {
   margin: 0 auto;
 }
 
+.clientLogos{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem 0;
+}
+
+.clientLogo{
+  width: 100px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.largerLogo{
+  width: 150px;
+}
+
 @media only screen and (max-width: 50rem) {
   .list {
     display: block;
@@ -231,5 +251,9 @@ a {
 
   .comingSoon{
     right: 10px;
+  }
+
+  .clientLogos{
+    display: block;
   }
 }
