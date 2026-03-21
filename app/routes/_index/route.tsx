@@ -96,7 +96,7 @@ export default function App() {
                 <label className={styles.label}>
                   <span>Shop domain</span>
                   <input className={styles.input} type="text" name="shop" />
-                  <span>e.g. my-shop.myshopify.com</span>
+                  <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span>
                 </label>
                 <button className={styles.button} type="submit">
                   Log in
@@ -130,7 +130,6 @@ export default function App() {
                 </li>
               </ul>
             </BlockStack>
-            <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           </section>
           <section>
             <Image source={
@@ -139,6 +138,7 @@ export default function App() {
             <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
             </Text>
+            <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           </section>
         </div>
         <div className={styles.clientLogos}>
