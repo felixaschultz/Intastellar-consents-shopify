@@ -112,7 +112,9 @@ export default function App() {
           <Text as="p" variant="bodyMd">
             &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
           </Text>
-          <Link to="https://www.intastellarsolutions.com/privacy-policy" target="_blank">Privacy Policy</Link>
+          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link>
+          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link>
+          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
         </BlockStack>
       </footer>
     </>
