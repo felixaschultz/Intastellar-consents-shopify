@@ -75,9 +75,9 @@ export default function App() {
             <h1 className={styles.heading}>
               Consent management for your Shopify store
             </h1>
-            <p className={styles.text}>
+            <Text as="p" variant="bodyMd">
               Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
-            </p>
+            </Text>
           </BlockStack>
           {showForm && (
             <Form className={styles.form} method="post" action="/auth/login">
@@ -102,12 +102,14 @@ export default function App() {
             <li>
               Google Consent Mode (incl. Advanced)
             </li>
-            <li>connects directly with the tools you rely on including analytics, CRM, experimentation, and CMS platforms.</li>
           </ul>
           <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           <Text as="p" variant="bodyMd">
             Wanna access your users consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform</Link>.
           </Text>
+          <Image source={
+            "https://www.intastellarsolutions.com/assets/gdprcookiebanner/consents-website-banner.png"
+          } alt="Intastellar Consents" className={styles.featuresImage} />
         </div>
       </div>
       <footer className={styles.footer}>
