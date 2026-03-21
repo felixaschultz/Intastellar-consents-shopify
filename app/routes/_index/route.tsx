@@ -67,14 +67,16 @@ export default function App() {
   return (
     <>
       <div className={styles.index}>
-        <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
-          <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
-        </Link>
+        <header>
+          <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
+          </Link>
+        </header>
         <div className={styles.content}>
           <section>
             <BlockStack gap="200">
               <h1 className={styles.heading}>
-                Consent management for your Shopify store
+                Consent management for your Shopify store - for free
               </h1>
               <Text as="p" variant="bodyMd">
                 Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
@@ -84,7 +86,7 @@ export default function App() {
               <Form className={styles.form} method="post" action="/auth/login">
                 <label className={styles.label}>
                   <span>Shop domain</span>
-                  <input className={styles.input} type="text" name="shop" />
+                  <input disabled className={styles.input} type="text" name="shop" />
                   <span>e.g: my-shop-domain.myshopify.com</span>
                 </label>
                 <button className={styles.button} type="submit">
