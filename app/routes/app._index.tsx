@@ -88,11 +88,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   let shopLogoUrl: string | null = null;
   let shopBrandColor: string | null = null;
   try {
-    const assets = await fetchShopBrandAssets(admin);
-    shopLogoUrl = assets.logo;
-    shopBrandColor = assets.color;
+    const result = await fetchShopBrandAssets(admin);
+    shopLogoUrl = result.logo;
+    shopBrandColor = result.color;
   } catch {
-    /* checkout branding or theme fetch failed */
+    /* brand prefill optional; merchants can set logo/color manually */
   }
 
   const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents`;
