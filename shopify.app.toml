@@ -3,7 +3,7 @@
 
 client_id = ""
 name = "Intastellar Consents"
-application_url = "https://example.com"
+application_url = "https://app.consentsmanagement.com"
 embedded = true
 
 [build]
@@ -15,10 +15,11 @@ automatically_update_urls_on_dev = true
 # See https://shopify.dev/docs/api/usage/access-scopes
 scopes = "read_checkout_branding_settings,read_themes"
 
+# Same host as application_url + /auth/* (see app/shopify.server.ts authPathPrefix).
 [auth]
 redirect_urls = [
-  "https://example.com/auth/callback",
-  "https://example.com/auth/shopify/callback",
+  "https://app.consentsmanagement.com/auth/callback",
+  "https://app.consentsmanagement.com/auth/shopify/callback",
 ]
 
 [webhooks]
