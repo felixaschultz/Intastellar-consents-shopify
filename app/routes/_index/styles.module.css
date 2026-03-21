@@ -60,6 +60,7 @@ a {
 
 .content {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   max-width: 80rem;
   margin: 0 auto;

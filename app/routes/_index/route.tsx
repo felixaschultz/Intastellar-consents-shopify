@@ -68,30 +68,33 @@ export default function App() {
     <>
       <div className={styles.index}>
         <div className={styles.content}>
-          <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
-            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
-          </Link>
-          <BlockStack gap="200">
-            <h1 className={styles.heading}>
-              Consent management for your Shopify store
-            </h1>
-            <Text as="p" variant="bodyMd">
-              Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
-            </Text>
-          </BlockStack>
-          {showForm && (
-            <Form className={styles.form} method="post" action="/auth/login">
-              <label className={styles.label}>
-                <span>Shop domain</span>
-                <input className={styles.input} type="text" name="shop" />
-                <span>e.g: my-shop-domain.myshopify.com</span>
-              </label>
-              <button className={styles.button} type="submit">
-                Log in
-              </button>
-            </Form>
-          )}
-          <BlockStack gap="200">
+          <section>
+            <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+              <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
+            </Link>
+            <BlockStack gap="200">
+              <h1 className={styles.heading}>
+                Consent management for your Shopify store
+              </h1>
+              <Text as="p" variant="bodyMd">
+                Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
+              </Text>
+            </BlockStack>
+            {showForm && (
+              <Form className={styles.form} method="post" action="/auth/login">
+                <label className={styles.label}>
+                  <span>Shop domain</span>
+                  <input className={styles.input} type="text" name="shop" />
+                  <span>e.g: my-shop-domain.myshopify.com</span>
+                </label>
+                <button className={styles.button} type="submit">
+                  Log in
+                </button>
+              </Form>
+            )}
+          </section>
+          <section>
+            <BlockStack gap="200">
             <ul className={styles.list}>
               {/* Add the features of the Intastellar Consents app here */}
               <li>
@@ -112,6 +115,7 @@ export default function App() {
           <Image source={
             "https://www.intastellarsolutions.com/assets/gdprcookiebanner/consents-website-banner.png"
           } alt="Intastellar Consents" className={styles.featuresImage} />
+          </section>
         </div>
       </div>
       <footer className={styles.footer}>
