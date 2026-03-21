@@ -138,7 +138,7 @@ a {
   max-width: 30rem;
   text-align: left;
   font-size: 1rem;
-  width: 82%;
+  width: 79%;
 }
 
 .helpText{
@@ -179,7 +179,7 @@ a {
 }
 
 .button {
-  padding: 0.4rem;
+  padding: .4rem 1rem;
   background-color: #c09f53;
   color: #fff;
   border: none;
