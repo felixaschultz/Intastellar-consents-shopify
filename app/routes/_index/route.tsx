@@ -1,11 +1,11 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
-import { BlockStack, Image } from "@shopify/polaris";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import { BlockStack, Image, Text } from "@shopify/polaris";
 import { login } from "../../shopify.server";
 
 import styles from "./styles.module.css";
-import logo from "../../assets/intastellar-consents-logo.svg";
+import logo from "../../assets/consents-logo.svg";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -67,7 +67,9 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <Image source={logo} alt="Intastellar Consents" width={300} height={100} />
+        <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+          <Image source={logo} alt="Intastellar Consents" width={300} height={100} />
+        </Link>
         <BlockStack gap="200">
           <h1 className={styles.heading}>
             Consent management for your Shopify store
@@ -103,6 +105,14 @@ export default function App() {
           </li>
         </ul>
       </div>
+      <footer className={styles.footer}>
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
+          </Text>
+          <Link to="https://www.intastellarsolutions.com/privacy-policy" target="_blank">Privacy Policy</Link>
+        </BlockStack>
+      </footer>
     </div>
   );
 }
