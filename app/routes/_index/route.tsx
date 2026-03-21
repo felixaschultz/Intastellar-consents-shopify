@@ -12,7 +12,7 @@ import appScreen from "../../assets/app-screen.png";
  * Set `VITE_GTM_CONTAINER_ID=GTM-XXXX` in `.env`.
  */
 export const handle = {
-  googleTagManagerId: import.meta.env.VITE_GTM_CONTAINER_ID,
+  googleTagManagerId: process.env.VITE_GTM_CONTAINER_ID,
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
