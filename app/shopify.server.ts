@@ -13,6 +13,14 @@ const scopesFromEnv = (process.env.SCOPES ?? "")
   .map((s) => s.trim())
   .filter(Boolean);
 
+/** New FormData must not reuse the old multipart boundary from Content-Type. */
+function headersForRebuiltFormData(request: Request): Headers {
+  const h = new Headers(request.headers);
+  h.delete("content-type");
+  h.delete("content-length");
+  return h;
+}
+
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
@@ -36,7 +44,7 @@ async function loginWithResolvedShopDomain(request: Request) {
   const innerLogin = shopify.login.bind(shopify);
 
   if (request.method === "GET") {
-    const shopQ = url.searchParams.get("shop");
+    const shopQ = url.searchParams.get("shop")?.trim();
     if (shopQ) {
       const resolved = await resolveShopInputToMyshopifyHost(shopQ);
       if (resolved) {
@@ -68,7 +76,7 @@ async function loginWithResolvedShopDomain(request: Request) {
       new Request(request.url, {
         method: "POST",
         body: newFd,
-        headers: request.headers,
+        headers: headersForRebuiltFormData(request),
       }),
     );
   }

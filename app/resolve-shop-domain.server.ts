@@ -6,11 +6,16 @@
 const MYSHOPIFY_HOST = /\.myshopify\.com$/i;
 
 function shopHostname(raw: string): string | null {
-  const t = raw.trim();
+  const t = raw.trim().replace(/^\uFEFF/, "");
   if (!t) return null;
   try {
-    const withProto = /^[a-z]+:\/\//i.test(t) ? t : `https://${t}`;
-    const u = new URL(withProto);
+    let asUrl = t;
+    if (asUrl.startsWith("//")) {
+      asUrl = `https:${asUrl}`;
+    } else if (!/^[a-z][a-z0-9+.-]*:/i.test(asUrl)) {
+      asUrl = `https://${asUrl}`;
+    }
+    const u = new URL(asUrl);
     return u.hostname.toLowerCase() || null;
   } catch {
     return null;
