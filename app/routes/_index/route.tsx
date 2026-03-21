@@ -76,7 +76,7 @@ export default function App() {
               Consent management for your Shopify store
             </h1>
             <p className={styles.text}>
-              Manage your cookie consents and preferences in one place.
+              Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
             </p>
           </BlockStack>
           {showForm && (
@@ -92,19 +92,22 @@ export default function App() {
             </Form>
           )}
           <ul className={styles.list}>
+            {/* Add the features of the Intastellar Consents app here */}
             <li>
-              <strong>Google Consent Mode v2</strong>. Google's new consent mode that allows you to manage your cookie consents and preferences in one place. Supporting advanced mode.
+              GDPR, CCPA & DMA compliant
             </li>
             <li>
-              <strong>GDPR compliance</strong>. We help you comply with GDPR and other privacy laws.
+              Hosted securely in the EU
             </li>
             <li>
-              <strong>CCPA compliance</strong>. We help you comply with CCPA and other privacy laws.
+              Google Consent Mode (incl. Advanced)
             </li>
-            <li>
-              <strong>Cookie consent banner</strong>. We help you display a cookie consent banner on your store.
-            </li>
+            <li>connects directly with the tools you rely on including analytics, CRM, experimentation, and CMS platforms.</li>
           </ul>
+          <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
+          <Text as="p" variant="bodyMd">
+            Wanna access your users consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform</Link>.
+          </Text>
         </div>
       </div>
       <footer className={styles.footer}>
@@ -112,8 +115,8 @@ export default function App() {
           <Text as="p" variant="bodyMd">
             &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
           </Text>
-          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link>
-          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link>
+          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
+          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
           <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
         </BlockStack>
       </footer>
