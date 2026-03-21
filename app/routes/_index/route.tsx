@@ -5,7 +5,7 @@ import { BlockStack, Image, Text } from "@shopify/polaris";
 import { login } from "../../shopify.server";
 
 import styles from "./styles.module.css";
-import logo from "../../assets/consents-logo.svg";
+import logo from "../../assets/combined-intastellar-shopify.svg";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
