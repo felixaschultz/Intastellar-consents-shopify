@@ -96,12 +96,25 @@ export default function App() {
                 <label className={styles.label}>
                   <span>Shop domain</span>
                   <input className={styles.input} type="text" name="shop" />
-                  <span>e.g: my-shop-domain.myshopify.com</span>
+                  <span>e.g. my-shop.myshopify.com or your custom domain</span>
                 </label>
                 <button className={styles.button} type="submit">
                   Log in
                 </button>
               </Form>
+            )}
+            {showForm && (
+              <Text as="p" variant="bodyMd" tone="subdued">
+                Don&apos;t have a store yet?{" "}
+                <Link
+                  to="https://www.shopify.com/free-trial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Create a Shopify store (free trial),
+                </Link>
+                 then return here to install the app.
+              </Text>
             )}
             <BlockStack gap="200">
               <ul className={styles.list}>
