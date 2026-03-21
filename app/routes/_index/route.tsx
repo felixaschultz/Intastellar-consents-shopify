@@ -124,7 +124,7 @@ export default function App() {
               </Text>
             )}
           </section>
-          <section>
+          <section className={styles.appScreen}>
             <Image source={
               appScreen
             } alt="Intastellar Consents" className={styles.featuresImage} />
