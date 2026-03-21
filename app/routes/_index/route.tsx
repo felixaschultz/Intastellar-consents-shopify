@@ -88,12 +88,12 @@ export default function App() {
             <span className={styles.comingSoon}>Coming Soon</span>
           </Link>
         </header>
+        <h1 className={styles.heading}>
+          Consent management for your Shopify store - for free
+        </h1>
         <div className={styles.content}>
           <section>
             <BlockStack gap="200">
-              <h1 className={styles.heading}>
-                Consent management for your Shopify store - for free
-              </h1>
               <Text as="p" variant="bodyMd">
                 Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
               </Text>
@@ -130,8 +130,8 @@ export default function App() {
             } alt="Intastellar Consents" className={styles.featuresImage} />
             <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
+              <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
             </Text>
-            <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           </section>
         </div>
         <BlockStack gap="200">
@@ -154,7 +154,7 @@ export default function App() {
         <BlockStack gap="200">
             <div className={styles.stats}>
               <div className={styles.stat}>
-                <span className={styles.statNumber}>276.000+</span>
+                <span className={styles.statNumber}>276K+</span>
                 <span className={styles.statLabel}>Consent decisions processed</span>
                 <span className={styles.statDescription}>— Across live websites</span>
               </div>

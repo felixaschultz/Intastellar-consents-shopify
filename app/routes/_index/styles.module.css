@@ -282,7 +282,6 @@ a {
     grid-template-columns: 1fr;
     display: block;
     height: 100%;
-    margin-top: 5.5rem;
   }
 
   .form{
@@ -314,7 +313,7 @@ a {
     width: 100%;
   }
   header{
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     width: 100%;
