@@ -16,7 +16,7 @@ import {
   Link,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
-import { ApiVersion, authenticate, unauthenticated } from "../shopify.server";
+import { authenticate } from "../shopify.server";
 import {
   defaultIntaConfig,
   loadAppInstallationIntaConfig,
@@ -57,7 +57,7 @@ function buildPreviewSrcDoc(config: IntaConfig): string {
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin } = await authenticate.admin(request);
 
   const shopRes = await admin.graphql(
     `#graphql
@@ -87,28 +87,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const config = await loadAppInstallationIntaConfig(admin, shopCtx);
   let shopLogoUrl: string | null = null;
   let shopBrandColor: string | null = null;
-  let storefrontFromSession: Awaited<
-    ReturnType<typeof unauthenticated.storefront>
-  >["storefront"] | undefined;
   try {
-    const ctx = await unauthenticated.storefront(session.shop);
-    storefrontFromSession = ctx.storefront;
-  } catch {
-    /* offline session unavailable for Storefront client */
-  }
-  try {
-    const assets = await fetchShopBrandAssets(
-      admin,
-      shopNode.myshopifyDomain as string,
-      {
-        storefront: storefrontFromSession,
-        storefrontApiVersion: ApiVersion.January25,
-      },
-    );
+    const assets = await fetchShopBrandAssets(admin);
     shopLogoUrl = assets.logo;
     shopBrandColor = assets.color;
   } catch {
-    /* token create / Storefront fetch failed */
+    /* checkout branding or theme fetch failed */
   }
 
   const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents`;
