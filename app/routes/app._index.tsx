@@ -13,17 +13,18 @@ import {
   Select,
   InlineStack,
   Banner,
-  Link,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import {
   defaultIntaConfig,
-  loadAppInstallationIntaConfig,
+  loadAppInstallationHomeData,
   saveAppInstallationIntaConfig,
+  saveOnboardingState,
   type IntaConfig,
 } from "../lib/intastellar-metafields.server";
 import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
+import { IntastellarOnboardingModal } from "../components/IntastellarOnboardingModal";
 
 const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js";
 const DOCS_URL =
@@ -84,7 +85,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     primaryDomainHost,
   };
 
-  const config = await loadAppInstallationIntaConfig(admin, shopCtx);
+  const { config, onboarding } = await loadAppInstallationHomeData(
+    admin,
+    shopCtx,
+  );
   let shopLogoUrl: string | null = null;
   let shopBrandColor: string | null = null;
   try {
@@ -106,12 +110,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       primaryDomainHost,
     },
     themeEditorEmbedUrl,
+    onboardingCompleted: onboarding.completed,
   };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
   const form = await request.formData();
+  const intent = String(form.get("intent") ?? "");
 
   const shopRes = await admin.graphql(
     `#graphql
@@ -136,6 +142,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ok: false as const,
       message: "Shop or app installation unavailable",
     };
+  }
+
+  if (intent === "completeOnboarding") {
+    const result = await saveOnboardingState(admin, installationId, {
+      completed: true,
+    });
+    if (!result.ok) {
+      return { ok: false as const, message: result.message };
+    }
+    return { ok: true as const, intent: "completeOnboarding" as const };
   }
 
   const primaryDomainHost = shopNode.primaryDomain?.host ?? "";
@@ -201,6 +217,7 @@ export default function Index() {
     shopBrandColor,
     themeEditorEmbedUrl,
     shop,
+    onboardingCompleted,
   } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
 
@@ -281,19 +298,16 @@ export default function Index() {
   return (
     <Page fullWidth>
       <TitleBar title="Intastellar Consents" />
+      <IntastellarOnboardingModal
+        themeEditorEmbedUrl={themeEditorEmbedUrl}
+        docsUrl={DOCS_URL}
+        onboardingCompleted={onboardingCompleted}
+      />
       <BlockStack gap="500">
         <Banner tone="info">
           <BlockStack gap="200">
             <Text as="p" variant="bodyMd">
-              The storefront banner is always loaded with{" "}
-              <code>{UC_JS_URL}</code> after <code>window.INTA</code> is set, as
-              described in the{" "}
-              <Link url={DOCS_URL} target="_blank">
-                Intastellar JavaScript documentation
-              </Link>
-              . Enable the app embed under{" "}
-              <strong>Online Store → Themes → App embeds</strong> (or use the
-              link below).
+             To show the banner on your store, you need to activate the app embed. Click the button below to open the theme editor — then just save.
             </Text>
             <InlineStack gap="300" wrap>
               <Button url={themeEditorEmbedUrl} target="_blank">

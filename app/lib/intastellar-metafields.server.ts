@@ -8,6 +8,12 @@ type AdminClient = {
 /** App-installation metafield (app-owned); exposed in theme app extensions as `app.metafields`. */
 export const INTA_METAFIELD_NAMESPACE = "intastellar_consents";
 export const INTA_METAFIELD_KEY = "banner_config";
+export const INTA_ONBOARDING_METAFIELD_KEY = "onboarding";
+
+export type OnboardingState = {
+  completed: boolean;
+  completedAt?: string;
+};
 
 export type IntaSettings = {
   rootDomain: string;
@@ -85,31 +91,116 @@ export function parseIntaConfigFromMetafieldValue(
   }
 }
 
-export async function loadAppInstallationIntaConfig(
+export function parseOnboardingState(
+  raw: string | null | undefined,
+): OnboardingState {
+  if (!raw) return { completed: false };
+  try {
+    const o = JSON.parse(raw) as OnboardingState;
+    return {
+      completed: Boolean(o.completed),
+      completedAt:
+        typeof o.completedAt === "string" ? o.completedAt : undefined,
+    };
+  } catch {
+    return { completed: false };
+  }
+}
+
+/** Single round-trip: banner config, onboarding flag, installation id (for home / loader). */
+export async function loadAppInstallationHomeData(
   admin: AdminClient,
   shop: { name: string; primaryDomainHost: string },
-): Promise<IntaConfig> {
+): Promise<{
+  config: IntaConfig;
+  onboarding: OnboardingState;
+  installationId: string;
+}> {
   const res = await admin.graphql(
     `#graphql
-    query IntaAppInstallationMetafield($namespace: String!, $key: String!) {
+    query IntaAppInstallationHome {
       currentAppInstallation {
-        metafield(namespace: $namespace, key: $key) {
+        id
+        bannerConfig: metafield(
+          namespace: "${INTA_METAFIELD_NAMESPACE}",
+          key: "${INTA_METAFIELD_KEY}"
+        ) {
+          value
+        }
+        onboardingState: metafield(
+          namespace: "${INTA_METAFIELD_NAMESPACE}",
+          key: "${INTA_ONBOARDING_METAFIELD_KEY}"
+        ) {
           value
         }
       }
     }`,
+  );
+  const json = await res.json();
+  const inst = json.data?.currentAppInstallation;
+  const installationId = inst?.id as string | undefined;
+  if (!installationId) {
+    throw new Response("App installation unavailable", { status: 500 });
+  }
+  const bannerRaw = inst?.bannerConfig?.value as string | undefined;
+  const onboardingRaw = inst?.onboardingState?.value as string | undefined;
+  return {
+    config: parseIntaConfigFromMetafieldValue(bannerRaw, shop),
+    onboarding: parseOnboardingState(onboardingRaw),
+    installationId,
+  };
+}
+
+export async function loadAppInstallationIntaConfig(
+  admin: AdminClient,
+  shop: { name: string; primaryDomainHost: string },
+): Promise<IntaConfig> {
+  const { config } = await loadAppInstallationHomeData(admin, shop);
+  return config;
+}
+
+export async function saveOnboardingState(
+  admin: AdminClient,
+  appInstallationId: string,
+  state: OnboardingState,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const payload: OnboardingState = {
+    ...state,
+    ...(state.completed
+      ? { completedAt: state.completedAt ?? new Date().toISOString() }
+      : {}),
+  };
+  const res = await admin.graphql(
+    `#graphql
+    mutation IntaOnboardingMetafieldSet($metafields: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $metafields) {
+        metafields { id }
+        userErrors { field message }
+      }
+    }`,
     {
       variables: {
-        namespace: INTA_METAFIELD_NAMESPACE,
-        key: INTA_METAFIELD_KEY,
+        metafields: [
+          {
+            ownerId: appInstallationId,
+            namespace: INTA_METAFIELD_NAMESPACE,
+            key: INTA_ONBOARDING_METAFIELD_KEY,
+            type: "json",
+            value: JSON.stringify(payload),
+          },
+        ],
       },
     },
   );
   const json = await res.json();
-  const raw = json.data?.currentAppInstallation?.metafield?.value as
-    | string
-    | undefined;
-  return parseIntaConfigFromMetafieldValue(raw, shop);
+  const userErrors = json.data?.metafieldsSet?.userErrors ?? [];
+  if (userErrors.length) {
+    return {
+      ok: false,
+      message: userErrors.map((e: { message: string }) => e.message).join("; "),
+    };
+  }
+  return { ok: true };
 }
 
 export async function saveAppInstallationIntaConfig(
