@@ -185,7 +185,7 @@ a {
 .list {
   list-style: none;
   padding: 0;
-  padding-top: 3rem;
+  padding-block: 3rem;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -240,9 +240,13 @@ a {
   align-items: center;
   gap: 2rem;
   padding: 5rem 0;
-  margin-top: 4rem;
-  background-color: #3f3f3f;
+  background-color: #202020;
+  background-image: url(https://static.wingify.com/gcp/wp-content/themes/vwo/images/new-website/vwo-ai-capabilities/banner-pattern.png), url(https://static.wingify.com/gcp/wp-content/themes/vwo/images/new-website/vwo-ai-capabilities/ai-banner-gradient-1-updated.png);
+  background-position: 0 0, 50% 0;
+  background-repeat: repeat, no-repeat;
+  background-size: 200px, 1600px;
 }
+
 .stat{
   text-align: center;
   max-width: 20rem;
