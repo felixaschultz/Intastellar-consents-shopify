@@ -147,12 +147,22 @@ a {
   color: #666;
 }
 
+.errorText{
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(148, 45, 45);
+}
+
 .input {
   padding: 0.4rem;
   border: 1px solid #ccc;
   border-radius: 0.2rem;
   font-size: 1rem;
   width: 100%;
+}
+
+.input.error {
+  border: 1px solid rgb(148, 45, 45);
 }
 
 .input:disabled::placeholder {

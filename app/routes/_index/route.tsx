@@ -1,11 +1,12 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { BlockStack, Image, Text } from "@shopify/polaris";
 import { login } from "../../shopify.server";
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
+import { loginErrorMessage } from "../auth.login/error.server";
 
 /**
  * Read in root via useMatches() to inject GTM only on this route (not in the embedded app).
@@ -23,6 +24,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   return { showForm: Boolean(login) };
+};
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const errors = loginErrorMessage(await login(request));
+
+  return {
+    errors,
+  };
 };
 
 export const meta = () => {
@@ -78,6 +87,8 @@ export const links = () => {
 
 export default function App() {
   const { showForm } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const errors = actionData?.errors;
 
   return (
     <>
@@ -99,11 +110,12 @@ export default function App() {
               </Text>
             </BlockStack>
             {showForm && (
-              <Form className={styles.form} method="post" action="/auth/login">
+              <Form className={styles.form} method="post" /* action="/auth/login" */>
                 <label className={styles.label}>
                   <span>Shop domain</span>
-                  <input className={styles.input} type="text" name="shop" />
-                  <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span>
+                  <input className={[styles.input, errors?.shop ? styles.error : ""].join(" ")} type="text" name="shop" />
+                  {errors?.shop ? <span className={[styles.errorText, styles.helpText].join(" ")}>{errors.shop}</span> : <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span> }
+
                 </label>
                 <button className={styles.button} type="submit">
                   Log in
