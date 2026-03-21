@@ -175,6 +175,7 @@ export default function App() {
           <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
           <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
           <Image source="https://inta.dev/waterless/wordpress/wp-content/uploads/2025/09/cropped-waterless-logo-2.png" alt="Waterless" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
         </div>
       </div>
       <footer className={styles.footer}>
