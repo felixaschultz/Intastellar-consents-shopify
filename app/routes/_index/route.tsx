@@ -3,10 +3,17 @@ import { redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { BlockStack, Image, Text } from "@shopify/polaris";
 import { login } from "../../shopify.server";
-
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
+
+/**
+ * Read in root via useMatches() to inject GTM only on this route (not in the embedded app).
+ * Set `VITE_GTM_CONTAINER_ID=GTM-XXXX` in `.env`.
+ */
+export const handle = {
+  googleTagManagerId: import.meta.env.VITE_GTM_CONTAINER_ID,
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
