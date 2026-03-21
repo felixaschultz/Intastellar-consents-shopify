@@ -76,8 +76,9 @@ export default function App() {
     <>
       <div className={styles.index}>
         <header>
-          <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+          <Link className={styles.logoLink} to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
             <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
+            <span className={styles.comingSoon}>Coming soon</span>
           </Link>
         </header>
         <div className={styles.content}>
@@ -119,12 +120,12 @@ export default function App() {
             <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           </section>
           <section>
-          <Text as="p" variant="bodyMd">
-            Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
-          </Text>
-          <Image source={
-            appScreen
-          } alt="Intastellar Consents" className={styles.featuresImage} />
+            <Image source={
+              appScreen
+            } alt="Intastellar Consents" className={styles.featuresImage} />
+            <Text as="p" variant="bodyMd">
+              Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
+            </Text>
           </section>
         </div>
       </div>

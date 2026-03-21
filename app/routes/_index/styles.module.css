@@ -45,6 +45,32 @@ a {
   margin: 0;
 }
 
+.logoLink{
+  display: block;
+  position: relative;
+  width: max-content;
+  height: max-content;
+  margin-inline: auto;
+  padding: 15px;
+}
+
+.comingSoon{
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  color: #c09f53;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  background-color: #c09f53;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
 .logoImage {
   width: 600px;
   padding: 15px;
@@ -196,5 +222,9 @@ a {
   .logoImage{
     width: 100%;
     margin: auto;
+  }
+
+  .logoLink{
+    width: 100%;
   }
 }
