@@ -123,20 +123,6 @@ export default function App() {
                  then return here to install the app.
               </Text>
             )}
-            <BlockStack gap="200">
-              <ul className={styles.list}>
-                {/* Add the features of the Intastellar Consents app here */}
-                <li>
-                  GDPR, CCPA & DMA compliant
-                </li>
-                <li>
-                  Hosted securely in the EU
-                </li>
-                <li>
-                  Google Consent Mode (incl. Advanced)
-                </li>
-              </ul>
-            </BlockStack>
           </section>
           <section>
             <Image source={
@@ -148,6 +134,23 @@ export default function App() {
             <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           </section>
         </div>
+        <BlockStack gap="200">
+            <ul className={styles.list}>
+              {/* Add the features of the Intastellar Consents app here */}
+              <li>
+                GDPR, CCPA & DMA compliant
+              </li>
+              <li>
+                Hosted securely in the EU
+              </li>
+              <li>
+                Google Consent Mode (incl. Advanced)
+              </li>
+              <li>
+                Shopify Customer Privacy API
+              </li>
+            </ul>
+        </BlockStack>
         <div className={styles.clientLogos}>
           <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord" className={styles.clientLogo} />
           <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
