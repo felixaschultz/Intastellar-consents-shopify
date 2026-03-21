@@ -73,7 +73,7 @@ export default function Auth() {
     <PolarisAppProvider i18n={loaderData.polarisTranslations}>
       <div className={styles.index}>
         <header>
-          <Link className={styles.logoLink} to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+          <Link className={styles.logoLink} to="/">
             <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
             <span className={styles.comingSoon}>Coming Soon</span>
           </Link>
