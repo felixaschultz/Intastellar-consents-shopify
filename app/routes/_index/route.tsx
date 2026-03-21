@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
-import { Image } from "@shopify/polaris";
+import { BlockStack, Image } from "@shopify/polaris";
 import { login } from "../../shopify.server";
 
 import styles from "./styles.module.css";
@@ -23,13 +23,15 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <Image source={logo} alt="Intastellar Consents" width={100} height={100} />
-        <h1 className={styles.heading}>
-          Intastellar Consents
-        </h1>
-        <p className={styles.text}>
-          Manage your cookie consents and preferences in one place.
-        </p>
+        <Image source={logo} alt="Intastellar Consents" width={300} height={100} />
+        <BlockStack gap="200">
+          <h1 className={styles.heading}>
+            Consent management for your Shopify store
+          </h1>
+          <p className={styles.text}>
+            Manage your cookie consents and preferences in one place.
+          </p>
+        </BlockStack>
         {showForm && (
           <Form className={styles.form} method="post" action="/auth/login">
             <label className={styles.label}>
