@@ -151,6 +151,25 @@ export default function App() {
               </li>
             </ul>
         </BlockStack>
+        <BlockStack gap="200">
+            <div className={styles.stats}>
+              <div className={styles.stat}>
+                <span className={styles.statNumber}>276.000+</span>
+                <span className={styles.statLabel}>Consent decisions processed</span>
+                <span className={styles.statDescription}>— Across live websites</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statNumber}>65%</span>
+                <span className={styles.statLabel}>Average consent acceptance rate</span>
+                <span className={styles.statDescription}>— With clear, compliant UX</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statNumber}>149</span>
+                <span className={styles.statLabel}>Countries</span>
+                <span className={styles.statDescription}>— Region-aware consent handling</span>
+              </div>
+            </div>
+        </BlockStack>
         <div className={styles.clientLogos}>
           <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord" className={styles.clientLogo} />
           <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
