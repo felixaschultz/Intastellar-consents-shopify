@@ -269,6 +269,7 @@ a {
     gap: 6px;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    width: 100%;
   }
   header{
     position: fixed;
