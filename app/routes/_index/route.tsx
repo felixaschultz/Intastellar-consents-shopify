@@ -107,7 +107,7 @@ export default function App() {
           </BlockStack>
           <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           <Text as="p" variant="bodyMd">
-            Wanna access your users consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform</Link>.
+            Want to access your users consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
           </Text>
           <Image source={
             "https://www.intastellarsolutions.com/assets/gdprcookiebanner/consents-website-banner.png"
