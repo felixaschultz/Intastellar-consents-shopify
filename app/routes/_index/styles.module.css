@@ -211,9 +211,10 @@ a {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem 0;
+  width: 80rem;
+  margin: 4rem auto;
+  padding: 4rem 0;
+  border-top: 1px solid #ccc;
 }
 
 .clientLogo{
@@ -282,5 +283,9 @@ a {
     justify-content: center;
     align-items: center;
     gap: 1rem;
+  }
+
+  .label{
+    max-width: 72%;
   }
 }
