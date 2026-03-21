@@ -67,11 +67,11 @@ export default function App() {
   return (
     <>
       <div className={styles.index}>
+        <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
+          <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
+        </Link>
         <div className={styles.content}>
           <section>
-            <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
-              <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
-            </Link>
             <BlockStack gap="200">
               <h1 className={styles.heading}>
                 Consent management for your Shopify store
@@ -92,25 +92,25 @@ export default function App() {
                 </button>
               </Form>
             )}
+            <BlockStack gap="200">
+              <ul className={styles.list}>
+                {/* Add the features of the Intastellar Consents app here */}
+                <li>
+                  GDPR, CCPA & DMA compliant
+                </li>
+                <li>
+                  Hosted securely in the EU
+                </li>
+                <li>
+                  Google Consent Mode (incl. Advanced)
+                </li>
+              </ul>
+            </BlockStack>
+            <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           </section>
           <section>
-            <BlockStack gap="200">
-            <ul className={styles.list}>
-              {/* Add the features of the Intastellar Consents app here */}
-              <li>
-                GDPR, CCPA & DMA compliant
-              </li>
-              <li>
-                Hosted securely in the EU
-              </li>
-              <li>
-                Google Consent Mode (incl. Advanced)
-              </li>
-            </ul>
-          </BlockStack>
-          <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
           <Text as="p" variant="bodyMd">
-            Want to access your users consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
+            Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
           </Text>
           <Image source={
             "https://www.intastellarsolutions.com/assets/gdprcookiebanner/consents-website-banner.png"
@@ -120,6 +120,7 @@ export default function App() {
       </div>
       <footer className={styles.footer}>
         <BlockStack gap="200">
+          <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
           <Text as="p" variant="bodyMd">
             &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
           </Text>

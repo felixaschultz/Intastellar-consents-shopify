@@ -24,7 +24,7 @@ a {
 }
 
 .index {
-  min-height: 90vh;
+  min-height: 80vh;
   width: 100%;
   text-align: center;
 }
@@ -36,9 +36,16 @@ a {
 }
 
 .logoImage {
-  width: 500px;
+  width: 600px;
   padding: 15px;
   height: auto;
+}
+
+.footerLogoImage{
+  width: 400px;
+  height: auto;
+  margin: auto;
+  padding: 15px;
 }
 
 .loginLogoImage {
@@ -65,12 +72,15 @@ a {
   max-width: 80rem;
   margin: 0 auto;
   padding: 1rem;
+  place-content: center;
+  place-items: center;
+  height: 50vh;
 }
 
 .form {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   margin: 0 auto;
   gap: 1rem;
 }
@@ -144,5 +154,24 @@ a {
 
   .list > li {
     padding-bottom: 1rem;
+    margin-inline: auto;
+  }
+  .content {
+    grid-template-columns: 1fr;
+    display: block;
+  }
+
+  .form{
+    justify-content: center;
+  }
+
+  .featuresImage{
+    width: 100%;
+    margin: auto;
+  }
+
+  .logoImage{
+    width: 100%;
+    margin: auto;
   }
 }
