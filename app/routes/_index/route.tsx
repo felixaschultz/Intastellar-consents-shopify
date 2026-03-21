@@ -69,7 +69,7 @@ export default function App() {
       <div className={styles.index}>
         <div className={styles.content}>
           <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
-            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} width={600} height={100} />
+            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
           </Link>
           <BlockStack gap="200">
             <h1 className={styles.heading}>
