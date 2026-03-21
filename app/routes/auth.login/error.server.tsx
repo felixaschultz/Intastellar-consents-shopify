@@ -7,7 +7,7 @@ interface LoginErrorMessage {
 
 export function loginErrorMessage(loginErrors: LoginError): LoginErrorMessage {
   if (loginErrors?.shop === LoginErrorType.MissingShop) {
-    return { shop: "Please enter your shop domain to log in" };
+    return { shop: "Please enter your shop domain to log in (e.g. my-shop.myshopify.com)" };
   } else if (loginErrors?.shop === LoginErrorType.InvalidShop) {
     return {
       shop: "Use your store’s .myshopify.com domain (shown in Shopify admin), or a working custom domain.",
