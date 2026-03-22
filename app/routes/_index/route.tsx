@@ -115,8 +115,10 @@ export default function App() {
           <Text as="p" variant="bodyMd">
             Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
           </Text>
+        </BlockStack>
+        <BlockStack gap="200">
           <Text as="p" variant="bodyMd">
-            Intastellar Consents syncs consent decisions with your Shopify store, via the Shopify Customer Privacy API, so you can access them in your Shopify admin - while getting a advanced analytics dashboard for your consent decisions with <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar CMP</Link>, our consent management platform.
+            Intastellar Consents syncs consent decisions with your Shopify store, via the Shopify Customer Privacy API, so you can access them in your Shopify admin <br /> - while getting a advanced analytics dashboard for your consent decisions with <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar CMP</Link>, our consent management platform.
           </Text>
         </BlockStack>
         <div className={styles.content}>
