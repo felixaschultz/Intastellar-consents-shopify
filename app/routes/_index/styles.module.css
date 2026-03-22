@@ -301,6 +301,9 @@ a {
 }
 
 @media only screen and (max-width: 50rem) {
+  .heading{
+    line-height: 2.5rem;
+  }
   .list {
     display: block;
   }
