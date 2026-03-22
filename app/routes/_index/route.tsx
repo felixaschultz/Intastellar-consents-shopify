@@ -111,13 +111,13 @@ export default function App() {
         <h1 className={styles.heading}>
           Consent management for your Shopify store - for free
         </h1>
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
+          </Text>
+        </BlockStack>
         <div className={styles.content}>
           <section>
-            <BlockStack gap="200">
-              <Text as="p" variant="bodyMd">
-                Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
-              </Text>
-            </BlockStack>
             {showForm && (
               <Form className={styles.form} method="post" /* action="/auth/login" */>
                 <label className={styles.label}>
