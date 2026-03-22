@@ -155,7 +155,7 @@ export default function App() {
             >
               <Image source={appScreen} alt="Intastellar Consents" className={styles.featuresImage} />
             </button> */}
-            <video src={IntastellarShopifyGuideVideo} width="100%" height="100%" autoPlay muted loop></video>
+            <video src={IntastellarShopifyGuideVideo} width="100%" height="342px" autoPlay muted loop></video>
             <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
                 <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
