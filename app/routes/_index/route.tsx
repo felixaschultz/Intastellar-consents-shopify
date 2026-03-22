@@ -1,19 +1,23 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
-import { BlockStack, Image, Text } from "@shopify/polaris";
+import { AppProvider, BlockStack, Image, Modal, Text } from "@shopify/polaris";
+import polarisTranslations from "@shopify/polaris/locales/en.json";
+import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { login } from "../../shopify.server";
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
 import { loginErrorMessage } from "../auth.login/error.server";
+import { useState } from "react";
+import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
 
 /**
  * Read in root via useMatches() to inject GTM only on this route (not in the embedded app).
  * Set `VITE_GTM_CONTAINER_ID=GTM-XXXX` in `.env`.
  */
 export const handle = {
-  googleTagManagerId: process.env.VITE_GTM_CONTAINER_ID,
+  googleTagManagerId: process.env.VITE_GTM_CONTAINER_ID || "",
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -23,7 +27,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
-  return { showForm: Boolean(login) };
+  return { showForm: Boolean(login), polarisTranslations };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -69,6 +73,7 @@ export const links = () => {
       <link rel="icon" type="image/png" sizes="16x16" href="https://www.intastellarsolutions.com/assets/icons/fav/favicon-16x16.png">
   */
   return [
+    { rel: "stylesheet", href: polarisStyles },
     { rel: "apple-touch-icon", sizes: "57x57", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-57x57.png" },
     { rel: "apple-touch-icon", sizes: "60x60", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-60x60.png" },
     { rel: "apple-touch-icon", sizes: "72x72", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-72x72.png" },
@@ -86,12 +91,16 @@ export const links = () => {
 };
 
 export default function App() {
-  const { showForm } = useLoaderData<typeof loader>();
+  const { showForm, polarisTranslations } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const errors = actionData?.errors;
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => {
+    console.log("openModal");
+    setIsModalOpen(true);
+  };
   return (
-    <>
+    <AppProvider i18n={polarisTranslations}>
       <div className={styles.index}>
         <header>
           <Link className={styles.logoLink} to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
@@ -136,14 +145,30 @@ export default function App() {
             )}
           </section>
           <section className={styles.appScreen}>
-            <Image source={
-              appScreen
-            } alt="Intastellar Consents" className={styles.featuresImage} />
+            {/* <button
+              type="button"
+              onClick={() => {
+                console.log("onClick");
+              }}
+              className={styles.appScreenImageButton}
+              aria-label="View app demo"
+            >
+              <Image source={appScreen} alt="Intastellar Consents" className={styles.featuresImage} />
+            </button> */}
+            <video src={IntastellarShopifyGuideVideo} width="100%" height="100%" autoPlay muted loop></video>
             <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
-              <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
-            </Text>
+                <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
+              </Text>
           </section>
+            <Modal
+              open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title="Intastellar Consents Platform"
+            primaryAction={{ content: "Close", onAction: () => setIsModalOpen(false) }}
+          >
+            <video src={IntastellarShopifyGuideVideo}></video>
+          </Modal>
         </div>
         <BlockStack gap="200">
             <ul className={styles.list}>
@@ -200,6 +225,6 @@ export default function App() {
           </Text>
         </BlockStack>
       </footer>
-    </>
+    </AppProvider>
   );
 }
