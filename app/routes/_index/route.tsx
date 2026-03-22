@@ -215,11 +215,13 @@ export default function App() {
         </div>
       </div>
       <footer className={styles.footer}>
-        <BlockStack gap="200">
+        <BlockStack as="div" gap="200">
           <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
-          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
-          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
-          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+          <div className={styles.footerLinks}>
+            <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
+            <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
+            <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+          </div>
           <Text as="p" variant="bodyMd">
             &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
           </Text>

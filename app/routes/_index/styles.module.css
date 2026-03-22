@@ -234,6 +234,13 @@ a {
   margin: 0 auto;
 }
 
+.footerLinks{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
 .clientLogos{
   display: flex;
   justify-content: center;
