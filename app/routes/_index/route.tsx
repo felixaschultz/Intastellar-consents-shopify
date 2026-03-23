@@ -109,32 +109,9 @@ export default function App() {
           </Link>
         </header>
         <h1 className={styles.heading}>
-          Your Shopify consents <br /> recorded and actually understandable
+          Understand Shopify consent data. Not just store it.
         </h1>
-        <div className={styles.description}>
-          <div>
-            <h2 className={styles.subheading}>
-              Consistent across Shopify and Intastellar
-            </h2>
-            <Text as="p" variant="bodyMd">
-              Each consent is tracked using the same ID in both systems — no mismatches, no confusion.
-            </Text>
-          </div>
-          <BlockStack gap="200">
-            <h2 className={styles.subheading}>
-              Built for clarity
-            </h2>
-            <Text as="p" variant="bodyMd">
-              Shopify keeps the full legal record. Intastellar gives you the insights — with a cleaner, analytics-focused view of user consent behavior.
-            </Text>
-          </BlockStack>
-        </div>
-        <BlockStack gap="200">
-          <Text as="p" variant="bodyMd">
-            Go further with the <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar dashboard</Link>:
-            Understand how users actually respond to your banner - by country, region, and behavior — and export reports when you need them.
-          </Text>
-        </BlockStack>
+        <h2 className={styles.subheading}>Same Consent ID across Shopify and Intastellar</h2>
         <div className={styles.content}>
           <section>
             {showForm && (
@@ -162,33 +139,42 @@ export default function App() {
                  then return here to install the app.
               </Text>
             )}
+            <Text as="p" variant="bodyMd" tone="subdued">
+              Without clear consent data, you’re guessing.
+            </Text>
           </section>
-          <section className={styles.appScreen}>
-            {/* <button
-              type="button"
-              onClick={() => {
-                console.log("onClick");
-              }}
-              className={styles.appScreenImageButton}
-              aria-label="View app demo"
-            >
-              <Image source={appScreen} alt="Intastellar Consents" className={styles.featuresImage} />
-            </button> */}
-            <video src={IntastellarShopifyGuideVideo} width="100%" height="342px" className={styles.appScreenVideo} autoPlay muted loop></video>
-            <Text as="p" variant="bodyMd">
+          {/* <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
                 <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
-              </Text>
+              </Text> */}
+          <section className={styles.appScreen}>
+            <video src={IntastellarShopifyGuideVideo} width="100%" height="342px" className={styles.appScreenVideo} autoPlay muted loop></video>
           </section>
-            <Modal
-              open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            title="Intastellar Consents Platform"
-            primaryAction={{ content: "Close", onAction: () => setIsModalOpen(false) }}
-          >
-            <video src={IntastellarShopifyGuideVideo}></video>
-          </Modal>
         </div>
+        <div className={styles.content}>
+          <BlockStack gap="200">
+            <h2 className={styles.subheading}>
+              Consistent across Shopify and Intastellar
+            </h2>
+            <Text as="p" variant="bodyMd">
+              Each consent is tracked using the same ID in both systems — no mismatches, no confusion.
+            </Text>
+          </BlockStack>
+          <BlockStack gap="200">
+            <h2 className={styles.subheading}>
+              Built for clarity
+            </h2>
+            <Text as="p" variant="bodyMd">
+              Shopify keeps the full legal record. Intastellar gives you the insights — with a cleaner, analytics-focused view of user consent behavior.
+            </Text>
+          </BlockStack>
+        </div>
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            Go further with the <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar dashboard</Link>:
+            Understand how users actually respond to your banner - by country, region, and behavior — and export reports when you need them.
+          </Text>
+        </BlockStack>
         <BlockStack gap="200">
             <ul className={styles.list}>
               {/* Add the features of the Intastellar Consents app here */}
@@ -231,6 +217,44 @@ export default function App() {
           <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
           <Image source="https://inta.dev/waterless/wordpress/wp-content/uploads/2025/09/cropped-waterless-logo-2.png" alt="Waterless" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
           <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+        </div>
+        <div className={styles.mainContent}>
+          <BlockStack gap="200">
+            <h2 className={styles.subheading}>How Shopify consent data works (and where it falls short)</h2>
+            <Text as="p" variant="bodyMd">
+              Shopify includes built-in consent tracking through its Customer Privacy API. When a visitor interacts with your cookie banner, Shopify records their choices and assigns a consent ID. This allows your store to respect user preferences and meet legal requirements across regions like the EU and California.
+            </Text>
+            <Text as="p" variant="bodyMd">That part works.</Text>
+            <Text as="p" variant="bodyMd">
+              But here’s the limitation:
+            </Text>
+            <Text as="p" variant="bodyMd">
+              Shopify focuses on storing consent, not helping you understand it.
+            </Text>
+            <ul>
+              <li>You can’t easily see how users behave after giving or denying consent</li>
+              <li>You don’t get a clear, actionable overview of consent patterns</li>
+              <li>There’s no simple way to connect consent data with marketing or analytics decisions</li>
+              <li>Cross-system visibility is limited, especially when using external tools</li>
+            </ul>
+            <Text as="p" variant="bodyMd">
+              So while the data exists, it’s not built for insight.
+            </Text>
+            <Text as="p" variant="bodyMd">
+              That’s where most store owners end up guessing:
+            </Text>
+            <ul>
+              <li>Which users can actually be tracked</li>
+              <li>Whether consent rates are improving</li>
+              <li>How consent impacts conversion and campaigns</li>
+            </ul>
+            <Text as="p" variant="bodyMd">
+              Intastellar Consents bridges that gap.
+            </Text>
+            <Text as="p" variant="bodyMd">
+              By syncing the same consent ID across Shopify and Intastellar, you get a consistent view of consent data across systems — turning a static legal record into something you can actually use.
+            </Text>
+          </BlockStack>
         </div>
       </div>
       <footer className={styles.footer}>

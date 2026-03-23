@@ -19,7 +19,6 @@ a {
   text-decoration: none;
   display: inline-block;
   padding: 0.5rem .2rem;
-  font-size: 1rem;
 }
 
 .footer a{
@@ -48,6 +47,16 @@ a {
   padding: 1rem;
   margin: 0;
   line-height: 2rem;
+}
+
+.subheading{
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  color: #c09f53;
+  padding: 1rem;
+  margin: 0;
 }
 
 .logoLink{
@@ -123,9 +132,18 @@ a {
   gap: 2rem;
   max-width: 80rem;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 3rem;
   place-content: center;
   place-items: center;
+}
+
+.mainContent{
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 3rem;
+  place-content: center;
+  place-items: center;
+  text-align: left;
 }
 
 .form {
