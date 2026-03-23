@@ -148,7 +148,7 @@ a {
   max-width: 30rem;
   text-align: left;
   font-size: 1rem;
-  width: 79%;
+  width: 67%;
 }
 
 .helpText{
@@ -298,6 +298,22 @@ a {
   font-size: 0.8rem;
   font-weight: 600;
   color: #c09f53;
+}
+
+.description{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1rem;
+  place-content: center;
+  place-items: center;
+  text-align: left;
+}
+.description > div{
+  max-width: 20rem;
+  text-align: center;
 }
 
 @media only screen and (max-width: 50rem) {

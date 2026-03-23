@@ -109,14 +109,30 @@ export default function App() {
           </Link>
         </header>
         <h1 className={styles.heading}>
-          Consent management for your Shopify store - for free
+          Your Shopify consents <br /> recorded and actually understandable
         </h1>
+        <div className={styles.description}>
+          <div>
+            <h2 className={styles.subheading}>
+              Consistent across Shopify and Intastellar
+            </h2>
+            <Text as="p" variant="bodyMd">
+              Each consent is tracked using the same ID in both systems — no mismatches, no confusion.
+            </Text>
+          </div>
+          <BlockStack gap="200">
+            <h2 className={styles.subheading}>
+              Built for clarity
+            </h2>
+            <Text as="p" variant="bodyMd">
+              Shopify keeps the full legal record. Intastellar gives you the insights — with a cleaner, analytics-focused view of user consent behavior.
+            </Text>
+          </BlockStack>
+        </div>
         <BlockStack gap="200">
           <Text as="p" variant="bodyMd">
-            Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
-          </Text>
-          <Text as="p" variant="bodyMd">
-              Intastellar Consents syncs consent decisions with your Shopify store, via the Shopify Customer Privacy API, so you can access them in your Shopify admin <br /> - while getting a advanced analytics dashboard for your consent decisions with <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar CMP</Link>, our consent management platform.
+            Go further with the <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar dashboard</Link>:
+            Understand how users actually respond to your banner - by country, region, and behavior — and export reports when you need them.
           </Text>
         </BlockStack>
         <div className={styles.content}>
@@ -124,12 +140,12 @@ export default function App() {
             {showForm && (
               <Form className={styles.form} method="post" /* action="/auth/login" */>
                 <label className={styles.label}>
-                  <span>Shop domain</span>
+                  <span>Install on your Shopify store</span>
                   <input placeholder="e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)" className={[styles.input, errors?.shop ? styles.error : ""].join(" ")} type="text" name="shop" />
                   {errors?.shop ? <span className={[styles.errorText, styles.helpText].join(" ")}>{errors.shop}</span> : <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span> }
                 </label>
                 <button className={styles.button} type="submit">
-                  Log in
+                  Install now
                 </button>
               </Form>
             )}
