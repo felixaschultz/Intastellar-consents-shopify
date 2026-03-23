@@ -111,7 +111,7 @@ export default function App() {
         <h1 className={styles.heading}>
           Understand Shopify consent data. Not just store it.
         </h1>
-        <h2 className={styles.subheading}>Same Consent ID across Shopify and Intastellar</h2>
+        <h2 className={styles.subheading}>Same Consent ID across Shopify and Intastellar Consents</h2>
         <div className={styles.content}>
           <section>
             {showForm && (
