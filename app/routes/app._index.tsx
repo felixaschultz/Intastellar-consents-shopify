@@ -19,9 +19,11 @@ import { authenticate } from "../shopify.server";
 import {
   defaultIntaConfig,
   loadAppInstallationHomeData,
+  parseRequiredCookiesFromFormJson,
   saveAppInstallationIntaConfig,
   saveOnboardingState,
   type IntaConfig,
+  type IntaRequiredCookie,
 } from "../lib/intastellar-metafields.server";
 import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
 import { IntastellarOnboardingModal } from "../components/IntastellarOnboardingModal";
@@ -174,7 +176,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       logo: String(form.get("logo") ?? "").trim(),
       design: String(form.get("design") ?? "").trim(),
       gtagId: String(form.get("gtagId") ?? "").trim(),
-      requiredCookies: parseStringArray(
+      requiredCookies: parseRequiredCookiesFromFormJson(
         String(form.get("requiredCookies") ?? ""),
       ),
       keepInLocalStorage: parseStringArray(
@@ -229,11 +231,9 @@ export default function Index() {
   }, [initial, shopLogoUrl, shopBrandColor]);
 
   const [config, setConfig] = useState<IntaConfig>(initialConfig);
-  const [requiredCookiesRaw, setRequiredCookiesRaw] = useState(() =>
-    initial.settings.requiredCookies.length
-      ? JSON.stringify(initial.settings.requiredCookies)
-      : "",
-  );
+  const [requiredCookiesRows, setRequiredCookiesRows] = useState<
+    IntaRequiredCookie[]
+  >(() => [...initialConfig.settings.requiredCookies]);
   const [keepInLocalStorageRaw, setKeepInLocalStorageRaw] = useState(() =>
     initial.settings.keepInLocalStorage.length
       ? JSON.stringify(initial.settings.keepInLocalStorage)
@@ -254,11 +254,7 @@ export default function Index() {
     const data = fetcher.data;
     if (data && "ok" in data && data.ok === true && "config" in data) {
       setConfig(data.config);
-      setRequiredCookiesRaw(
-        data.config.settings.requiredCookies.length
-          ? JSON.stringify(data.config.settings.requiredCookies)
-          : "",
-      );
+      setRequiredCookiesRows([...data.config.settings.requiredCookies]);
       setKeepInLocalStorageRaw(
         data.config.settings.keepInLocalStorage.length
           ? JSON.stringify(data.config.settings.keepInLocalStorage)
@@ -274,12 +270,38 @@ export default function Index() {
       ...config,
       settings: {
         ...config.settings,
-        requiredCookies: parseStringArray(requiredCookiesRaw),
+        requiredCookies: requiredCookiesRows,
         keepInLocalStorage: parseStringArray(keepInLocalStorageRaw),
       },
     }),
-    [config, requiredCookiesRaw, keepInLocalStorageRaw],
+    [config, requiredCookiesRows, keepInLocalStorageRaw],
   );
+
+  const patchRequiredCookieRow = useCallback(
+    (index: number, patch: Partial<IntaRequiredCookie>) => {
+      setRequiredCookiesRows((rows) =>
+        rows.map((row, i) => (i === index ? { ...row, ...patch } : row)),
+      );
+    },
+    [],
+  );
+
+  const addRequiredCookieRow = useCallback(() => {
+    setRequiredCookiesRows((rows) => [
+      ...rows,
+      {
+        cookie: "",
+        domain: "",
+        provider: "",
+        type: "",
+        purpose: "",
+      },
+    ]);
+  }, []);
+
+  const removeRequiredCookieRow = useCallback((index: number) => {
+    setRequiredCookiesRows((rows) => rows.filter((_, i) => i !== index));
+  }, []);
 
   const previewSrcDoc = useMemo(
     () => buildPreviewSrcDoc(previewConfig),
@@ -463,17 +485,234 @@ export default function Index() {
                       autoComplete="off"
                       helpText="Optional, e.g. G-XXXXXXXXXX"
                     />
+                    <BlockStack gap="200">
+                      <Text as="p" variant="bodyMd" fontWeight="semibold">
+                        Required cookies
+                      </Text>
+                      <Text as="p" variant="bodySm" tone="subdued">
+                        Cookie name, domain, provider, type (e.g. functional), and
+                        purpose. Saved as JSON on your installation metafield.
+                      </Text>
+                      <input
+                        type="hidden"
+                        name="requiredCookies"
+                        value={JSON.stringify(requiredCookiesRows)}
+                        readOnly
+                      />
+                      <Box overflowX="scroll">
+                        <table
+                          style={{
+                            width: "100%",
+                            minWidth: "720px",
+                            borderCollapse: "collapse",
+                          }}
+                        >
+                          <thead>
+                            <tr>
+                              <th
+                                style={{
+                                  textAlign: "left",
+                                  padding: "8px 8px 8px 0",
+                                  borderBottom:
+                                    "1px solid var(--p-color-border)",
+                                  fontSize: "var(--p-font-size-300)",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Cookie
+                              </th>
+                              <th
+                                style={{
+                                  textAlign: "left",
+                                  padding: "8px",
+                                  borderBottom:
+                                    "1px solid var(--p-color-border)",
+                                  fontSize: "var(--p-font-size-300)",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Domain
+                              </th>
+                              <th
+                                style={{
+                                  textAlign: "left",
+                                  padding: "8px",
+                                  borderBottom:
+                                    "1px solid var(--p-color-border)",
+                                  fontSize: "var(--p-font-size-300)",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Provider
+                              </th>
+                              <th
+                                style={{
+                                  textAlign: "left",
+                                  padding: "8px",
+                                  borderBottom:
+                                    "1px solid var(--p-color-border)",
+                                  fontSize: "var(--p-font-size-300)",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Type
+                              </th>
+                              <th
+                                style={{
+                                  textAlign: "left",
+                                  padding: "8px",
+                                  borderBottom:
+                                    "1px solid var(--p-color-border)",
+                                  fontSize: "var(--p-font-size-300)",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                Purpose
+                              </th>
+                              <th
+                                style={{
+                                  width: 88,
+                                  padding: "8px",
+                                  borderBottom:
+                                    "1px solid var(--p-color-border)",
+                                }}
+                              />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {requiredCookiesRows.length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan={6}
+                                  style={{
+                                    padding: "12px 0",
+                                    color: "var(--p-color-text-secondary)",
+                                  }}
+                                >
+                                  <Text as="span" variant="bodySm" tone="subdued">
+                                    No cookies yet. Use &quot;Add cookie&quot; to
+                                    add one.
+                                  </Text>
+                                </td>
+                              </tr>
+                            ) : (
+                              requiredCookiesRows.map((row, i) => (
+                                <tr key={i}>
+                                  <td
+                                    style={{
+                                      padding: "8px 8px 8px 0",
+                                      verticalAlign: "top",
+                                    }}
+                                  >
+                                    <TextField
+                                      labelHidden
+                                      label="Cookie"
+                                      value={row.cookie}
+                                      onChange={(v) =>
+                                        patchRequiredCookieRow(i, { cookie: v })
+                                      }
+                                      autoComplete="off"
+                                    />
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      verticalAlign: "top",
+                                    }}
+                                  >
+                                    <TextField
+                                      labelHidden
+                                      label="Domain"
+                                      value={row.domain}
+                                      onChange={(v) =>
+                                        patchRequiredCookieRow(i, { domain: v })
+                                      }
+                                      autoComplete="off"
+                                    />
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      verticalAlign: "top",
+                                    }}
+                                  >
+                                    <TextField
+                                      labelHidden
+                                      label="Provider"
+                                      value={row.provider}
+                                      onChange={(v) =>
+                                        patchRequiredCookieRow(i, {
+                                          provider: v,
+                                        })
+                                      }
+                                      autoComplete="off"
+                                    />
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      verticalAlign: "top",
+                                      minWidth: 120,
+                                    }}
+                                  >
+                                    <TextField
+                                      labelHidden
+                                      label="Type"
+                                      value={row.type}
+                                      onChange={(v) =>
+                                        patchRequiredCookieRow(i, { type: v })
+                                      }
+                                      autoComplete="off"
+                                      placeholder="e.g. functional"
+                                    />
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      verticalAlign: "top",
+                                      minWidth: 200,
+                                    }}
+                                  >
+                                    <TextField
+                                      labelHidden
+                                      label="Purpose"
+                                      value={row.purpose}
+                                      onChange={(v) =>
+                                        patchRequiredCookieRow(i, { purpose: v })
+                                      }
+                                      autoComplete="off"
+                                      multiline={2}
+                                    />
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      verticalAlign: "top",
+                                    }}
+                                  >
+                                    <Button
+                                      submit={false}
+                                      variant="plain"
+                                      tone="critical"
+                                      onClick={() => removeRequiredCookieRow(i)}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </Box>
+                      <InlineStack>
+                        <Button submit={false} onClick={addRequiredCookieRow}>
+                          Add cookie
+                        </Button>
+                      </InlineStack>
+                    </BlockStack>
                     <TextField
-                      label="Required cookies (settings.requiredCookies)"
-                      name="requiredCookies"
-                      value={requiredCookiesRaw}
-                      onChange={setRequiredCookiesRaw}
-                      multiline={3}
-                      autoComplete="off"
-                      helpText="JSON array of strings, or comma-separated values (parsed on save)"
-                    />
-                    <TextField
-                      label="Keep in localStorage (settings.keepInLocalStorage)"
+                      label="Keep in localStorage"
                       name="keepInLocalStorage"
                       value={keepInLocalStorageRaw}
                       onChange={setKeepInLocalStorageRaw}

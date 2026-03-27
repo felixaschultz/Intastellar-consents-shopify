@@ -15,6 +15,15 @@ export type OnboardingState = {
   completedAt?: string;
 };
 
+/** `settings.requiredCookies` — matches Intastellar banner config (cookie declarations). */
+export type IntaRequiredCookie = {
+  cookie: string;
+  domain: string;
+  provider: string;
+  type: string;
+  purpose: string;
+};
+
 export type IntaSettings = {
   rootDomain: string;
   company: string;
@@ -23,7 +32,7 @@ export type IntaSettings = {
   logo: string;
   design: string;
   gtagId: string;
-  requiredCookies: string[];
+  requiredCookies: IntaRequiredCookie[];
   keepInLocalStorage: string[];
 };
 
@@ -53,6 +62,46 @@ export function defaultIntaConfig(shop: {
   };
 }
 
+const emptyRequiredCookie = (): IntaRequiredCookie => ({
+  cookie: "",
+  domain: "",
+  provider: "",
+  type: "",
+  purpose: "",
+});
+
+function normalizeRequiredCookieEntry(item: unknown): IntaRequiredCookie {
+  if (typeof item === "string") {
+    return { ...emptyRequiredCookie(), cookie: item };
+  }
+  if (item && typeof item === "object") {
+    const o = item as Record<string, unknown>;
+    return {
+      cookie: typeof o.cookie === "string" ? o.cookie : "",
+      domain: typeof o.domain === "string" ? o.domain : "",
+      provider: typeof o.provider === "string" ? o.provider : "",
+      type: typeof o.type === "string" ? o.type : "",
+      purpose: typeof o.purpose === "string" ? o.purpose : "",
+    };
+  }
+  return emptyRequiredCookie();
+}
+
+/** Parse JSON posted from the admin form (`hidden` name `requiredCookies`). */
+export function parseRequiredCookiesFromFormJson(raw: string): IntaRequiredCookie[] {
+  const t = raw.trim();
+  if (!t) return [];
+  try {
+    const parsed = JSON.parse(t) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map(normalizeRequiredCookieEntry)
+      .filter((row) => row.cookie.trim() !== "");
+  } catch {
+    return [];
+  }
+}
+
 export function parseIntaConfigFromMetafieldValue(
   raw: string | null | undefined,
   shop: { name: string; primaryDomainHost: string },
@@ -75,9 +124,7 @@ export function parseIntaConfigFromMetafieldValue(
         arrange:
           parsed.settings?.arrange === "rtl" ? "rtl" : ("ltr" as const),
         requiredCookies: Array.isArray(parsed.settings?.requiredCookies)
-          ? parsed.settings!.requiredCookies!.filter(
-              (x): x is string => typeof x === "string",
-            )
+          ? parsed.settings!.requiredCookies!.map(normalizeRequiredCookieEntry)
           : base.settings.requiredCookies,
         keepInLocalStorage: Array.isArray(parsed.settings?.keepInLocalStorage)
           ? parsed.settings!.keepInLocalStorage!.filter(
