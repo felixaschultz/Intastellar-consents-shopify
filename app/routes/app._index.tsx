@@ -357,7 +357,7 @@ export default function Index() {
                 <fetcher.Form method="post">
                   <BlockStack gap="300">
                     <TextField
-                      label="Privacy policy URL (policy_link)"
+                      label="Privacy policy URL"
                       name="policy_link"
                       value={config.policy_link}
                       onChange={(v) =>
@@ -367,7 +367,7 @@ export default function Index() {
                       helpText="Linked from the banner; must be a valid URL on your store."
                     />
                     <TextField
-                      label="Root domain (settings.rootDomain)"
+                      label="Root domain"
                       name="rootDomain"
                       value={config.settings.rootDomain}
                       onChange={(v) => updateSettings({ rootDomain: v })}
@@ -375,7 +375,7 @@ export default function Index() {
                       helpText={`Default from your shop: ${shop.primaryDomainHost || shop.myshopifyDomain}`}
                     />
                     <TextField
-                      label="Company / brand (settings.company)"
+                      label="Company / brand"
                       name="company"
                       value={config.settings.company}
                       onChange={(v) => updateSettings({ company: v })}
@@ -449,7 +449,7 @@ export default function Index() {
                       </Box>
                     </InlineStack>
                     <TextField
-                      label="Logo URL (settings.logo)"
+                      label="Logo URL"
                       name="logo"
                       value={config.settings.logo}
                       onChange={(v) => updateSettings({ logo: v })}
@@ -463,7 +463,7 @@ export default function Index() {
                     <Box minWidth="200px">
                         <Select
                           label="Banner Layout"
-                          name="arrange"
+                          name="design"
                           options={[
                             { label: "Overlay", value: "overlay" },
                             { label: "Full width banner", value: "banner" },
@@ -478,7 +478,7 @@ export default function Index() {
                         />
                     </Box>
                     <TextField
-                      label="Google Analytics / gtag ID (settings.gtagId)"
+                      label="Google Analytics / gtag ID"
                       name="gtagId"
                       value={config.settings.gtagId}
                       onChange={(v) => updateSettings({ gtagId: v })}
