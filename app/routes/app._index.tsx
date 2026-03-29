@@ -102,6 +102,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents`;
+  /** Settings → Customer privacy (cookie banner, regions, consent activity in Shopify admin). */
+  const shopifyConsentLogOverviewUrl = `https://${shopNode.myshopifyDomain}/admin/settings/privacy/consent-log/`;
   return {
     config,
     shopLogoUrl,
@@ -112,6 +114,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       primaryDomainHost,
     },
     themeEditorEmbedUrl,
+    shopifyConsentLogOverviewUrl,
     onboardingCompleted: onboarding.completed,
   };
 };
@@ -218,6 +221,7 @@ export default function Index() {
     shopLogoUrl,
     shopBrandColor,
     themeEditorEmbedUrl,
+    shopifyConsentLogOverviewUrl,
     shop,
     onboardingCompleted,
   } = useLoaderData<typeof loader>();
@@ -332,9 +336,14 @@ export default function Index() {
              To show the banner on your store, you need to activate the app embed. Click the button below to open the theme editor — then just save.
             </Text>
             <InlineStack gap="300" wrap>
-              <Button url={themeEditorEmbedUrl} target="_blank">
-                Open theme editor (activate embed)
-              </Button>
+              <InlineStack wrap blockAlign="start" gap="400">
+                <Button url={themeEditorEmbedUrl} target="_blank">
+                  Open theme editor (activate embed)
+                </Button>
+                <Button url={shopifyConsentLogOverviewUrl}>
+                  Consent log (Shopify)
+                </Button>
+              </InlineStack>
               <Button url={DOCS_URL} target="_blank" variant="plain">
                 JS docs
               </Button>

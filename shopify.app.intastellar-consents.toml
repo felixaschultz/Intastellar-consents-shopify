@@ -1,18 +1,8 @@
-# Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
-#
-# application_url + redirect_urls = where THIS Remix app is served (Vercel: app.consentsmanagement.com).
-# Set SHOPIFY_APP_URL=https://app.consentsmanagement.com in Vercel env.
-#
-# They are NOT:
-# - The merchant’s store domain (*.myshopify.com) — Shopify never sends OAuth callbacks there.
-# - Your marketing site unless that same host/path actually reverse-proxies to this Node app.
-#
-# OAuth flow: after the merchant approves the app, Shopify redirects their browser to YOUR
-# /auth/callback and /auth/shopify/callback routes (see app/shopify.server.ts authPathPrefix).
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "3ef5d1afdfa566bc7e67aeed637daad0"
+client_id = "6863733b33c26559baf378566d828acf"
 name = "Intastellar Consents"
-application_url = "https://app.consentsmanagement.com"
+application_url = "https://example.com"
 embedded = true
 
 [build]
@@ -23,10 +13,8 @@ include_config_on_deploy = true
 api_version = "2026-04"
 
 [access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_checkout_branding_settings,read_themes"
 
 [auth]
-redirect_urls = [
-  "https://app.consentsmanagement.com/auth/callback",
-  "https://app.consentsmanagement.com/auth/shopify/callback",
-]
+redirect_urls = [ "https://example.com/api/auth" ]
