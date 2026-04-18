@@ -52,7 +52,7 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
-        <script>
+        <script dangerouslySetInnerHTML={{ __html: `
           window.INTA = {
             "policy_link": "https://www.intastellarsolutions.com/policies/privacy-policy",
             "settings": {
@@ -60,14 +60,14 @@ export default function App() {
               "company": "Intastellar Solutions International",
               "arrange": "ltr",
               "color": "#1a1a1a",
-              "logo": "http://localhost:3000/assets/combined-intastellar-shopify-Ddl8uPI-.svg",
+              "logo": "https://www.consentsplatform.com/assets/combined-intastellar-shopify-9l5Y1w6a.svg",
               "design": "bannerV2",
               "gtagId": "",
               "requiredCookies": [],
               "keepInLocalStorage": [],
             }
           }
-        </script>
+        `}}></script>
         <script src="https://consents.cdn.intastellarsolutions.com/uc.js"></script>
         {gtmId ? (
           <link rel="preconnect" href="https://www.googletagmanager.com" />
