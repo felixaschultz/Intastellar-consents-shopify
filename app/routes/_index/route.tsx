@@ -47,7 +47,7 @@ const jsonLdSchema = {
 export const handle = {
   googleTagManagerId: process.env.VITE_GTM_CONTAINER_ID || "",
   jsonLdSchema,
-  scripts: [
+  headScripts: [
     { src: "https://downloads.intastellarsolutions.com/cookieconsents/intastellarsolutions.com/config.js", async: false },
     { src: "https://consents.cdn.intastellarsolutions.com/uc.js", async: false },
   ],
