@@ -52,6 +52,23 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
+        <script>
+          window.INTA = {
+            "policy_link": "https://www.intastellarsolutions.com/policies/privacy-policy",
+            "settings": {
+              "rootDomain": "consentsplatform.com",
+              "company": "Intastellar Solutions International",
+              "arrange": "ltr",
+              "color": "#1a1a1a",
+              "logo": "",
+              "design": "overlay",
+              "gtagId": "",
+              "requiredCookies": [],
+              "keepInLocalStorage": [],
+            }
+          }
+        </script>
+        <script src="https://consents.cdn.intastellarsolutions.com/uc.js"></script>
         {gtmId ? (
           <link rel="preconnect" href="https://www.googletagmanager.com" />
         ) : null}
