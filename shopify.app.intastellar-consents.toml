@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "6863733b33c26559baf378566d828acf"
+client_id = "1d66b24cf0d66f6ccf57d9e949b1c7c8"
 name = "Intastellar Consents"
 application_url = "https://example.com"
 embedded = true

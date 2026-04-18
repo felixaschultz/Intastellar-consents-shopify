@@ -12,12 +12,41 @@ import { loginErrorMessage } from "../auth.login/error.server";
 import { useState } from "react";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
 
+/** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
+const jsonLdSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Intastellar Consents",
+  description:
+    "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place.",
+  url: "https://www.intastellarconsents.com/",
+  publisher: {
+    "@type": "Organization",
+    "@id": "https://www.intastellarsolutions.com/#organization",
+    name: "Intastellar Solutions International",
+    url: "https://www.intastellarsolutions.com/",
+    logo: "https://www.intastellarconsents.com/assets/icons/intastellar-logo-black.svg",
+    logoWidth: 100,
+    logoHeight: 100,
+    logoType: "image/svg+xml",
+    logoAlt: "Intastellar Consents",
+  },
+  about: [
+    {
+      "@type": "SoftwareApplication",
+      name: "Intastellar Consents",
+    },
+  ],
+  inLanguage: "en-US",
+};
+
 /**
- * Read in root via useMatches() to inject GTM only on this route (not in the embedded app).
+ * Read in root via useMatches() to inject GTM and JSON-LD only on this route (not in the embedded app).
  * Set `VITE_GTM_CONTAINER_ID=GTM-XXXX` in `.env`.
  */
 export const handle = {
   googleTagManagerId: process.env.VITE_GTM_CONTAINER_ID || "",
+  jsonLdSchema,
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

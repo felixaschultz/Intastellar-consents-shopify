@@ -103,7 +103,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents`;
   /** Settings → Customer privacy (cookie banner, regions, consent activity in Shopify admin). */
-  const shopifyConsentLogOverviewUrl = `https://${shopNode.myshopifyDomain}/admin/settings/privacy/consent-log/`;
+  const shopifyConsentLogOverviewUrl = `https://${shopNode.myshopifyDomain}/admin/settings/privacy/consent-log`;
   return {
     config,
     shopLogoUrl,

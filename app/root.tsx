@@ -7,7 +7,10 @@ import {
   useMatches,
 } from "@remix-run/react";
 
-type GtmHandle = { googleTagManagerId?: string };
+type GtmHandle = {
+  googleTagManagerId?: string;
+  jsonLdSchema?: Record<string, unknown>;
+};
 
 function sanitizeGtmContainerId(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
@@ -26,8 +29,18 @@ function useLandingGtmContainerId(): string | undefined {
   return undefined;
 }
 
+function useLandingJsonLdSchema(): Record<string, unknown> | undefined {
+  const matches = useMatches();
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const schema = (matches[i].handle as GtmHandle | undefined)?.jsonLdSchema;
+    if (schema && typeof schema === "object") return schema;
+  }
+  return undefined;
+}
+
 export default function App() {
   const gtmId = useLandingGtmContainerId();
+  const jsonLdSchema = useLandingJsonLdSchema();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -44,6 +57,14 @@ export default function App() {
         ) : null}
         <Meta />
         <Links />
+        {jsonLdSchema ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(jsonLdSchema).replace(/</g, "\\u003c"),
+            }}
+          />
+        ) : null}
         {gtmId ? (
           <script
             dangerouslySetInnerHTML={{
