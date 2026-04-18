@@ -58,13 +58,14 @@ export default function App() {
             "settings": {
               "rootDomain": "consentsplatform.com",
               "company": "Intastellar Solutions International",
-              "arrange": "ltr",
-              "color": "#1a1a1a",
-              "logo": "https://www.consentsplatform.com/assets/combined-intastellar-shopify-9l5Y1w6a.svg",
-              "design": "bannerV2",
-              "gtagId": "",
+              color: "rgb(163, 133, 64)",
+              language: "auto",
+              gtagId: "G-86T4LDB766",
+              arrange: "rtl",
+              design: "bannerV2",
               "requiredCookies": [],
               "keepInLocalStorage": [],
+              logo: "/assets/combined-intastellar-shopify-Ddl8uPI-.svg",
             }
           }
         `}}></script>
