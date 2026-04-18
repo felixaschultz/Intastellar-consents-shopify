@@ -54,7 +54,10 @@ export default function App() {
         />
         <script dangerouslySetInnerHTML={{ __html: `
           window.INTA = {
-            "policy_link": "https://www.intastellarsolutions.com/policies/privacy-policy",
+            "policy_link": {
+              "link": "https://www.intastellarsolutions.com/about/legal/privacy",
+              "target": "_blank",
+            },
             "settings": {
               "rootDomain": "consentsplatform.com",
               "company": "Intastellar Solutions International",
