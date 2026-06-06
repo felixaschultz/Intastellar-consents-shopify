@@ -55,7 +55,7 @@ export default function App() {
         <script dangerouslySetInnerHTML={{ __html: `
           window.INTA = {
             "policy_link": {
-              "link": "https://www.intastellarsolutions.com/about/legal/privacy",
+              "url": "https://www.intastellarsolutions.com/about/legal/privacy",
               "target": "_blank",
             },
             "settings": {
