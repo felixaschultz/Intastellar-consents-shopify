@@ -172,29 +172,36 @@ export default function App() {
         <div className={styles.content}>
           <section>
             {showForm && (
-              <Form className={styles.form} method="post" /* action="/auth/login" */>
-                <label className={styles.label}>
-                  <span>Install on your Shopify store</span>
-                  <input placeholder="e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)" className={[styles.input, errors?.shop ? styles.error : ""].join(" ")} type="text" name="shop" />
-                  {errors?.shop ? <span className={[styles.errorText, styles.helpText].join(" ")}>{errors.shop}</span> : <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span> }
-                </label>
-                <button className={styles.button} type="submit">
-                  Install now
-                </button>
-              </Form>
-            )}
-            {showForm && (
-              <Text as="p" variant="bodyMd" tone="subdued">
-                Don&apos;t have a store yet?{" "}
-                <Link
-                  to="https://www.shopify.com/free-trial"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Create a Shopify store (free trial),
-                </Link>
-                 then return here to install the app.
-              </Text>
+              <BlockStack gap="300">
+                <Text as="p" variant="bodyMd">
+                  You can test the full integration on a free Shopify{" "}
+                  <strong>development store</strong> — enter your{" "}
+                  <code>your-store.myshopify.com</code> address below and
+                  install the app. No live storefront or paid plan required.
+                </Text>
+                <Form className={styles.form} method="post" /* action="/auth/login" */>
+                  <label className={styles.label}>
+                    <span>Install on your Shopify store</span>
+                    <input placeholder="e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)" className={[styles.input, errors?.shop ? styles.error : ""].join(" ")} type="text" name="shop" />
+                    {errors?.shop ? <span className={[styles.errorText, styles.helpText].join(" ")}>{errors.shop}</span> : <span className={styles.helpText}>e.g. my-shop.myshopify.com or your custom domain (e.g. yourstore.com)</span> }
+                  </label>
+                  <button className={styles.button} type="submit">
+                    Install now
+                  </button>
+                </Form>
+                <Text as="p" variant="bodyMd" tone="subdued">
+                  Don&apos;t have a development store yet?{" "}
+                  <Link
+                    to="https://www.shopify.com/partners"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Create one free with Shopify Partners
+                  </Link>
+                  , then return here to install and try the banner on your dev
+                  storefront.
+                </Text>
+              </BlockStack>
             )}
             <Text as="p" variant="bodyMd" tone="subdued">
               Without clear consent data, you’re guessing.
