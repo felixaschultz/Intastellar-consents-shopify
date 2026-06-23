@@ -2,7 +2,7 @@
 
 client_id = "1d66b24cf0d66f6ccf57d9e949b1c7c8"
 name = "Intastellar Consents"
-application_url = "https://example.com"
+application_url = "https://app.consentsmanagement.com"
 embedded = true
 
 [build]
@@ -17,4 +17,4 @@ api_version = "2026-04"
 scopes = "read_checkout_branding_settings,read_themes"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://app.consentsmanagement.com/api/auth" ]
