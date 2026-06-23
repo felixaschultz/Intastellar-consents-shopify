@@ -1,18 +1,25 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+# Keep in sync with shopify.app.intastellar-consents.toml (same client_id + production URLs).
 
 client_id = "1d66b24cf0d66f6ccf57d9e949b1c7c8"
 name = "Intastellar Consents"
-application_url = "https://www.consentsplatform.com/"
+application_url = "https://app.consentsmanagement.com"
 embedded = true
 
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_checkout_branding_settings,read_themes"
 optional_scopes = [ ]
 use_legacy_install_flow = false
 
 [auth]
-redirect_urls = [ "https://consentsplatform.com/api/auth" ]
+redirect_urls = [
+  "https://app.consentsmanagement.com/auth/callback",
+  "https://app.consentsmanagement.com/auth/shopify/callback",
+]
 
 [webhooks]
 api_version = "2026-04"
