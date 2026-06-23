@@ -1,3 +1,5 @@
+import { getGraphqlErrors, throwGraphqlFailure } from "./admin-graphql.server";
+
 type AdminClient = {
   graphql: (
     query: string,
@@ -184,10 +186,17 @@ export async function loadAppInstallationHomeData(
     }`,
   );
   const json = await res.json();
+  const gqlError = getGraphqlErrors(json);
+  if (gqlError) {
+    throwGraphqlFailure("App installation query failed", json);
+  }
   const inst = json.data?.currentAppInstallation;
   const installationId = inst?.id as string | undefined;
   if (!installationId) {
-    throw new Response("App installation unavailable", { status: 500 });
+    throw new Response(
+      "App installation unavailable (currentAppInstallation missing — try reopening the app from Shopify admin)",
+      { status: 500 },
+    );
   }
   const bannerRaw = inst?.bannerConfig?.value as string | undefined;
   const onboardingRaw = inst?.onboardingState?.value as string | undefined;

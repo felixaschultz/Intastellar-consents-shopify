@@ -26,6 +26,7 @@ import {
   type IntaRequiredCookie,
 } from "../lib/intastellar-metafields.server";
 import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
+import { throwGraphqlFailure } from "../lib/admin-graphql.server";
 import { IntastellarOnboardingModal } from "../components/IntastellarOnboardingModal";
 
 const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js";
@@ -76,6 +77,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }`,
   );
   const shopJson = await shopRes.json();
+  if (shopJson.errors?.length) {
+    throwGraphqlFailure("Shop query failed", shopJson);
+  }
   const shopNode = shopJson.data?.shop;
   if (!shopNode?.id) {
     throw new Response("Shop unavailable", { status: 500 });
@@ -101,7 +105,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     /* brand prefill optional; merchants can set logo/color manually */
   }
 
-  const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents`;
+  const themeEditorEmbedUrl = `https://${shopNode.myshopifyDomain}/admin/themes/current/editor?context=apps&activateAppId=${process.env.SHOPIFY_API_KEY}/intastellar-consents-banner`;
   /** Settings → Customer privacy (cookie banner, regions, consent activity in Shopify admin). */
   const shopifyConsentLogOverviewUrl = `https://${shopNode.myshopifyDomain}/admin/settings/privacy/consent-log`;
   return {

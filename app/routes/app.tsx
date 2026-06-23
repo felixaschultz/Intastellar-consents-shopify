@@ -1,5 +1,5 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
+import { isRouteErrorResponse, Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { NavMenu } from "@shopify/app-bridge-react";
@@ -32,7 +32,35 @@ export default function App() {
 
 // Shopify needs Remix to catch some thrown responses, so that their headers are included in the response.
 export function ErrorBoundary() {
-  return boundary.error(useRouteError());
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div style={{ padding: 16, fontFamily: "system-ui, sans-serif" }}>
+        <h1>Something went wrong</h1>
+        <p>
+          {error.status} {error.statusText}
+        </p>
+        {typeof error.data === "string" ? <p>{error.data}</p> : null}
+      </div>
+    );
+  }
+
+  if (error instanceof Error) {
+    console.error("[app] ErrorBoundary", error);
+    return (
+      <div style={{ padding: 16, fontFamily: "system-ui, sans-serif" }}>
+        <h1>Something went wrong</h1>
+        <p>{error.message}</p>
+        <p style={{ color: "#666" }}>
+          If this mentions Prisma or the database, set DATABASE_URL on Vercel to
+          PostgreSQL and redeploy.
+        </p>
+      </div>
+    );
+  }
+
+  return boundary.error(error);
 }
 
 export const headers: HeadersFunction = (headersArgs) => {
