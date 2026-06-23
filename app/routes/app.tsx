@@ -53,8 +53,8 @@ export function ErrorBoundary() {
         <h1>Something went wrong</h1>
         <p>{error.message}</p>
         <p style={{ color: "#666" }}>
-          If this mentions Prisma or the database, set DATABASE_URL on Vercel to
-          PostgreSQL and redeploy.
+                If this mentions Prisma or the database, set shopify_DATABASE_URL on
+                Vercel to a PostgreSQL connection string and redeploy.
         </p>
       </div>
     );
