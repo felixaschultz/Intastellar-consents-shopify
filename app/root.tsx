@@ -7,9 +7,12 @@ import {
   useMatches,
 } from "@remix-run/react";
 
-type GtmHandle = {
+type LandingHeadHandle = {
   googleTagManagerId?: string;
   jsonLdSchema?: Record<string, unknown>;
+  /** Inline `window.INTA` for the marketing landing page only (not embedded /app). */
+  intaConfig?: Record<string, unknown>;
+  headScripts?: { src: string; async?: boolean; defer?: boolean }[];
 };
 
 function sanitizeGtmContainerId(raw: string | undefined): string | undefined {
@@ -18,29 +21,28 @@ function sanitizeGtmContainerId(raw: string | undefined): string | undefined {
   return /^GTM-[A-Z0-9]+$/i.test(id) ? id.toUpperCase() : undefined;
 }
 
-function useLandingGtmContainerId(): string | undefined {
+function useLandingHandle(): LandingHeadHandle | undefined {
   const matches = useMatches();
   for (let i = matches.length - 1; i >= 0; i--) {
-    const id = sanitizeGtmContainerId(
-      (matches[i].handle as GtmHandle | undefined)?.googleTagManagerId,
-    );
-    if (id) return id;
-  }
-  return undefined;
-}
-
-function useLandingJsonLdSchema(): Record<string, unknown> | undefined {
-  const matches = useMatches();
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const schema = (matches[i].handle as GtmHandle | undefined)?.jsonLdSchema;
-    if (schema && typeof schema === "object") return schema;
+    const handle = matches[i].handle as LandingHeadHandle | undefined;
+    if (
+      handle?.googleTagManagerId ||
+      handle?.jsonLdSchema ||
+      handle?.intaConfig ||
+      handle?.headScripts?.length
+    ) {
+      return handle;
+    }
   }
   return undefined;
 }
 
 export default function App() {
-  const gtmId = useLandingGtmContainerId();
-  const jsonLdSchema = useLandingJsonLdSchema();
+  const landing = useLandingHandle();
+  const gtmId = sanitizeGtmContainerId(landing?.googleTagManagerId);
+  const jsonLdSchema = landing?.jsonLdSchema;
+  const intaConfig = landing?.intaConfig;
+  const headScripts = landing?.headScripts ?? [];
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -52,27 +54,21 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
-        <script dangerouslySetInnerHTML={{ __html: `
-          window.INTA = {
-            "policy_link": {
-              "url": "https://www.intastellarsolutions.com/about/legal/privacy",
-              "target": "_blank",
-            },
-            "settings": {
-              "rootDomain": "consentsplatform.com",
-              "company": "Intastellar Solutions International",
-              "color": "rgb(163, 133, 64)",
-              "language": "auto",
-              "gtagId": "G-86T4LDB766",
-              "arrange": "rtl",
-              "design": "bannerV2",
-              "requiredCookies": [],
-              "keepInLocalStorage": [],
-              "logo": "/assets/combined-intastellar-shopify-Ddl8uPI-.svg",
-            }
-          }
-        `}}></script>
-        <script src="https://consents.cdn.intastellarsolutions.com/uc.js"></script>
+        {intaConfig ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.INTA=${JSON.stringify(intaConfig).replace(/</g, "\\u003c")};`,
+            }}
+          />
+        ) : null}
+        {headScripts.map((script) => (
+          <script
+            key={script.src}
+            src={script.src}
+            async={script.async}
+            defer={script.defer}
+          />
+        ))}
         {gtmId ? (
           <link rel="preconnect" href="https://www.googletagmanager.com" />
         ) : null}

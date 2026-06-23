@@ -40,16 +40,40 @@ const jsonLdSchema = {
   inLanguage: "en-US",
 };
 
+/** Marketing-site banner config — scoped to `/` only via root `handle` (never on embedded `/app`). */
+const landingIntaConfig = {
+  policy_link: {
+    url: "https://www.intastellarsolutions.com/about/legal/privacy",
+    target: "_blank",
+  },
+  settings: {
+    rootDomain:
+      process.env.VITE_INTA_LANDING_ROOT_DOMAIN || "consentsplatform.com",
+    company: "Intastellar Solutions International",
+    color: "rgb(163, 133, 64)",
+    language: "auto",
+    gtagId: "G-86T4LDB766",
+    arrange: "rtl",
+    design: "bannerV2",
+    requiredCookies: [],
+    keepInLocalStorage: [],
+    logo: "/assets/combined-intastellar-shopify.svg",
+  },
+};
+
 /**
- * Read in root via useMatches() to inject GTM and JSON-LD only on this route (not in the embedded app).
+ * Read in root via useMatches() to inject GTM, JSON-LD, and Intastellar banner only on this route.
  * Set `VITE_GTM_CONTAINER_ID=GTM-XXXX` in `.env`.
  */
 export const handle = {
   googleTagManagerId: process.env.VITE_GTM_CONTAINER_ID || "",
   jsonLdSchema,
+  intaConfig: landingIntaConfig,
   headScripts: [
-    { src: "https://downloads.intastellarsolutions.com/cookieconsents/intastellarsolutions.com/config.js", async: false },
-    { src: "https://consents.cdn.intastellarsolutions.com/uc.js", async: false },
+    {
+      src: "https://consents.cdn.intastellarsolutions.com/uc.js",
+      async: false,
+    },
   ],
 };
 
