@@ -2,10 +2,19 @@
  * Creates app development stores via Shopify Business Platform Organizations API
  * (same backend as `shopify store create dev`).
  *
- * Requires env:
- * - SHOPIFY_BUSINESS_PLATFORM_TOKEN — Business Platform token from a Partner org owner session
- * - SHOPIFY_PARTNER_ORG_ID — numeric organization id from partners.shopify.com URL
+ * Env (Vercel / production):
+ * - SHOPIFY_APP_AUTOMATION_TOKEN — from Dev Dashboard → App → Settings (recommended)
+ * - SHOPIFY_PARTNER_ORG_ID — numeric org id from partners.shopify.com URL
+ *
+ * Env (local dev alternative):
+ * - SHOPIFY_BUSINESS_PLATFORM_TOKEN — CLI session access token (not atkn_*)
  */
+
+import {
+  isPilotStoreAuthConfigured,
+  readPartnerOrganizationId,
+  resolveBusinessPlatformAccessToken,
+} from "./shopify-business-platform-auth.server";
 
 const BP_FQDN = "destinations.shopifysvc.com";
 
@@ -21,52 +30,53 @@ export type StoreCreationStatus =
 
 type BpUserError = { code?: string; field?: string[]; message?: string };
 
-function partnerOrgConfig(): { token: string; organizationId: string } | null {
-  const token = process.env.SHOPIFY_BUSINESS_PLATFORM_TOKEN?.trim();
-  const organizationId = process.env.SHOPIFY_PARTNER_ORG_ID?.trim();
-  if (!token || !organizationId) return null;
-  return { token, organizationId };
-}
-
 export function isPilotStoreProvisioningConfigured(): boolean {
-  return partnerOrgConfig() !== null;
+  return isPilotStoreAuthConfigured();
 }
 
 async function organizationsGraphql<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const config = partnerOrgConfig();
-  if (!config) {
+  const organizationId = readPartnerOrganizationId();
+  if (!organizationId) {
     throw new Error(
-      "Pilot store provisioning is not configured (SHOPIFY_BUSINESS_PLATFORM_TOKEN, SHOPIFY_PARTNER_ORG_ID)",
+      "SHOPIFY_PARTNER_ORG_ID is not set (numeric id from partners.shopify.com/ORG_ID/...).",
     );
   }
 
-  const url = `https://${BP_FQDN}/organizations/api/unstable/organization/${config.organizationId}/graphql`;
+  const accessToken = await resolveBusinessPlatformAccessToken();
+  const url = `https://${BP_FQDN}/organizations/api/unstable/organization/${organizationId}/graphql`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Access-Token": config.token,
+      "X-Shopify-Access-Token": accessToken,
     },
     body: JSON.stringify({ query, variables }),
   });
 
   const text = await res.text();
+  if (res.status === 401 || res.status === 403) {
+    throw new Error(
+      `Business Platform API unauthorized (${res.status}). ` +
+        "Use SHOPIFY_APP_AUTOMATION_TOKEN from Dev Dashboard (not the raw atkn value as the API bearer). " +
+        "Verify SHOPIFY_PARTNER_ORG_ID matches your Partner organization.",
+    );
+  }
+
   let json: { data?: T; errors?: { message?: string }[] };
   try {
     json = JSON.parse(text) as typeof json;
   } catch {
     throw new Error(
-      `Business Platform API returned non-JSON (${res.status}): ${text.slice(0, 200)}`,
+      `Business Platform API returned non-JSON (${res.status}): ${text.slice(0, 200) || "(empty)"}`,
     );
   }
 
   if (!res.ok || json.errors?.length) {
     const msg =
-      json.errors?.map((e) => e.message).join("; ") ||
-      `HTTP ${res.status}`;
+      json.errors?.map((e) => e.message).join("; ") || `HTTP ${res.status}`;
     throw new Error(`Business Platform API error: ${msg}`);
   }
   if (!json.data) throw new Error("Business Platform API returned empty data");
