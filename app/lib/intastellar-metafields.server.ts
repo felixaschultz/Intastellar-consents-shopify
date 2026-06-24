@@ -1,4 +1,8 @@
 import { getGraphqlErrors, throwGraphqlFailure } from "./admin-graphql.server";
+import {
+  normalizeBannerLanguage,
+  type BannerLanguage,
+} from "./intastellar-banner-languages";
 
 type AdminClient = {
   graphql: (
@@ -33,6 +37,7 @@ export type IntaSettings = {
   color: string;
   logo: string;
   design: string;
+  language: BannerLanguage;
   gtagId: string;
   requiredCookies: IntaRequiredCookie[];
   keepInLocalStorage: string[];
@@ -57,6 +62,7 @@ export function defaultIntaConfig(shop: {
       color: "#1a1a1a",
       logo: "",
       design: "overlay",
+      language: "auto",
       gtagId: "",
       requiredCookies: [],
       keepInLocalStorage: [],
@@ -125,6 +131,7 @@ export function parseIntaConfigFromMetafieldValue(
           : {}),
         arrange:
           parsed.settings?.arrange === "rtl" ? "rtl" : ("ltr" as const),
+        language: normalizeBannerLanguage(parsed.settings?.language),
         requiredCookies: Array.isArray(parsed.settings?.requiredCookies)
           ? parsed.settings!.requiredCookies!.map(normalizeRequiredCookieEntry)
           : base.settings.requiredCookies,

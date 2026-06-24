@@ -25,6 +25,10 @@ import {
   type IntaConfig,
   type IntaRequiredCookie,
 } from "../lib/intastellar-metafields.server";
+import {
+  BANNER_LANGUAGE_OPTIONS,
+  normalizeBannerLanguage,
+} from "../lib/intastellar-banner-languages";
 import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
 import { buildThemeEditorAppEmbedUrl } from "../lib/theme-app-extension.server";
 import { throwGraphqlFailure } from "../lib/admin-graphql.server";
@@ -188,6 +192,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       color: String(form.get("color") ?? "").trim(),
       logo: String(form.get("logo") ?? "").trim(),
       design: String(form.get("design") ?? "").trim(),
+      language: normalizeBannerLanguage(form.get("language")),
       gtagId: String(form.get("gtagId") ?? "").trim(),
       requiredCookies: parseRequiredCookiesFromFormJson(
         String(form.get("requiredCookies") ?? ""),
@@ -479,14 +484,29 @@ export default function Index() {
                           : undefined
                       }
                     />
-                    <Box minWidth="200px">
+                    <InlineStack gap="400" wrap blockAlign="start">
+                      <Box minWidth="200px">
+                        <Select
+                          label="Banner language"
+                          name="language"
+                          options={[...BANNER_LANGUAGE_OPTIONS]}
+                          value={config.settings.language}
+                          onChange={(v) =>
+                            updateSettings({
+                              language: normalizeBannerLanguage(v),
+                            })
+                          }
+                          helpText="Auto uses your theme's HTML lang attribute."
+                        />
+                      </Box>
+                      <Box minWidth="200px">
                         <Select
                           label="Banner Layout"
                           name="design"
                           options={[
                             { label: "Overlay", value: "overlay" },
                             { label: "Full width banner", value: "banner" },
-                            { label: "Banner", value: "bannerV2"}
+                            { label: "Banner", value: "bannerV2" },
                           ]}
                           value={config.settings.design}
                           onChange={(v) =>
@@ -495,7 +515,8 @@ export default function Index() {
                             })
                           }
                         />
-                    </Box>
+                      </Box>
+                    </InlineStack>
                     <TextField
                       label="Google Analytics / gtag ID"
                       name="gtagId"
