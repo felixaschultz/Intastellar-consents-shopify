@@ -103,12 +103,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   );
   let shopLogoUrl: string | null = null;
   let shopBrandColor: string | null = null;
+  let shopLogoDiagnostics: string[] = [];
   try {
     const result = await fetchShopBrandAssets(admin);
     shopLogoUrl = result.logo;
     shopBrandColor = result.color;
-  } catch {
-    /* brand prefill optional; merchants can set logo/color manually */
+    if (!shopLogoUrl) {
+      shopLogoDiagnostics = result.loadDiagnostics;
+    }
+  } catch (err) {
+    shopLogoDiagnostics = [
+      err instanceof Error ? err.message : "Could not load shop brand assets",
+    ];
   }
 
   const themeEditorEmbedUrl =
@@ -123,6 +129,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     config,
     shopLogoUrl,
     shopBrandColor,
+    shopLogoDiagnostics,
     shop: {
       myshopifyDomain: shopNode.myshopifyDomain as string,
       name: shopCtx.name,
@@ -172,6 +179,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return { ok: false as const, message: result.message };
     }
     return { ok: true as const, intent: "completeOnboarding" as const };
+  }
+
+  if (intent === "loadShopLogo") {
+    try {
+      const result = await fetchShopBrandAssets(admin);
+      if (!result.logo) {
+        return {
+          ok: false as const,
+          intent: "loadShopLogo" as const,
+          message:
+            "No logo found in checkout branding or your live theme. Add a logo under Online Store → Themes → Customize, or paste a logo URL manually.",
+          diagnostics: result.loadDiagnostics,
+        };
+      }
+      return {
+        ok: true as const,
+        intent: "loadShopLogo" as const,
+        logo: result.logo,
+        color: result.color,
+      };
+    } catch (err) {
+      return {
+        ok: false as const,
+        intent: "loadShopLogo" as const,
+        message:
+          err instanceof Error ? err.message : "Could not load shop logo",
+      };
+    }
   }
 
   const primaryDomainHost = shopNode.primaryDomain?.host ?? "";
@@ -236,12 +271,22 @@ export default function Index() {
     config: initial,
     shopLogoUrl,
     shopBrandColor,
+    shopLogoDiagnostics,
     themeEditorEmbedUrl,
     shopifyConsentLogOverviewUrl,
     shop,
     onboardingCompleted,
   } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
+  const logoFetcher = useFetcher<typeof action>();
+  const [detectedShopLogo, setDetectedShopLogo] = useState<string | null>(
+    shopLogoUrl,
+  );
+  const [logoLoadError, setLogoLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (shopLogoUrl) setDetectedShopLogo(shopLogoUrl);
+  }, [shopLogoUrl]);
 
   const initialConfig = useMemo((): IntaConfig => {
     const patched = { ...initial, settings: { ...initial.settings } };
@@ -269,6 +314,27 @@ export default function Index() {
     },
     [],
   );
+
+  useEffect(() => {
+    const data = logoFetcher.data;
+    if (!data || !("intent" in data) || data.intent !== "loadShopLogo") return;
+    if (data.ok && "logo" in data) {
+      setDetectedShopLogo(data.logo);
+      setLogoLoadError(null);
+      setConfig((c) => ({
+        ...c,
+        settings: {
+          ...c.settings,
+          logo: data.logo,
+          ...(data.color ? { color: data.color } : {}),
+        },
+      }));
+      return;
+    }
+    if (!data.ok && "message" in data) {
+      setLogoLoadError(data.message);
+    }
+  }, [logoFetcher.data]);
 
   useEffect(() => {
     const data = fetcher.data;
@@ -474,17 +540,29 @@ export default function Index() {
                       </Box>
                     </InlineStack>
                     <BlockStack gap="300">
+                      {logoLoadError ? (
+                        <Banner tone="warning" onDismiss={() => setLogoLoadError(null)}>
+                          <p>{logoLoadError}</p>
+                        </Banner>
+                      ) : null}
+                      {!logoLoadError &&
+                      !detectedShopLogo &&
+                      shopLogoDiagnostics.length > 0 ? (
+                        <Banner tone="info">
+                          <p>
+                            Store logo was not detected automatically. Use the
+                            button below to try again after adding a logo in your
+                            theme, or paste a URL manually.
+                          </p>
+                        </Banner>
+                      ) : null}
                       <TextField
                         label="Logo URL"
                         name="logo"
                         value={config.settings.logo}
                         onChange={(v) => updateSettings({ logo: v })}
                         autoComplete="off"
-                        helpText={
-                          shopLogoUrl
-                            ? "We detected a logo from your theme or checkout branding. Use the button below to apply it, or paste any https:// URL."
-                            : "Paste an absolute https:// URL to your store logo."
-                        }
+                        helpText="Paste an absolute https:// URL, or use the button below to load your theme logo."
                       />
                       {config.settings.logo.trim() ? (
                         <Box
@@ -503,25 +581,53 @@ export default function Index() {
                             />
                           </BlockStack>
                         </Box>
-                      ) : null}
-                      {shopLogoUrl ? (
-                        <InlineStack gap="200" blockAlign="center">
-                          <Button
-                            type="button"
-                            onClick={() =>
-                              updateSettings({ logo: shopLogoUrl })
-                            }
-                            disabled={config.settings.logo === shopLogoUrl}
-                          >
-                            Use shop logo
-                          </Button>
-                          {config.settings.logo === shopLogoUrl ? (
-                            <Text as="span" variant="bodySm" tone="success">
-                              Using detected shop logo
+                      ) : detectedShopLogo ? (
+                        <Box
+                          padding="300"
+                          background="bg-surface-secondary"
+                          borderRadius="200"
+                        >
+                          <BlockStack gap="200">
+                            <Text as="p" variant="bodySm" fontWeight="medium">
+                              Detected store logo
                             </Text>
-                          ) : null}
-                        </InlineStack>
+                            <Image
+                              source={detectedShopLogo}
+                              alt={`${shop.name} store logo`}
+                              width={160}
+                            />
+                          </BlockStack>
+                        </Box>
                       ) : null}
+                      <InlineStack gap="200" blockAlign="center">
+                        <Button
+                          type="button"
+                          loading={logoFetcher.state !== "idle"}
+                          onClick={() => {
+                            setLogoLoadError(null);
+                            if (detectedShopLogo) {
+                              updateSettings({ logo: detectedShopLogo });
+                              return;
+                            }
+                            logoFetcher.submit(
+                              { intent: "loadShopLogo" },
+                              { method: "post" },
+                            );
+                          }}
+                          disabled={
+                            Boolean(detectedShopLogo) &&
+                            config.settings.logo === detectedShopLogo
+                          }
+                        >
+                          Use store logo
+                        </Button>
+                        {detectedShopLogo &&
+                        config.settings.logo === detectedShopLogo ? (
+                          <Text as="span" variant="bodySm" tone="success">
+                            Store logo applied
+                          </Text>
+                        ) : null}
+                      </InlineStack>
                     </BlockStack>
                     <InlineStack gap="400" wrap blockAlign="start">
                       <Box minWidth="200px">
