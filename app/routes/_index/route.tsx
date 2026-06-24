@@ -15,34 +15,16 @@ import { PILOT_CMP_OPTIONS } from "../../lib/pilot-lead-cmp-options";
 import { isPilotStoreProvisioningConfigured } from "../../lib/partner-dev-store.server";
 import { isDevEnvironment, publicPilotStartError } from "../../lib/public-messages.server";
 import { startPilotSignup } from "../../lib/pilot-lead.server";
+import {
+  buildLandingJsonLd,
+  LANDING_FAQ,
+  LANDING_FEATURES,
+  LANDING_META,
+  LANDING_URL,
+} from "../../lib/landing-content";
 
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
-const jsonLdSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "Intastellar Consents",
-  description:
-    "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place.",
-  url: "https://www.intastellarconsents.com/",
-  publisher: {
-    "@type": "Organization",
-    "@id": "https://www.intastellarsolutions.com/#organization",
-    name: "Intastellar Solutions International",
-    url: "https://www.intastellarsolutions.com/",
-    logo: "https://www.intastellarconsents.com/assets/icons/intastellar-logo-black.svg",
-    logoWidth: 100,
-    logoHeight: 100,
-    logoType: "image/svg+xml",
-    logoAlt: "Intastellar Consents",
-  },
-  about: [
-    {
-      "@type": "SoftwareApplication",
-      name: "Intastellar Consents",
-    },
-  ],
-  inLanguage: "en-US",
-};
+const jsonLdSchema = buildLandingJsonLd();
 
 /** Marketing-site banner config — scoped to `/` only via root `handle` (never on embedded `/app`). */
 const landingIntaConfig = {
@@ -158,17 +140,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export const meta = () => {
+  const ogImage = appScreen.startsWith("http")
+    ? appScreen
+    : new URL(appScreen, LANDING_URL).href;
+
   return [
-    { title: "Intastellar Consents: Consent management for your Shopify store" },
-    { description: "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place." },
-    { property: "og:image", content: appScreen },
-    { property: "og:title", content: "Intastellar Consents: Consent management for your Shopify store" },
-    { property: "og:description", content: "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place." },
-    { property: "og:url", content: "https://www.intastellarsolutions.com/solutions/cookie-consents" },
+    { title: LANDING_META.title },
+    { name: "description", content: LANDING_META.description },
+    { name: "robots", content: "index, follow" },
+    { tagName: "link", rel: "canonical", href: LANDING_URL },
+    { property: "og:image", content: ogImage },
+    { property: "og:image:alt", content: "Intastellar Consents Shopify app admin preview" },
+    { property: "og:title", content: LANDING_META.title },
+    { property: "og:description", content: LANDING_META.description },
+    { property: "og:url", content: LANDING_URL },
     { property: "og:type", content: "website" },
     { property: "og:site_name", content: "Intastellar Consents" },
     { property: "og:locale", content: "en_US" },
-    { property: "og:locale:alternate", content: "en_US" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: LANDING_META.title },
+    { name: "twitter:description", content: LANDING_META.description },
+    { name: "twitter:image", content: ogImage },
   ];
 };
 
@@ -298,23 +290,60 @@ export default function App() {
   }, [showManualInstall]);
   return (
     <AppProvider i18n={polarisTranslations}>
-      <div className={styles.index}>
-        <header>
-          <Link className={styles.logoLink} to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">
-            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
+      <div className={styles.page}>
+        <a href="#main-content" className={styles.skipLink}>
+          Skip to main content
+        </a>
+        <header className={styles.siteHeader}>
+          <div className={styles.logoWrap}>
+            <Link
+              className={styles.logoLink}
+              to="https://www.intastellarsolutions.com/solutions/cookie-consents"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                source={logo}
+                alt="Intastellar Consents for Shopify"
+                className={styles.logoImage}
+              />
+            </Link>
             <span className={styles.comingSoon}>Coming Soon</span>
-          </Link>
+          </div>
         </header>
-        <h1 className={styles.heading}>
-          Understand Shopify consent data. Not just store it.
-        </h1>
-        <h2 className={styles.subheading}>Same Consent ID across Shopify and Intastellar Consents</h2>
-        <div className={styles.content}>
+        <main id="main-content" className={styles.index}>
+          <section className={styles.hero} aria-labelledby="hero-heading">
+            <ul className={styles.heroBadges} aria-label="Highlights">
+              <li className={styles.badge}>
+                <span className={styles.badgeDot} aria-hidden="true" />
+                EU-hosted
+              </li>
+              <li className={styles.badge}>
+                <span className={styles.badgeDot} aria-hidden="true" />
+                Shopify Customer Privacy API
+              </li>
+              <li className={styles.badge}>
+                <span className={styles.badgeDot} aria-hidden="true" />
+                Free to install
+              </li>
+            </ul>
+            <h1 id="hero-heading" className={styles.heading}>
+              Understand Shopify consent data.{" "}
+              <span className={styles.headingAccent}>Not just store it.</span>
+            </h1>
+            <p className={styles.lead}>
+              Cookie consent for Shopify with the same consent ID across Shopify
+              Customer Privacy API and Intastellar — plus analytics merchants
+              actually use.
+            </p>
+          </section>
+          <div className={styles.content}>
           <section className={styles.formSection}>
             {showForm && (
               <BlockStack gap="400">
                 <BlockStack gap="200">
                   <div className={styles.formIntro}>
+                    <p className={styles.formCardTitle}>Start free demo</p>
                     <Text as="p" variant="bodyMd">
                       Try Intastellar Consents on a free Shopify demo store — we
                       create it for you, install the app, and open the admin so you
@@ -519,136 +548,162 @@ export default function App() {
               </BlockStack>
             )}
             <Text as="p" variant="bodyMd" tone="subdued">
-              Without clear consent data, you’re guessing.
+              <span className={styles.tagline}>
+                Without clear consent data, you&apos;re guessing.
+              </span>
             </Text>
           </section>
           {/* <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
                 <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
               </Text> */}
-          <section className={styles.appScreen}>
-            <video src={IntastellarShopifyGuideVideo} width="100%" height="342px" className={styles.appScreenVideo} autoPlay muted loop></video>
+          <section className={styles.appScreen} aria-label="Install guide video">
+            <div className={styles.appScreenFrame}>
+              <video
+                src={IntastellarShopifyGuideVideo}
+                width="100%"
+                height="342"
+                className={styles.appScreenVideo}
+                autoPlay
+                muted
+                loop
+                playsInline
+                aria-label="How to install Intastellar Consents on Shopify"
+              />
+            </div>
           </section>
         </div>
-        <div className={styles.content}>
-          <BlockStack gap="200">
-            <h2 className={styles.subheading}>
-              Consistent across Shopify and Intastellar
-            </h2>
-            <Text as="p" variant="bodyMd">
-              Each consent is tracked using the same ID in both systems — no mismatches, no confusion.
-            </Text>
-          </BlockStack>
-          <BlockStack gap="200">
-            <h2 className={styles.subheading}>
-              Built for clarity
-            </h2>
-            <Text as="p" variant="bodyMd">
-              Shopify keeps the full legal record. Intastellar gives you the insights — with a cleaner, analytics-focused view of user consent behavior.
-            </Text>
-          </BlockStack>
-        </div>
-        <BlockStack gap="200">
-          <Text as="p" variant="bodyMd">
-            Go further with the <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar dashboard</Link>:
-            Understand how users actually respond to your banner - by country, region, and behavior — and export reports when you need them.
-          </Text>
-        </BlockStack>
-        <BlockStack gap="200">
-            <ul className={styles.list}>
-              {/* Add the features of the Intastellar Consents app here */}
-              <li>
-                GDPR, CCPA & DMA compliant
+
+        <section
+          className={[styles.section, styles.sectionAlt].join(" ")}
+          aria-labelledby="features-heading"
+        >
+          <span className={styles.sectionEyebrow}>Features</span>
+          <h2 id="features-heading" className={styles.sectionTitle}>
+            Why merchants choose Intastellar Consents
+          </h2>
+          <ul className={styles.featureGrid}>
+            {LANDING_FEATURES.map((feature, index) => (
+              <li key={feature.title} className={styles.featureCard}>
+                <span className={styles.featureIcon} aria-hidden="true">
+                  {index + 1}
+                </span>
+                <h3 className={styles.featureTitle}>{feature.title}</h3>
+                <p className={styles.featureBody}>{feature.body}</p>
               </li>
-              <li>
-                Hosted securely in the EU
-              </li>
-              <li>
-                Google Consent Mode (incl. Advanced)
-              </li>
-              <li>
-                Shopify Customer Privacy API
-              </li>
-            </ul>
-        </BlockStack>
-        <BlockStack gap="200">
-            <div className={styles.stats}>
-              <div className={styles.stat}>
-                <span className={styles.statNumber}>276K+</span>
-                <span className={styles.statLabel}>Consent decisions processed</span>
-                <span className={styles.statDescription}>— Across live websites</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statNumber}>65%</span>
-                <span className={styles.statLabel}>Average consent acceptance rate</span>
-                <span className={styles.statDescription}>— With clear, compliant UX</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statNumber}>149</span>
-                <span className={styles.statLabel}>Countries</span>
-                <span className={styles.statDescription}>— Region-aware consent handling</span>
-              </div>
+            ))}
+          </ul>
+          <p className={styles.sectionNote}>
+            Go further with the{" "}
+            <Link to="https://www.intastellarconsents.com" target="_blank" rel="noopener noreferrer">
+              Intastellar dashboard
+            </Link>
+            : see acceptance by country and region, track behavior over time, and
+            export reports when you need them.
+          </p>
+        </section>
+
+        <section className={styles.statsSection} aria-label="Platform statistics">
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <span className={styles.statNumber}>276K+</span>
+              <span className={styles.statLabel}>Consent decisions processed</span>
+              <span className={styles.statDescription}>Across live websites</span>
             </div>
-        </BlockStack>
-        <div className={styles.clientLogos}>
-          <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord" className={styles.clientLogo} />
-          <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
-          <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-          <Image source="https://waterless.dk/wp-content/uploads/2025/11/Waterless-scandinavia.png" alt="Waterless" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-          <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-        </div>
-        <div className={styles.mainContent}>
-          <BlockStack gap="200">
-            <h2 className={styles.subheading}>How Shopify consent data works (and where it falls short)</h2>
+            <div className={styles.stat}>
+              <span className={styles.statNumber}>65%</span>
+              <span className={styles.statLabel}>Average consent acceptance rate</span>
+              <span className={styles.statDescription}>With clear, compliant UX</span>
+            </div>
+            <div className={styles.stat}>
+              <span className={styles.statNumber}>149</span>
+              <span className={styles.statLabel}>Countries</span>
+              <span className={styles.statDescription}>Region-aware consent handling</span>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.section} aria-label="Trusted by">
+          <span className={styles.sectionEyebrow}>Trusted by</span>
+          <div className={styles.clientLogos}>
+          <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord logo" className={styles.clientLogo} />
+          <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software logo" className={styles.clientLogo} />
+          <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://waterless.dk/wp-content/uploads/2025/11/Waterless-scandinavia.png" alt="Waterless Scandinavia logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          </div>
+        </section>
+
+        <section className={styles.section} aria-labelledby="story-heading">
+          <span className={styles.sectionEyebrow}>The problem</span>
+          <article className={styles.mainContent}>
+            <h2 id="story-heading" className={styles.sectionTitle}>
+              How Shopify consent data works (and where it falls short)
+            </h2>
+          <p>
+            Shopify includes built-in consent tracking through its Customer Privacy
+            API. When a visitor interacts with your cookie banner, Shopify records
+            their choices and assigns a consent ID. This allows your store to
+            respect user preferences and meet legal requirements across regions
+            like the EU and California.
+          </p>
+          <p>That part works.</p>
+          <p>
+            But Shopify focuses on <strong>storing</strong> consent, not helping
+            you understand it:
+          </p>
+          <ul>
+            <li>You can’t easily see how users behave after giving or denying consent</li>
+            <li>You don’t get a clear, actionable overview of consent patterns</li>
+            <li>There’s no simple way to connect consent data with marketing or analytics decisions</li>
+            <li>Cross-system visibility is limited, especially when using external tools</li>
+          </ul>
+          <p>So while the data exists, it’s not built for insight.</p>
+          <p>That’s where most store owners end up guessing:</p>
+          <ul>
+            <li>Which users can actually be tracked</li>
+            <li>Whether consent rates are improving</li>
+            <li>How consent impacts conversion and campaigns</li>
+          </ul>
+          <p>
+            <strong>Intastellar Consents</strong> bridges that gap by syncing the
+            same consent ID across Shopify and Intastellar — turning a static legal
+            record into something you can actually use.
+          </p>
+          </article>
+        </section>
+
+        <section className={styles.section} aria-labelledby="faq-heading">
+          <span className={styles.sectionEyebrow}>FAQ</span>
+          <h2 id="faq-heading" className={styles.sectionTitle}>
+            Frequently asked questions
+          </h2>
+          <dl className={styles.faq}>
+            {LANDING_FAQ.map((item) => (
+              <div key={item.question} className={styles.faqItem}>
+                <dt className={styles.faqQuestion}>{item.question}</dt>
+                <dd className={styles.faqAnswer}>{item.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+        </main>
+        <footer className={styles.footer}>
+          <BlockStack as="div" gap="200">
+            <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
+            <div className={styles.footerLinks}>
+              <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+              <span className={styles.footerDivider} aria-hidden="true">·</span>
+              <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
+              <span className={styles.footerDivider} aria-hidden="true">·</span>
+              <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank" rel="noopener noreferrer">Data Processing Agreement</Link>
+            </div>
             <Text as="p" variant="bodyMd">
-              Shopify includes built-in consent tracking through its Customer Privacy API. When a visitor interacts with your cookie banner, Shopify records their choices and assigns a consent ID. This allows your store to respect user preferences and meet legal requirements across regions like the EU and California.
-            </Text>
-            <Text as="p" variant="bodyMd">That part works.</Text>
-            <Text as="p" variant="bodyMd">
-              But here’s the limitation:
-            </Text>
-            <Text as="p" variant="bodyMd">
-              Shopify focuses on storing consent, not helping you understand it.
-            </Text>
-            <ul>
-              <li>You can’t easily see how users behave after giving or denying consent</li>
-              <li>You don’t get a clear, actionable overview of consent patterns</li>
-              <li>There’s no simple way to connect consent data with marketing or analytics decisions</li>
-              <li>Cross-system visibility is limited, especially when using external tools</li>
-            </ul>
-            <Text as="p" variant="bodyMd">
-              So while the data exists, it’s not built for insight.
-            </Text>
-            <Text as="p" variant="bodyMd">
-              That’s where most store owners end up guessing:
-            </Text>
-            <ul>
-              <li>Which users can actually be tracked</li>
-              <li>Whether consent rates are improving</li>
-              <li>How consent impacts conversion and campaigns</li>
-            </ul>
-            <Text as="p" variant="bodyMd">
-              Intastellar Consents bridges that gap.
-            </Text>
-            <Text as="p" variant="bodyMd">
-              By syncing the same consent ID across Shopify and Intastellar, you get a consistent view of consent data across systems — turning a static legal record into something you can actually use.
+              &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
             </Text>
           </BlockStack>
-        </div>
+        </footer>
       </div>
-      <footer className={styles.footer}>
-        <BlockStack as="div" gap="200">
-          <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
-          <div className={styles.footerLinks}>
-            <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
-            <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
-            <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
-          </div>
-          <Text as="p" variant="bodyMd">
-            &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
-          </Text>
-        </BlockStack>
-      </footer>
     </AppProvider>
   );
 }
