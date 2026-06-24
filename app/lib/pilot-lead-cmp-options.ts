@@ -1,6 +1,7 @@
 export const PILOT_CMP_OPTIONS = [
   { value: "none", label: "None / Shopify Customer Privacy only" },
   { value: "cookiebot", label: "Cookiebot" },
+  { value: "cookieinformation", label: "Cookie Information" },
   { value: "onetrust", label: "OneTrust" },
   { value: "cookieyes", label: "CookieYes" },
   { value: "iubenda", label: "iubenda" },
