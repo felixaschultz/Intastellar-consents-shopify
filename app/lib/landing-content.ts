@@ -25,7 +25,7 @@ export const LANDING_FEATURES = [
   },
   {
     title: "Built for compliance",
-    body: "GDPR, CCPA, and DMA support with EU hosting, Google Consent Mode (including Advanced), and required-cookie disclosure.",
+    body: "GDPR, CCPA, POPIA, LGPD, PDPA and DMA support with EU hosting, Google Consent Mode (including Advanced), and required-cookie disclosure.",
   },
 ] as const;
 
@@ -48,7 +48,7 @@ export const LANDING_FAQ = [
   {
     question: "Is Intastellar Consents GDPR compliant?",
     answer:
-      "The app supports GDPR, CCPA, and DMA requirements including consent categories, policy links, required-cookie lists, and EU-hosted infrastructure. Merchants remain responsible for their overall compliance program.",
+      "The app supports GDPR, CCPA, POPIA, LGPD, PDPA and DMA requirements including consent categories, policy links, required-cookie lists, and EU-hosted infrastructure. Merchants remain responsible for their overall compliance program.",
   },
   {
     question: "Is the cookie banner free for Shopify stores?",
