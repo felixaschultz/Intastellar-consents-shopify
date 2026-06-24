@@ -86,28 +86,38 @@ export async function startPilotSignup(
   const currentCmp = formatPilotCmp(input.cmpValue, input.cmpOther);
   const pollToken = createPollToken();
 
-  const lead = await db.pilotLead.create({
-    data: {
-      email,
-      storeName,
-      currentCmp,
-      pollToken,
-      status: "PENDING",
-    },
-  });
-
   try {
-    await updateLead(lead.id, { status: "CREATING" });
-    const { shopDomain } = await createAppDevelopmentStore(storeName);
-    await updateLead(lead.id, { shopDomain, status: "CREATING" });
-    return { ok: true, pollToken, shopDomain, email };
+    const lead = await db.pilotLead.create({
+      data: {
+        email,
+        storeName,
+        currentCmp,
+        pollToken,
+        status: "PENDING",
+      },
+    });
+
+    try {
+      await updateLead(lead.id, { status: "CREATING" });
+      const { shopDomain } = await createAppDevelopmentStore(storeName);
+      await updateLead(lead.id, { shopDomain, status: "CREATING" });
+      return { ok: true, pollToken, shopDomain, email };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not create development store";
+      await updateLead(lead.id, { status: "FAILED", statusNote: message });
+      return {
+        ok: false,
+        message: `We could not create your demo store: ${message}`,
+      };
+    }
   } catch (err) {
     const message =
-      err instanceof Error ? err.message : "Could not create development store";
-    await updateLead(lead.id, { status: "FAILED", statusNote: message });
+      err instanceof Error ? err.message : "Could not save your pilot request";
+    console.error("[pilot-lead] startPilotSignup failed", err);
     return {
       ok: false,
-      message: `We could not create your demo store: ${message}`,
+      message: `We could not start your demo store setup: ${message}`,
     };
   }
 }

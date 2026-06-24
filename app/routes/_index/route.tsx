@@ -104,34 +104,47 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const intent = String(form.get("intent") ?? "");
 
   if (intent === "pilot") {
-    const honeypot = String(form.get("company_website") ?? "").trim();
-    if (honeypot) {
-      return json({ intent: "pilot" as const, ok: false as const, message: "Thanks." });
-    }
+    try {
+      const honeypot = String(form.get("company_website") ?? "").trim();
+      if (honeypot) {
+        return json({ intent: "pilot" as const, ok: false as const, message: "Thanks." });
+      }
 
-    const result = await startPilotSignup({
-      email: String(form.get("email") ?? ""),
-      storeName: String(form.get("storeName") ?? ""),
-      cmpValue: String(form.get("currentCmp") ?? ""),
-      cmpOther: String(form.get("cmpOther") ?? ""),
-    });
+      const result = await startPilotSignup({
+        email: String(form.get("email") ?? ""),
+        storeName: String(form.get("storeName") ?? ""),
+        cmpValue: String(form.get("currentCmp") ?? ""),
+        cmpOther: String(form.get("cmpOther") ?? ""),
+      });
 
-    if (!result.ok) {
+      if (!result.ok) {
+        return json({
+          intent: "pilot" as const,
+          ok: false as const,
+          message: result.message,
+          fieldErrors: result.fieldErrors ?? {},
+        });
+      }
+
+      return json({
+        intent: "pilot" as const,
+        ok: true as const,
+        pollToken: result.pollToken,
+        shopDomain: result.shopDomain,
+        email: result.email,
+      });
+    } catch (err) {
+      console.error("[index] pilot action failed", err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
       return json({
         intent: "pilot" as const,
         ok: false as const,
-        message: result.message,
-        fieldErrors: result.fieldErrors ?? {},
+        message: `We could not start your demo store setup: ${message}`,
       });
     }
-
-    return json({
-      intent: "pilot" as const,
-      ok: true as const,
-      pollToken: result.pollToken,
-      shopDomain: result.shopDomain,
-      email: result.email,
-    });
   }
 
   const errors = loginErrorMessage(await login(request));
@@ -328,6 +341,7 @@ export default function App() {
                   <Form
                     className={[styles.form, styles.pilotForm].join(" ")}
                     method="post"
+                    action="?index"
                   >
                     <input type="hidden" name="intent" value="pilot" />
                     <input
@@ -462,7 +476,7 @@ export default function App() {
                       Enter your <code>your-store.myshopify.com</code> address to
                       install on an existing development store.
                     </Text>
-                    <Form className={styles.form} method="post">
+                    <Form className={styles.form} method="post" action="?index">
                       <input type="hidden" name="intent" value="install" />
                       <label className={styles.label}>
                         <span className={styles.labelTitle}>Shop domain</span>
