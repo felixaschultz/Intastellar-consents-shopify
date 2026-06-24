@@ -1,6 +1,6 @@
 # Intastellar Consents — Shopify app
 
-Embedded [Shopify](https://shopify.dev/docs/apps) app (Remix) that stores your [Intastellar Consents](https://developers.intastellarsolutions.com/cookie-solutions/docs/js-docs) `window.INTA` configuration on the **app installation** (app-owned metafields) and injects the official **`uc.js`** script on the storefront via a **theme app embed** with target **`compliance_head`** — Shopify’s earliest [app embed head injection](https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration#app-embed-blocks) (runs before other `head` app embeds). Scripts still appear where the theme outputs `{{ content_for_header }}`; for maximum priority inside `<head>`, keep that tag near the top of `<head>` (after `charset` / essential meta).
+Embedded [Shopify](https://shopify.dev/docs/apps) app (Remix) that stores your [Intastellar Consents](https://inta.dev) `window.INTA` configuration on the **app installation** (app-owned metafields) and injects the official **`uc.js`** script on the storefront via a **theme app embed** with target **`compliance_head`** — Shopify’s earliest [app embed head injection](https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration#app-embed-blocks) (runs before other `head` app embeds). Scripts still appear where the theme outputs `{{ content_for_header }}`; for maximum priority inside `<head>`, keep that tag near the top of `<head>` (after `charset` / essential meta).
 
 ## What merchants get
 
@@ -34,8 +34,8 @@ CLI will link `client_id`, tunnel URL, and `redirect_urls` in `shopify.app.toml`
 
 ## References
 
-- [Intastellar JavaScript documentation](https://developers.intastellarsolutions.com/cookie-solutions/docs/js-docs)
-- [Intastellar documentation hub](https://developers.intastellarsolutions.com/cookie-solutions/docs)
+- [Intastellar developer documentation](https://inta.dev)
+- [Intastellar help center](https://help.intastellarsolutions.com)
 - [Theme app extensions](https://shopify.dev/docs/apps/build/online-store/theme-app-extensions)
 
 ## Scripts

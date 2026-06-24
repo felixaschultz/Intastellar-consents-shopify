@@ -3,7 +3,11 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { login } from "../../shopify.server";
 import logo from "../../assets/combined-intastellar-shopify.svg";
-import { PUBLIC_SITE_URL, SHOPIFY_APP_META } from "../../lib/shopify-app-seo";
+import {
+  INTASTELLAR_SUPPORT_LINKS,
+  PUBLIC_SITE_URL,
+  SHOPIFY_APP_META,
+} from "../../lib/shopify-app-seo";
 import { APP_LEGAL_LINKS } from "../../lib/legal-content";
 import { loginErrorMessage } from "./error.server";
 import styles from "./styles.module.css";
@@ -103,6 +107,20 @@ export default function AuthLoginPage() {
 
           <nav className={styles.secondaryLinks} aria-label="Related links">
             <Link to="/">New to Intastellar Consents? View the landing page</Link>
+            <a
+              href={INTASTELLAR_SUPPORT_LINKS.helpCenter.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {INTASTELLAR_SUPPORT_LINKS.helpCenter.label}
+            </a>
+            <a
+              href={INTASTELLAR_SUPPORT_LINKS.developerDocs.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {INTASTELLAR_SUPPORT_LINKS.developerDocs.label}
+            </a>
             <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link>
             <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>
           </nav>
@@ -110,9 +128,23 @@ export default function AuthLoginPage() {
       </main>
 
       <footer className={styles.footer}>
-        <nav className={styles.footerLinks} aria-label="Legal">
+        <nav className={styles.footerLinks} aria-label="Site links">
           <Link to={APP_LEGAL_LINKS.privacy}>App Privacy</Link>
           <Link to={APP_LEGAL_LINKS.terms}>App Terms</Link>
+          <a
+            href={INTASTELLAR_SUPPORT_LINKS.helpCenter.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {INTASTELLAR_SUPPORT_LINKS.helpCenter.label}
+          </a>
+          <a
+            href={INTASTELLAR_SUPPORT_LINKS.developerDocs.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {INTASTELLAR_SUPPORT_LINKS.developerDocs.label}
+          </a>
           <a
             href="https://www.intastellarsolutions.com/about/legal/privacy"
             target="_blank"

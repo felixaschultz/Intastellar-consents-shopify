@@ -6,6 +6,7 @@ import {
   LEGAL_COMPANY,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
+import { INTASTELLAR_SUPPORT_LINKS } from "../lib/shopify-app-seo";
 import styles from "../routes/legal/styles.module.css";
 
 type Props = {
@@ -87,12 +88,32 @@ export function LegalDocumentLayout({
         ) : null}
       </main>
       <footer className={styles.footer}>
-        <nav className={styles.footerLinks} aria-label="Legal">
+        <nav className={styles.footerLinks} aria-label="Site links">
           <Link to="/legal/privacy">App privacy</Link>
           <span className={styles.footerDivider} aria-hidden="true">
             ·
           </span>
           <Link to="/legal/terms">App terms</Link>
+          <span className={styles.footerDivider} aria-hidden="true">
+            ·
+          </span>
+          <a
+            href={INTASTELLAR_SUPPORT_LINKS.helpCenter.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {INTASTELLAR_SUPPORT_LINKS.helpCenter.label}
+          </a>
+          <span className={styles.footerDivider} aria-hidden="true">
+            ·
+          </span>
+          <a
+            href={INTASTELLAR_SUPPORT_LINKS.developerDocs.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {INTASTELLAR_SUPPORT_LINKS.developerDocs.label}
+          </a>
           <span className={styles.footerDivider} aria-hidden="true">
             ·
           </span>

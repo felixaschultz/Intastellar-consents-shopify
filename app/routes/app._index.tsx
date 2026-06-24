@@ -34,10 +34,11 @@ import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
 import { buildThemeEditorAppEmbedUrl } from "../lib/theme-app-extension.server";
 import { throwGraphqlFailure } from "../lib/admin-graphql.server";
 import { IntastellarOnboardingModal } from "../components/IntastellarOnboardingModal";
+import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
 
 const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js";
-const DOCS_URL =
-  "https://developers.intastellarsolutions.com/cookie-solutions/docs/js-docs";
+const DOCS_URL = SHOPIFY_APP_IDENTITY.developerDocsUrl;
+const HELP_URL = SHOPIFY_APP_IDENTITY.helpCenterUrl;
 
 function parseStringArray(raw: string): string[] {
   const t = raw.trim();
@@ -434,7 +435,10 @@ export default function Index() {
                 </Button>
               </InlineStack>
               <Button url={DOCS_URL} target="_blank" variant="plain">
-                JS docs
+                Documentation
+              </Button>
+              <Button url={HELP_URL} target="_blank" variant="plain">
+                Help center
               </Button>
             </InlineStack>
           </BlockStack>

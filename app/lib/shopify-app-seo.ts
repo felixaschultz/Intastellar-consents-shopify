@@ -30,6 +30,17 @@ export const PUBLIC_SITE_URL = `${publicSiteBase()}/`;
 /** @deprecated Prefer PUBLIC_SITE_URL for SEO/landing; server URL is shopifyAppServerBase(). */
 export const SHOPIFY_APP_URL = PUBLIC_SITE_URL;
 
+export const INTASTELLAR_SUPPORT_LINKS = {
+  helpCenter: {
+    url: "https://help.intastellarsolutions.com",
+    label: "Help center",
+  },
+  developerDocs: {
+    url: "https://inta.dev",
+    label: "Documentation",
+  },
+} as const;
+
 export const SHOPIFY_APP_IDENTITY = {
   name: "Intastellar Consents",
   productType: "Shopify app",
@@ -46,7 +57,10 @@ export const SHOPIFY_APP_IDENTITY = {
   ],
   developer: "Intastellar Solutions International",
   installPath: "/auth/login",
-  helpUrl: "https://inta.dev",
+  helpCenterUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
+  developerDocsUrl: INTASTELLAR_SUPPORT_LINKS.developerDocs.url,
+  /** Merchant help — used in JSON-LD `softwareHelp`. */
+  helpUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
   marketingUrl:
     "https://www.intastellarsolutions.com/solutions/cookie-consents",
   shopifyIntegrationUrl:
@@ -59,6 +73,8 @@ export const SHOPIFY_APP_IDENTITY = {
 export function shopifyAppSameAsLinks(): string[] {
   const links = [
     PUBLIC_SITE_URL,
+    INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
+    INTASTELLAR_SUPPORT_LINKS.developerDocs.url,
     SHOPIFY_APP_IDENTITY.shopifyIntegrationUrl,
     SHOPIFY_APP_IDENTITY.marketingUrl,
     SHOPIFY_APP_IDENTITY.platformUrl,
