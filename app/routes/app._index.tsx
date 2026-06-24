@@ -283,6 +283,7 @@ export default function Index() {
     shopLogoUrl,
   );
   const [logoLoadError, setLogoLoadError] = useState<string | null>(null);
+  const [logoLoadDiagnostics, setLogoLoadDiagnostics] = useState<string[]>([]);
 
   useEffect(() => {
     if (shopLogoUrl) setDetectedShopLogo(shopLogoUrl);
@@ -321,6 +322,7 @@ export default function Index() {
     if (data.ok && "logo" in data) {
       setDetectedShopLogo(data.logo);
       setLogoLoadError(null);
+      setLogoLoadDiagnostics([]);
       setConfig((c) => ({
         ...c,
         settings: {
@@ -333,6 +335,11 @@ export default function Index() {
     }
     if (!data.ok && "message" in data) {
       setLogoLoadError(data.message);
+      setLogoLoadDiagnostics(
+        "diagnostics" in data && Array.isArray(data.diagnostics)
+          ? data.diagnostics
+          : [],
+      );
     }
   }, [logoFetcher.data]);
 
@@ -541,19 +548,56 @@ export default function Index() {
                     </InlineStack>
                     <BlockStack gap="300">
                       {logoLoadError ? (
-                        <Banner tone="warning" onDismiss={() => setLogoLoadError(null)}>
-                          <p>{logoLoadError}</p>
+                        <Banner tone="warning" onDismiss={() => {
+                          setLogoLoadError(null);
+                          setLogoLoadDiagnostics([]);
+                        }}>
+                          <BlockStack gap="200">
+                            <p>{logoLoadError}</p>
+                            {logoLoadDiagnostics.length > 0 ? (
+                              <BlockStack gap="100">
+                                <Text as="p" variant="bodySm" fontWeight="medium">
+                                  Details
+                                </Text>
+                                <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                                  {logoLoadDiagnostics.map((line) => (
+                                    <li key={line}>
+                                      <Text as="span" variant="bodySm">
+                                        {line}
+                                      </Text>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </BlockStack>
+                            ) : null}
+                          </BlockStack>
                         </Banner>
                       ) : null}
                       {!logoLoadError &&
                       !detectedShopLogo &&
                       shopLogoDiagnostics.length > 0 ? (
                         <Banner tone="info">
-                          <p>
-                            Store logo was not detected automatically. Use the
-                            button below to try again after adding a logo in your
-                            theme, or paste a URL manually.
-                          </p>
+                          <BlockStack gap="200">
+                            <p>
+                              Store logo was not detected automatically. Use the
+                              button below to try again after adding a logo in your
+                              theme, or paste a URL manually.
+                            </p>
+                            <BlockStack gap="100">
+                              <Text as="p" variant="bodySm" fontWeight="medium">
+                                Details
+                              </Text>
+                              <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+                                {shopLogoDiagnostics.map((line) => (
+                                  <li key={line}>
+                                    <Text as="span" variant="bodySm">
+                                      {line}
+                                    </Text>
+                                  </li>
+                                ))}
+                              </ul>
+                            </BlockStack>
+                          </BlockStack>
                         </Banner>
                       ) : null}
                       <TextField
@@ -605,6 +649,7 @@ export default function Index() {
                           loading={logoFetcher.state !== "idle"}
                           onClick={() => {
                             setLogoLoadError(null);
+                            setLogoLoadDiagnostics([]);
                             if (detectedShopLogo) {
                               updateSettings({ logo: detectedShopLogo });
                               return;

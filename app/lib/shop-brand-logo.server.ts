@@ -228,7 +228,16 @@ const THEME_LOGO_SETTING_KEYS = [
   "brand_image",
   "header_logo",
   "mobile_logo",
+  "logo_image",
 ] as const;
+
+const LOGO_KEY_PATTERN = /logo|favicon|brand_image|brand_logo/i;
+
+type LogoRefCandidate = {
+  ref: string;
+  priority: number;
+  source: string;
+};
 
 function readLogoFromSettingsBlock(settings: unknown): string | null {
   if (!settings || typeof settings !== "object") return null;
@@ -240,54 +249,187 @@ function readLogoFromSettingsBlock(settings: unknown): string | null {
   return null;
 }
 
-/** Finds a logo reference in theme settings_data.json (URL or shopify://shop_images/…). */
-function pickThemeLogoRef(obj: unknown): string | null {
-  if (!obj || typeof obj !== "object") return null;
+function readLogoFromSectionLike(section: unknown): string | null {
+  if (!section || typeof section !== "object") return null;
+  const record = section as Record<string, unknown>;
+  const fromSettings = readLogoFromSettingsBlock(record.settings);
+  if (fromSettings) return fromSettings;
+
+  const blocks = record.blocks;
+  if (blocks && typeof blocks === "object" && !Array.isArray(blocks)) {
+    for (const block of Object.values(blocks as Record<string, unknown>)) {
+      const fromBlock = readLogoFromSettingsBlock(
+        block && typeof block === "object"
+          ? (block as Record<string, unknown>).settings
+          : null,
+      );
+      if (fromBlock) return fromBlock;
+    }
+  }
+  return null;
+}
+
+function collectLogoRefsFromTree(
+  obj: unknown,
+  keyPath = "",
+  out: LogoRefCandidate[] = [],
+): LogoRefCandidate[] {
+  if (obj === null || obj === undefined) return out;
+
+  if (typeof obj === "string") {
+    const trimmed = obj.trim();
+    if (!trimmed) return out;
+    if (/^https?:\/\//i.test(trimmed) && LOGO_KEY_PATTERN.test(keyPath)) {
+      out.push({ ref: trimmed, priority: 30, source: keyPath });
+      return out;
+    }
+    if (/^shopify:\/\//i.test(trimmed)) {
+      const priority = LOGO_KEY_PATTERN.test(keyPath)
+        ? 40
+        : /shop_images|\/files\//i.test(trimmed)
+          ? 5
+          : 1;
+      out.push({ ref: trimmed, priority, source: keyPath || "shopify-uri" });
+    }
+    return out;
+  }
+
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      collectLogoRefsFromTree(obj[i], `${keyPath}[${i}]`, out);
+    }
+    return out;
+  }
+
+  if (typeof obj === "object") {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      const path = keyPath ? `${keyPath}.${key}` : key;
+      if (
+        THEME_LOGO_SETTING_KEYS.includes(
+          key as (typeof THEME_LOGO_SETTING_KEYS)[number],
+        ) &&
+        typeof value === "string" &&
+        value.trim()
+      ) {
+        out.push({ ref: value.trim(), priority: 50, source: path });
+      }
+      collectLogoRefsFromTree(value, path, out);
+    }
+  }
+  return out;
+}
+
+/** Collects logo refs from theme settings_data.json, highest priority first. */
+function pickThemeLogoRefs(obj: unknown): LogoRefCandidate[] {
+  if (!obj || typeof obj !== "object") return [];
   const record = obj as Record<string, unknown>;
+  const candidates: LogoRefCandidate[] = [];
 
   const current = record.current;
 
-  // Online Store 2.0: logo lives in current.sections.*.settings (e.g. Dawn header).
   if (current && typeof current === "object" && !Array.isArray(current)) {
     const cur = current as Record<string, unknown>;
     const fromGlobal = readLogoFromSettingsBlock(cur);
-    if (fromGlobal) return fromGlobal;
+    if (fromGlobal) {
+      candidates.push({
+        ref: fromGlobal,
+        priority: 60,
+        source: "current (global theme settings)",
+      });
+    }
 
     const sections = cur.sections;
     if (sections && typeof sections === "object" && !Array.isArray(sections)) {
-      for (const section of Object.values(sections as Record<string, unknown>)) {
-        if (!section || typeof section !== "object") continue;
-        const fromSection = readLogoFromSettingsBlock(
-          (section as Record<string, unknown>).settings,
-        );
-        if (fromSection) return fromSection;
+      for (const [sectionId, section] of Object.entries(
+        sections as Record<string, unknown>,
+      )) {
+        const fromSection = readLogoFromSectionLike(section);
+        if (fromSection) {
+          candidates.push({
+            ref: fromSection,
+            priority: 55,
+            source: `current.sections.${sectionId}`,
+          });
+        }
+      }
+    }
+
+    const sectionGroups = cur.section_groups;
+    if (
+      sectionGroups &&
+      typeof sectionGroups === "object" &&
+      !Array.isArray(sectionGroups)
+    ) {
+      for (const [groupId, group] of Object.entries(
+        sectionGroups as Record<string, unknown>,
+      )) {
+        if (!group || typeof group !== "object") continue;
+        const groupSections = (group as Record<string, unknown>).sections;
+        if (
+          groupSections &&
+          typeof groupSections === "object" &&
+          !Array.isArray(groupSections)
+        ) {
+          for (const [sectionId, section] of Object.entries(
+            groupSections as Record<string, unknown>,
+          )) {
+            const fromSection = readLogoFromSectionLike(section);
+            if (fromSection) {
+              candidates.push({
+                ref: fromSection,
+                priority: 55,
+                source: `current.section_groups.${groupId}.sections.${sectionId}`,
+              });
+            }
+          }
+        }
       }
     }
   }
 
-  // Legacy themes: logo on the active preset object.
   if (typeof current === "string" && record.presets && typeof record.presets === "object") {
     const preset = (record.presets as Record<string, unknown>)[current];
     const fromPreset = readLogoFromSettingsBlock(preset);
-    if (fromPreset) return fromPreset;
+    if (fromPreset) {
+      candidates.push({
+        ref: fromPreset,
+        priority: 45,
+        source: `presets.${current}`,
+      });
+    }
   }
 
-  for (const [key, value] of Object.entries(record)) {
-    if (
-      THEME_LOGO_SETTING_KEYS.includes(
-        key as (typeof THEME_LOGO_SETTING_KEYS)[number],
-      ) &&
-      typeof value === "string" &&
-      value.trim()
-    ) {
-      return value.trim();
-    }
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      const nested = pickThemeLogoRef(value);
-      if (nested) return nested;
-    }
+  candidates.push(...collectLogoRefsFromTree(obj));
+
+  const seen = new Set<string>();
+  return candidates
+    .filter((c) => {
+      if (seen.has(c.ref)) return false;
+      seen.add(c.ref);
+      return true;
+    })
+    .sort((a, b) => b.priority - a.priority);
+}
+
+function decodeShopifyFilename(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
   }
-  return null;
+}
+
+function filenameQueryVariants(filename: string): string[] {
+  const decoded = decodeShopifyFilename(filename);
+  const basename = decoded.split("/").pop() ?? decoded;
+  const variants = new Set<string>();
+  for (const name of [decoded, basename, filename]) {
+    if (!name) continue;
+    variants.add(`filename:${name}`);
+    variants.add(`filename:"${name}"`);
+    variants.add(name);
+  }
+  return [...variants];
 }
 
 async function queryFilesForImageUrl(
@@ -297,7 +439,7 @@ async function queryFilesForImageUrl(
   const res = await admin.graphql(
     `#graphql
     query IntaShopImageFile($query: String!) {
-      files(first: 5, query: $query) {
+      files(first: 10, query: $query) {
         nodes {
           ... on MediaImage {
             image {
@@ -327,10 +469,63 @@ async function queryFilesForImageUrl(
   if (gqlError) return { url: null, error: gqlError };
 
   for (const node of json.data?.files?.nodes ?? []) {
-    const url = node?.image?.url ?? node?.url ?? null;
+    const url =
+      node?.image?.url ??
+      node?.url ??
+      null;
     if (url) return { url, error: null };
   }
   return { url: null, error: null };
+}
+
+async function resolveFileByListing(
+  admin: AdminClient,
+  filename: string,
+): Promise<string | null> {
+  const decoded = decodeShopifyFilename(filename);
+  const basename = (decoded.split("/").pop() ?? decoded).toLowerCase();
+  if (!basename) return null;
+
+  const res = await admin.graphql(
+    `#graphql
+    query IntaShopImageFileList {
+      files(first: 100, query: "media_type:IMAGE", sortKey: UPDATED_AT, reverse: true) {
+        nodes {
+          ... on MediaImage {
+            image {
+              url
+            }
+          }
+          ... on GenericFile {
+            url
+          }
+        }
+      }
+    }`,
+  );
+  const json = (await res.json()) as {
+    data?: {
+      files?: {
+        nodes?: Array<{
+          image?: { url?: string };
+          url?: string;
+        }>;
+      };
+    };
+    errors?: { message?: string }[];
+  };
+  const gqlError = graphqlErrorsMessage(json);
+  if (gqlError) return null;
+
+  for (const node of json.data?.files?.nodes ?? []) {
+    const url = node?.image?.url ?? node?.url ?? "";
+    if (!url) continue;
+    const path = url.split("?")[0]?.toLowerCase() ?? "";
+    if (path.endsWith(`/${basename}`) || path.includes(`/${encodeURIComponent(basename).toLowerCase()}`)) {
+      return node?.image?.url ?? node?.url ?? null;
+    }
+  }
+  return null;
 }
 
 async function resolveThemeLogoReference(
@@ -341,29 +536,35 @@ async function resolveThemeLogoReference(
   if (/^https?:\/\//i.test(ref)) return ref;
 
   const shopImage = ref.match(/^shopify:\/\/shop_images\/(.+)$/i);
-  if (!shopImage) {
+  const shopFile = ref.match(/^shopify:\/\/files\/(.+)$/i);
+  const filename = shopImage?.[1] ?? shopFile?.[1];
+  if (!filename) {
     diagnostics.push(`theme: unsupported logo reference format (${ref})`);
     return null;
   }
 
-  const filename = shopImage[1];
-  const queries = [`filename:${filename}`, filename];
-  for (const query of queries) {
+  let filesApiError: string | null = null;
+  for (const query of filenameQueryVariants(filename)) {
     const { url, error } = await queryFilesForImageUrl(admin, query);
     if (url) return url;
-    if (error) {
-      diagnostics.push(`theme files API: ${error}`);
-      if (/access denied|not authorized|scope/i.test(error)) {
-        diagnostics.push(
-          "theme: approve the read_files permission for this app (reinstall or accept updated scopes), then try Use store logo again",
-        );
-      }
-      return null;
+    if (error) filesApiError = error;
+  }
+
+  const listed = await resolveFileByListing(admin, filename);
+  if (listed) return listed;
+
+  if (filesApiError) {
+    diagnostics.push(`theme files API: ${filesApiError}`);
+    if (/access denied|not authorized|scope/i.test(filesApiError)) {
+      diagnostics.push(
+        "theme: approve the read_files permission for this app (reinstall or accept updated scopes), then try Use store logo again",
+      );
     }
+    return null;
   }
 
   diagnostics.push(
-    `theme: logo file "${filename}" was found in theme settings but could not be resolved to a CDN URL`,
+    `theme: logo file "${decodeShopifyFilename(filename)}" was found in theme settings but could not be resolved to a CDN URL`,
   );
   return null;
 }
@@ -422,12 +623,38 @@ async function loadMainThemeSettingsJson(
       `#graphql
       query IntaMainTheme {
         themes(first: 1, roles: [MAIN]) {
-          nodes { id }
+          nodes {
+            id
+            name
+            files(filenames: ["config/settings_data.json"], first: 1) {
+              nodes {
+                body {
+                  ... on OnlineStoreThemeFileBodyText {
+                    content
+                  }
+                  ... on OnlineStoreThemeFileBodyBase64 {
+                    contentBase64
+                  }
+                  ... on OnlineStoreThemeFileBodyUrl {
+                    url
+                  }
+                }
+              }
+            }
+          }
         }
       }`,
     );
     const themesJson = (await themesRes.json()) as {
-      data?: { themes?: { nodes?: { id: string }[] } };
+      data?: {
+        themes?: {
+          nodes?: Array<{
+            id: string;
+            name?: string;
+            files?: { nodes?: { body?: Record<string, unknown> }[] };
+          }>;
+        };
+      };
       errors?: { message?: string }[];
     };
     const themesGql = graphqlErrorsMessage(themesJson);
@@ -435,51 +662,16 @@ async function loadMainThemeSettingsJson(
       diagnostics.push(`themes: ${themesGql}`);
       return { parsed: null, diagnostics };
     }
-    const themeId = themesJson.data?.themes?.nodes?.[0]?.id;
-    if (!themeId) {
-      diagnostics.push("theme: no MAIN theme found");
+    const themeNode = themesJson.data?.themes?.nodes?.[0];
+    if (!themeNode?.id) {
+      diagnostics.push("theme: no MAIN (published) theme found");
       return { parsed: null, diagnostics };
     }
-
-    const filesRes = await admin.graphql(
-      `#graphql
-      query IntaThemeSettings($themeId: ID!) {
-        theme(id: $themeId) {
-          files(filenames: ["config/settings_data.json"], first: 1) {
-            nodes {
-              body {
-                ... on OnlineStoreThemeFileBodyText {
-                  content
-                }
-                ... on OnlineStoreThemeFileBodyBase64 {
-                  contentBase64
-                }
-                ... on OnlineStoreThemeFileBodyUrl {
-                  url
-                }
-              }
-            }
-          }
-        }
-      }`,
-      { variables: { themeId } },
+    diagnostics.push(
+      `theme: reading settings from published theme "${themeNode.name ?? "unknown"}"`,
     );
-    const filesJson = (await filesRes.json()) as {
-      data?: {
-        theme?: {
-          files?: {
-            nodes?: { body?: Record<string, unknown> }[];
-          };
-        };
-      };
-      errors?: { message?: string }[];
-    };
-    const filesGql = graphqlErrorsMessage(filesJson);
-    if (filesGql) {
-      diagnostics.push(`theme files: ${filesGql}`);
-      return { parsed: null, diagnostics };
-    }
-    const nodes = filesJson.data?.theme?.files?.nodes ?? [];
+
+    const nodes = themeNode.files?.nodes ?? [];
     const body = nodes[0]?.body;
     const rawContent = await themeFileBodyToUtf8(body);
     if (rawContent == null) {
@@ -537,17 +729,29 @@ async function brandFromThemeSettings(admin: AdminClient): Promise<{
   }
 
   let logo: string | null = null;
-  const logoRef = pickThemeLogoRef(parsed);
-  if (logoRef) {
-    logo = await resolveThemeLogoReference(admin, logoRef, diagnostics);
-    if (!logo) {
+  const logoRefs = pickThemeLogoRefs(parsed);
+  if (logoRefs.length > 0) {
+    diagnostics.push(
+      `theme: found ${logoRefs.length} logo candidate(s) in settings_data.json`,
+    );
+    for (const candidate of logoRefs) {
+      const resolved = await resolveThemeLogoReference(
+        admin,
+        candidate.ref,
+        diagnostics,
+      );
+      if (resolved) {
+        logo = resolved;
+        diagnostics.push(`theme: resolved logo from ${candidate.source}`);
+        break;
+      }
       diagnostics.push(
-        `theme: logo reference found (${logoRef}) but URL resolution failed`,
+        `theme: could not resolve ${candidate.ref} (${candidate.source})`,
       );
     }
   } else {
     diagnostics.push(
-      "theme: no logo in settings_data.json — set one under Online Store → Themes → Customize → Header",
+      "theme: no logo image in settings_data.json — in the theme editor choose Theme settings → Logo (or Header → logo image), upload an image, and click Save. Text-only shop names are not detected.",
     );
   }
 
