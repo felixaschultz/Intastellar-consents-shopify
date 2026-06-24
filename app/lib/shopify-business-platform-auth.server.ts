@@ -227,12 +227,22 @@ async function resolveFromPartnerIdentity(): Promise<CachedToken> {
       credentials.accessToken,
       "Partner identity → Business Platform exchange",
     );
-  } catch {
-    const identityAccess = await refreshPartnerIdentityToken(credentials);
-    return exchangeSubjectForBusinessPlatformToken(
-      identityAccess,
-      "Partner identity → Business Platform exchange",
-    );
+  } catch (firstErr) {
+    try {
+      const identityAccess = await refreshPartnerIdentityToken(credentials);
+      return await exchangeSubjectForBusinessPlatformToken(
+        identityAccess,
+        "Partner identity → Business Platform exchange",
+      );
+    } catch (refreshErr) {
+      const refreshMsg =
+        refreshErr instanceof Error ? refreshErr.message : String(refreshErr);
+      const exchangeMsg =
+        firstErr instanceof Error ? firstErr.message : String(firstErr);
+      throw new Error(
+        `${refreshMsg} (initial exchange: ${exchangeMsg})`,
+      );
+    }
   }
 }
 

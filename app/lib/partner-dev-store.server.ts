@@ -76,9 +76,18 @@ async function organizationsGraphql<T>(
   }
 
   if (!res.ok || json.errors?.length) {
+    const graphqlMsg = json.errors?.map((e) => e.message).join("; ");
     const msg =
-      json.errors?.map((e) => e.message).join("; ") || `HTTP ${res.status}`;
-    throw new Error(`Business Platform API error: ${msg}`);
+      graphqlMsg ||
+      text.slice(0, 300) ||
+      `HTTP ${res.status}`;
+    if (res.status === 400) {
+      throw new Error(
+        `Business Platform API bad request (400): ${msg}. ` +
+          "Check SHOPIFY_PARTNER_ORG_ID (numeric id from partners.shopify.com) and refresh partner identity tokens.",
+      );
+    }
+    throw new Error(`Business Platform API error (${res.status}): ${msg}`);
   }
   if (!json.data) throw new Error("Business Platform API returned empty data");
   return json.data;

@@ -17,7 +17,8 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
+    "vite": "vite",
+    "diagnose:pilot": "npx --yes tsx scripts/diagnose-pilot-provisioning.ts"
   },
   "type": "module",
   "engines": {
