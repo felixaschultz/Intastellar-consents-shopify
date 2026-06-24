@@ -2,8 +2,8 @@
  * Resolves a Business Platform API access token for pilot dev-store creation.
  *
  * Production (Vercel) — recommended:
- * - SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN (+ SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN)
- *   from `shopify auth login` CLI session identity (long-lived refresh flow)
+ * - SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN + SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN
+ *   from `shopify auth login` CLI session identity (atkn_* format is normal in CLI 3.94+)
  * - or SHOPIFY_APP_AUTOMATION_TOKEN (Dev Dashboard → App → Settings), exchanged server-side
  *
  * Local dev:
@@ -208,7 +208,9 @@ async function refreshPartnerIdentityToken(
       payload.error_description ?? payload.error ?? "identity refresh failed";
     throw new Error(
       `Partner identity refresh (${res.status}): ${detail}. ` +
-        "Run `npx shopify auth login` locally, then update SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN and SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN on Vercel.",
+        "Run `npx shopify auth login` (browser device code), re-extract identity tokens from the CLI session, " +
+        "and update SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN + SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN on Vercel. " +
+        "Note: newer Shopify CLI stores identity tokens as atkn_* after browser login — that is expected.",
     );
   }
   return payload.access_token;
@@ -219,11 +221,19 @@ async function resolveFromPartnerIdentity(): Promise<CachedToken> {
   if (!credentials) {
     throw new Error("Partner identity credentials are not configured.");
   }
-  const identityAccess = await refreshPartnerIdentityToken(credentials);
-  return exchangeSubjectForBusinessPlatformToken(
-    identityAccess,
-    "Partner identity → Business Platform exchange",
-  );
+
+  try {
+    return await exchangeSubjectForBusinessPlatformToken(
+      credentials.accessToken,
+      "Partner identity → Business Platform exchange",
+    );
+  } catch {
+    const identityAccess = await refreshPartnerIdentityToken(credentials);
+    return exchangeSubjectForBusinessPlatformToken(
+      identityAccess,
+      "Partner identity → Business Platform exchange",
+    );
+  }
 }
 
 /** Returns a valid Business Platform access token (cached until near expiry). */
