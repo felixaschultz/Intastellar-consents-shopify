@@ -3,6 +3,7 @@ import { LegalDocumentLayout } from "../components/LegalDocumentLayout";
 import {
   APP_LEGAL_LINKS,
   APP_NAME,
+  LEGAL_COMPANY,
   LEGAL_CONTACT_EMAIL,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
@@ -13,7 +14,7 @@ export const meta: MetaFunction = () => [
   },
   {
     name: "description",
-    content: `Terms of use for the ${APP_NAME} Shopify app: installation, free banner, merchant responsibilities, and relationship to Intastellar Platform.`,
+    content: `Terms of use for the ${APP_NAME} Shopify app: installation, free banner, merchant responsibilities, and relationship to the Intastellar Consents Platform.`,
   },
   { name: "robots", content: "index, follow" },
   { tagName: "link", rel: "canonical", href: "/legal/terms" },
@@ -36,11 +37,11 @@ export default function AppTermsPage() {
       <p>
         These App Terms of Use (&quot;App Terms&quot;) govern your access to and
         use of the {APP_NAME} application for Shopify (the &quot;App&quot;)
-        provided by Intastellar Solutions, International (&quot;Intastellar&quot;).
-        By installing, accessing, or using the App, you agree to these App Terms.
+        provided by {LEGAL_COMPANY}. By installing, accessing, or using the App,
+        you agree to these App Terms.
       </p>
       <p>
-        These App Terms are <strong>supplemental</strong> to Intastellar&apos;s{" "}
+        These App Terms are <strong>supplemental</strong> to {LEGAL_COMPANY}&apos;s{" "}
         <a
           href="https://www.intastellarsolutions.com/about/legal/terms"
           target="_blank"
@@ -72,7 +73,7 @@ export default function AppTermsPage() {
       <p>The App enables Shopify merchants to:</p>
       <ul>
         <li>
-          Configure an Intastellar cookie consent banner for their storefront
+          Configure an Intastellar Consents cookie consent banner for their storefront
         </li>
         <li>
           Store banner settings on the Shopify app installation and expose them
@@ -90,13 +91,13 @@ export default function AppTermsPage() {
         The <strong>storefront cookie banner</strong> is offered free for use on
         Shopify stores through this App unless otherwise stated in the Shopify App
         Store listing or a separate agreement. Paid Platform features are subject
-        to Intastellar Accounts and Platform subscription terms.
+        to Intastellar Accounts and Intastellar Consents Platform subscription terms.
       </p>
 
       <h2>3. Shopify relationship</h2>
       <p>
         The App is built for Shopify and requires a valid Shopify store. Your use
-        of Shopify is governed by Shopify&apos;s terms and policies. Intastellar
+        of Shopify is governed by Shopify&apos;s terms and policies. {LEGAL_COMPANY}
         is not Shopify; we are an independent third-party app developer. Shopify
         may remove, suspend, or modify App access in accordance with Shopify
         policies.
@@ -156,12 +157,12 @@ export default function AppTermsPage() {
         <li>
           Use the App to distribute malware or misleading consent interfaces
         </li>
-        <li>Resell or sublicense the App except as permitted by Intastellar</li>
+        <li>Resell or sublicense the App except as permitted by {LEGAL_COMPANY}</li>
       </ul>
 
       <h2>7. Intellectual property</h2>
       <p>
-        Intastellar retains all rights in the App, Intastellar Consents software,
+        {LEGAL_COMPANY} retains all rights in the App, Intastellar Consents software,
         documentation, and branding. You receive a limited, non-exclusive,
         revocable licence to use the App for your Shopify store while installed
         and in compliance with these App Terms.
@@ -180,14 +181,14 @@ export default function AppTermsPage() {
       <h2>9. Disclaimer</h2>
       <p>
         The App is provided &quot;as is&quot; to the extent permitted by law.
-        Intastellar disclaims warranties not required by mandatory law. We do not
+        {LEGAL_COMPANY} disclaims warranties not required by mandatory law. We do not
         warrant that the App will meet every merchant&apos;s specific legal or
         technical requirements without appropriate configuration and legal advice.
       </p>
 
       <h2>10. Limitation of liability</h2>
       <p>
-        To the maximum extent permitted by applicable law, Intastellar&apos;s
+        To the maximum extent permitted by applicable law, {LEGAL_COMPANY}&apos;s
         aggregate liability arising from or related to the App is limited as set
         out in the general Terms of use, except where mandatory law provides
         otherwise. Nothing in these App Terms limits liability for fraud, gross
@@ -212,7 +213,7 @@ export default function AppTermsPage() {
 
       <p>
         <em>
-          Last reviewed {LEGAL_LAST_UPDATED}. Please also read Intastellar&apos;s
+          Last reviewed {LEGAL_LAST_UPDATED}. Please also read {LEGAL_COMPANY}&apos;s
           general legal documents linked below.
         </em>
       </p>

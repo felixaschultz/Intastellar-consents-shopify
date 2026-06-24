@@ -48,14 +48,14 @@ export const SHOPIFY_APP_IDENTITY = {
   shortTitle: "Intastellar Consents — Shopify App",
   legacyTitle: "Intastellar Consents: Consent management for your Shopify store",
   description:
-    "Intastellar Consents is the official Shopify app by Intastellar Solutions for GDPR-ready cookie consent banners, Shopify Customer Privacy API sync, and consent analytics.",
+    "Intastellar Consents is the official Shopify app by Intastellar Solutions, International for GDPR-ready cookie consent banners, Shopify Customer Privacy API sync, and consent analytics.",
   alternateNames: [
     "Intastellar Consents Shopify App",
     "Intastellar Consents for Shopify",
     "Intastellar Consents: Consent management for your Shopify store",
     "Intastellar Consents cookie consent Shopify app",
   ],
-  developer: "Intastellar Solutions International",
+  developer: "Intastellar Solutions, International",
   installPath: "/auth/login",
   helpCenterUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
   developerDocsUrl: INTASTELLAR_SUPPORT_LINKS.developerDocs.url,

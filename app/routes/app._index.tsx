@@ -974,7 +974,7 @@ export default function Index() {
                 <Text as="p" variant="bodySm" tone="subdued">
                   Preview HTML puts <code>window.INTA</code> and{" "}
                   <code>uc.js</code> in <code>&lt;head&gt;</code> (right after
-                  charset/viewport), like Intastellar’s docs. Changes update as
+                  charset/viewport), like the Intastellar Consents documentation. Changes update as
                   you edit; saving persists to the storefront embed.
                 </Text>
                 <Box
@@ -987,7 +987,7 @@ export default function Index() {
                   minHeight="420px"
                 >
                   <iframe
-                    title="Intastellar banner preview"
+                    title="Intastellar Consents banner preview"
                     sandbox="allow-scripts allow-same-origin allow-forms"
                     style={{
                       width: "100%",

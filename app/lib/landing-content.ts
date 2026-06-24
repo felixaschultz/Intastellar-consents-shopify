@@ -13,7 +13,7 @@ export const LANDING_META = SHOPIFY_APP_META;
 export const LANDING_FEATURES = [
   {
     title: "Same consent ID everywhere",
-    body: "Shopify Customer Privacy API and Intastellar share one consent identifier — no mismatches between storefront and analytics.",
+    body: "Shopify Customer Privacy API and Intastellar Consents share one consent identifier — no mismatches between storefront and analytics.",
   },
   {
     title: "Banner in minutes",
@@ -21,7 +21,7 @@ export const LANDING_FEATURES = [
   },
   {
     title: "Consent you can analyze",
-    body: "See acceptance rates by region and behavior in the Intastellar dashboard — not just a legal log in Shopify admin.",
+    body: "See acceptance rates by region and behavior in the Intastellar Consents Platform — not just a legal log in Shopify admin.",
   },
   {
     title: "Built for compliance",
@@ -33,12 +33,12 @@ export const LANDING_FAQ = [
   {
     question: "Is Intastellar Consents a Shopify app?",
     answer:
-      "Yes. Intastellar Consents is an official Shopify app built by Intastellar Solutions International. It includes a Shopify admin app for configuration and a theme app embed for your storefront cookie banner. Install it from consentsplatform.com or the Shopify App Store when listed.",
+      "Yes. Intastellar Consents is an official Shopify app built by Intastellar Solutions, International. It includes a Shopify admin app for configuration and a theme app embed for your storefront cookie banner. Install it from consentsplatform.com or the Shopify App Store when listed.",
   },
   {
     question: "What is Intastellar Consents for Shopify?",
     answer:
-      "Intastellar Consents is a Shopify app that shows a cookie consent banner on your storefront, stores banner settings on the app installation, and syncs consent data with Shopify’s Customer Privacy API while giving you analytics in Intastellar.",
+      "Intastellar Consents is a Shopify app that shows a cookie consent banner on your storefront, stores banner settings on the app installation, and syncs consent data with Shopify’s Customer Privacy API while giving you analytics in Intastellar Consents.",
   },
   {
     question: "How do I install Intastellar Consents on my store?",
@@ -48,7 +48,7 @@ export const LANDING_FAQ = [
   {
     question: "Does it work with Shopify Customer Privacy API?",
     answer:
-      "Yes. The app is designed to align with Shopify’s Customer Privacy API and consent log, using a consistent consent ID so storefront choices match what you see in Intastellar.",
+      "Yes. The app is designed to align with Shopify’s Customer Privacy API and consent log, using a consistent consent ID so storefront choices match what you see in Intastellar Consents.",
   },
   {
     question: "Is Intastellar Consents GDPR compliant?",
@@ -58,7 +58,7 @@ export const LANDING_FAQ = [
   {
     question: "Is the cookie banner free for Shopify stores?",
     answer:
-      "Yes. The consent banner is free to install and use on your Shopify storefront. Paid Intastellar Platform plans add consent analytics, reporting, and multi-site management when you need deeper insight beyond Shopify’s built-in consent log.",
+      "Yes. The consent banner is free to install and use on your Shopify storefront. Paid Intastellar Consents Platform plans add consent analytics, reporting, and multi-site management when you need deeper insight beyond Shopify’s built-in consent log.",
   },
   {
     question: "Will this break my Google Analytics or ad tracking?",
@@ -73,7 +73,7 @@ export const LANDING_FAQ = [
   {
     question: "Will the app slow down my Shopify store?",
     answer:
-      "The banner loads as a lightweight theme app embed. It is designed to add minimal overhead compared to heavy enterprise CMPs — configuration lives in Shopify admin and the script loads from Intastellar’s EU-hosted CDN.",
+      "The banner loads as a lightweight theme app embed. It is designed to add minimal overhead compared to heavy enterprise CMPs — configuration lives in Shopify admin and the script loads from Intastellar Consents’ EU-hosted CDN.",
   },
   {
     question: "Can I customize the banner to match my store?",
@@ -153,7 +153,7 @@ export function buildLandingJsonLd() {
       {
         "@type": "Organization",
         "@id": "https://www.intastellarsolutions.com/#organization",
-        name: "Intastellar Solutions International",
+        name: "Intastellar Solutions, International",
         url: "https://www.intastellarsolutions.com/",
         sameAs: [
           "https://www.intastellarconsents.com",

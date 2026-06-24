@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import {
   APP_NAME,
   GENERAL_LEGAL_LINKS,
+  GENERAL_LEGAL_DOC_LABELS,
   LEGAL_COMPANY,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
@@ -25,17 +26,17 @@ export function LegalDocumentLayout({
   const defaultRelated = [
     {
       href: GENERAL_LEGAL_LINKS.privacy,
-      label: "Intastellar general Privacy & cookie policy",
+      label: GENERAL_LEGAL_DOC_LABELS.privacy,
       external: true,
     },
     {
       href: GENERAL_LEGAL_LINKS.terms,
-      label: "Intastellar general Terms of use",
+      label: GENERAL_LEGAL_DOC_LABELS.terms,
       external: true,
     },
     {
       href: GENERAL_LEGAL_LINKS.dpa,
-      label: "Intastellar Data Processing Agreement (DPA)",
+      label: GENERAL_LEGAL_DOC_LABELS.dpa,
       external: true,
     },
   ];
@@ -62,7 +63,7 @@ export function LegalDocumentLayout({
           to the {APP_NAME} Shopify app. Public pages and install are at{" "}
           <code>consentsplatform.com</code>; the embedded Shopify admin runs at{" "}
           <code>app.consentsmanagement.com</code>. It supplements — and does not
-          replace — Intastellar&apos;s general legal documents linked at the bottom
+          replace — {LEGAL_COMPANY}&apos;s general legal documents linked at the bottom
           of this page.
         </div>
         <article className={styles.prose}>{children}</article>

@@ -182,7 +182,7 @@ export function IntastellarOnboardingModal({
             {step === 0 ? (
               <BlockStack gap="300">
                 <Text as="p" variant="bodyMd">
-                  This app adds Intastellar’s cookie consent banner to your
+                  This app adds the Intastellar Consents cookie consent banner to your
                   storefront. The banner loads automatically to your store pages - no coding needed.
                 </Text>
                 <Text as="p" variant="bodyMd">
@@ -209,7 +209,7 @@ export function IntastellarOnboardingModal({
                   </List.Item>
                   <List.Item>
                     Optional: add Google Analytics / gtag ID or cookie lists if
-                    your Intastellar setup needs them.
+                    your Intastellar Consents setup needs them.
                   </List.Item>
                 </List>
                 <Text as="p" variant="bodySm" tone="subdued">
@@ -252,7 +252,7 @@ export function IntastellarOnboardingModal({
                     Open theme editor
                   </Button>
                   <Link url={docsUrl} target="_blank">
-                    Intastellar JS docs
+                    Intastellar Consents documentation
                   </Link>
                 </InlineStack>
               </BlockStack>

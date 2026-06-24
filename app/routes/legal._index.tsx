@@ -4,6 +4,7 @@ import {
   APP_LEGAL_LINKS,
   APP_NAME,
   GENERAL_LEGAL_LINKS,
+  GENERAL_LEGAL_DOC_LABELS,
   LEGAL_COMPANY,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
@@ -15,7 +16,7 @@ export const meta: MetaFunction = () => [
   },
   {
     name: "description",
-    content: `Legal documents for the ${APP_NAME} Shopify app, supplementing Intastellar's general privacy policy, terms, and DPA.`,
+    content: `Legal documents for the ${APP_NAME} Shopify app, supplementing ${LEGAL_COMPANY}'s general privacy policy, terms, and DPA.`,
   },
   { name: "robots", content: "index, follow" },
 ];
@@ -38,7 +39,7 @@ export default function LegalHubPage() {
         </p>
         <p>
           The {APP_NAME} Shopify app has its own supplemental privacy policy and
-          terms of use. Intastellar&apos;s general policies and DPA still apply
+          terms of use. {LEGAL_COMPANY}&apos;s general policies and DPA still apply
           to overall data processing, consent platform services, and contractual
           relationships.
         </p>
@@ -62,7 +63,7 @@ export default function LegalHubPage() {
 
         <section className={styles.related} aria-labelledby="general-legal">
           <h2 id="general-legal" className={styles.relatedTitle}>
-            Intastellar general legal documents
+            {GENERAL_LEGAL_DOC_LABELS.sectionTitle}
           </h2>
           <ul className={styles.relatedList}>
             <li>

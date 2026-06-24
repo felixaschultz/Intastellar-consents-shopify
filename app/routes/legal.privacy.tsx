@@ -4,6 +4,7 @@ import { LegalDocumentLayout } from "../components/LegalDocumentLayout";
 import {
   APP_LEGAL_LINKS,
   APP_NAME,
+  LEGAL_COMPANY,
   LEGAL_CONTACT_EMAIL,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
@@ -35,16 +36,15 @@ export default function AppPrivacyPolicyPage() {
     >
       <h2>1. Who this applies to</h2>
       <p>
-        This App Privacy Policy describes how Intastellar Solutions,
-        International (&quot;Intastellar&quot;, &quot;we&quot;, &quot;us&quot;)
-        processes personal data when you use the {APP_NAME} application for
+        This App Privacy Policy describes how {LEGAL_COMPANY} (&quot;we&quot;,
+        &quot;us&quot;) processes personal data when you use the {APP_NAME} application for
         Shopify merchants (the &quot;App&quot;), including our public landing
         page, OAuth install flow, embedded Shopify admin, and related services
         at <code>consentsplatform.com</code> and{" "}
         <code>app.consentsmanagement.com</code>.
       </p>
       <p>
-        For how Intastellar processes data across its websites, consent platform,
+        For how {LEGAL_COMPANY} processes data across its websites, consent platform,
         accounts, and other products, see the{" "}
         <a
           href="https://www.intastellarsolutions.com/about/legal/privacy"
@@ -64,7 +64,7 @@ export default function AppPrivacyPolicyPage() {
         describes processor obligations for consent-related processing.
       </p>
 
-      <h2>2. Roles: merchant, Intastellar, and Shopify</h2>
+      <h2>2. Roles: merchant, {APP_NAME}, and Shopify</h2>
       <ul>
         <li>
           <strong>You (the merchant)</strong> are typically the data controller
@@ -72,9 +72,9 @@ export default function AppPrivacyPolicyPage() {
           including cookie/consent choices on your shop.
         </li>
         <li>
-          <strong>Intastellar</strong> provides the App and, when the banner is
+          <strong>{LEGAL_COMPANY}</strong> provides the App ({APP_NAME}) and, when the banner is
           enabled, consent management technology. For consent logs and banner
-          analytics, Intastellar generally acts as a processor on your
+          analytics, {LEGAL_COMPANY} generally acts as a processor on your
           instructions — see the general DPA.
         </li>
         <li>
@@ -131,16 +131,16 @@ export default function AppPrivacyPolicyPage() {
         email with <strong>Intastellar Accounts</strong> (
         <code>intastellaraccounts.com</code>) so you can access the Intastellar
         Consents Platform later. That account system is governed by the general
-        Intastellar privacy policy and account terms in addition to this
+        privacy policy of {LEGAL_COMPANY} and account terms in addition to this
         document.
       </p>
 
       <h3>3.3 Storefront visitors (your customers)</h3>
       <p>
-        When you enable the theme app embed, Intastellar&apos;s consent script (
+        When you enable the theme app embed, the Intastellar Consents consent script (
         <code>uc.js</code>) loads on your storefront. Consent decisions and
-        related technical metadata are handled under Intastellar&apos;s consent
-        platform rules described in the general privacy policy (including EU/EEA
+        related technical metadata are handled under Intastellar Consents Platform
+        rules described in the general privacy policy (including EU/EEA
         storage of consent logs). The App itself does not persist customer PII in
         our application database.
       </p>
@@ -190,7 +190,7 @@ export default function AppPrivacyPolicyPage() {
           (PostgreSQL as configured for this app)
         </li>
         <li>
-          <strong>Intastellar CDN</strong> — delivery of{" "}
+          <strong>Intastellar Consents CDN</strong> — delivery of{" "}
           <code>uc.js</code> and consent services
         </li>
         <li>
@@ -227,8 +227,8 @@ export default function AppPrivacyPolicyPage() {
           installation metafields until you delete them or uninstall the App
         </li>
         <li>
-          <strong>Consent logs</strong> — retention per general Intastellar
-          consent platform policy and your Platform plan
+          <strong>Consent logs</strong> — retention per general Intastellar Consents
+          Platform policy and your Platform plan
         </li>
       </ul>
 

@@ -4,6 +4,13 @@ export const LEGAL_LAST_UPDATED = "24 June 2026";
 
 export const LEGAL_COMPANY = "Intastellar Solutions, International";
 
+export const GENERAL_LEGAL_DOC_LABELS = {
+  privacy: `${LEGAL_COMPANY} — Privacy & cookie policy`,
+  terms: `${LEGAL_COMPANY} — Terms of use`,
+  dpa: `${LEGAL_COMPANY} — Data Processing Agreement (DPA)`,
+  sectionTitle: `${LEGAL_COMPANY} general legal documents`,
+} as const;
+
 export const LEGAL_CONTACT_EMAIL = "privacy@intastellar.com";
 
 export const GENERAL_LEGAL_LINKS = {

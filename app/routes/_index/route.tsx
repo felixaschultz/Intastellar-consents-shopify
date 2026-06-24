@@ -36,7 +36,7 @@ const landingIntaConfig = {
   settings: {
     rootDomain:
       process.env.VITE_INTA_LANDING_ROOT_DOMAIN || "consentsplatform.com",
-    company: "Intastellar Solutions International",
+    company: "Intastellar Solutions, International",
     color: "rgb(163, 133, 64)",
     language: "auto",
     gtagId: "G-86T4LDB766",
@@ -320,7 +320,7 @@ export default function App() {
             </h1>
             <p className={styles.lead}>
               Cookie consent for Shopify with the same consent ID across Shopify
-              Customer Privacy API and Intastellar — plus analytics merchants
+              Customer Privacy API and Intastellar Consents — plus analytics merchants
               actually use.
             </p>
             <p className={styles.identityBlurb}>
@@ -563,7 +563,7 @@ export default function App() {
           <p className={styles.sectionNote}>
             Go further with the{" "}
             <Link to="https://www.intastellarconsents.com" target="_blank" rel="noopener noreferrer">
-              Intastellar dashboard
+              Intastellar Consents Platform dashboard
             </Link>
             : see acceptance by country and region, track behavior over time, and
             export reports when you need them.
@@ -634,7 +634,7 @@ export default function App() {
           </ul>
           <p>
             <strong>Intastellar Consents</strong> bridges that gap by syncing the
-            same consent ID across Shopify and Intastellar — turning a static legal
+            same consent ID across Shopify and Intastellar Consents — turning a static legal
             record into something you can actually use.
           </p>
           </article>
