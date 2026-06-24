@@ -222,23 +222,64 @@ async function brandFromCheckout(admin: AdminClient): Promise<{
   }
 }
 
+const THEME_LOGO_SETTING_KEYS = [
+  "logo",
+  "checkout_logo_image",
+  "brand_image",
+  "header_logo",
+  "mobile_logo",
+] as const;
+
+function readLogoFromSettingsBlock(settings: unknown): string | null {
+  if (!settings || typeof settings !== "object") return null;
+  const s = settings as Record<string, unknown>;
+  for (const key of THEME_LOGO_SETTING_KEYS) {
+    const value = s[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 /** Finds a logo reference in theme settings_data.json (URL or shopify://shop_images/…). */
 function pickThemeLogoRef(obj: unknown): string | null {
   if (!obj || typeof obj !== "object") return null;
   const record = obj as Record<string, unknown>;
 
   const current = record.current;
-  const presets = record.presets;
-  if (typeof current === "string" && presets && typeof presets === "object") {
-    const preset = (presets as Record<string, unknown>)[current];
-    if (preset && typeof preset === "object") {
-      const logo = (preset as Record<string, unknown>).logo;
-      if (typeof logo === "string" && logo.trim()) return logo.trim();
+
+  // Online Store 2.0: logo lives in current.sections.*.settings (e.g. Dawn header).
+  if (current && typeof current === "object" && !Array.isArray(current)) {
+    const cur = current as Record<string, unknown>;
+    const fromGlobal = readLogoFromSettingsBlock(cur);
+    if (fromGlobal) return fromGlobal;
+
+    const sections = cur.sections;
+    if (sections && typeof sections === "object" && !Array.isArray(sections)) {
+      for (const section of Object.values(sections as Record<string, unknown>)) {
+        if (!section || typeof section !== "object") continue;
+        const fromSection = readLogoFromSettingsBlock(
+          (section as Record<string, unknown>).settings,
+        );
+        if (fromSection) return fromSection;
+      }
     }
   }
 
+  // Legacy themes: logo on the active preset object.
+  if (typeof current === "string" && record.presets && typeof record.presets === "object") {
+    const preset = (record.presets as Record<string, unknown>)[current];
+    const fromPreset = readLogoFromSettingsBlock(preset);
+    if (fromPreset) return fromPreset;
+  }
+
   for (const [key, value] of Object.entries(record)) {
-    if (key === "logo" && typeof value === "string" && value.trim()) {
+    if (
+      THEME_LOGO_SETTING_KEYS.includes(
+        key as (typeof THEME_LOGO_SETTING_KEYS)[number],
+      ) &&
+      typeof value === "string" &&
+      value.trim()
+    ) {
       return value.trim();
     }
     if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -249,20 +290,14 @@ function pickThemeLogoRef(obj: unknown): string | null {
   return null;
 }
 
-async function resolveThemeLogoReference(
+async function queryFilesForImageUrl(
   admin: AdminClient,
-  ref: string,
-): Promise<string | null> {
-  if (/^https?:\/\//i.test(ref)) return ref;
-
-  const shopImage = ref.match(/^shopify:\/\/shop_images\/(.+)$/i);
-  if (!shopImage) return null;
-
-  const filename = shopImage[1];
+  query: string,
+): Promise<{ url: string | null; error: string | null }> {
   const res = await admin.graphql(
     `#graphql
     query IntaShopImageFile($query: String!) {
-      files(first: 1, query: $query) {
+      files(first: 5, query: $query) {
         nodes {
           ... on MediaImage {
             image {
@@ -275,7 +310,7 @@ async function resolveThemeLogoReference(
         }
       }
     }`,
-    { variables: { query: `filename:${filename}` } },
+    { variables: { query } },
   );
   const json = (await res.json()) as {
     data?: {
@@ -288,9 +323,93 @@ async function resolveThemeLogoReference(
     };
     errors?: { message?: string }[];
   };
-  if (graphqlErrorsMessage(json)) return null;
-  const node = json.data?.files?.nodes?.[0];
-  return node?.image?.url ?? node?.url ?? null;
+  const gqlError = graphqlErrorsMessage(json);
+  if (gqlError) return { url: null, error: gqlError };
+
+  for (const node of json.data?.files?.nodes ?? []) {
+    const url = node?.image?.url ?? node?.url ?? null;
+    if (url) return { url, error: null };
+  }
+  return { url: null, error: null };
+}
+
+async function resolveThemeLogoReference(
+  admin: AdminClient,
+  ref: string,
+  diagnostics: string[],
+): Promise<string | null> {
+  if (/^https?:\/\//i.test(ref)) return ref;
+
+  const shopImage = ref.match(/^shopify:\/\/shop_images\/(.+)$/i);
+  if (!shopImage) {
+    diagnostics.push(`theme: unsupported logo reference format (${ref})`);
+    return null;
+  }
+
+  const filename = shopImage[1];
+  const queries = [`filename:${filename}`, filename];
+  for (const query of queries) {
+    const { url, error } = await queryFilesForImageUrl(admin, query);
+    if (url) return url;
+    if (error) {
+      diagnostics.push(`theme files API: ${error}`);
+      if (/access denied|not authorized|scope/i.test(error)) {
+        diagnostics.push(
+          "theme: approve the read_files permission for this app (reinstall or accept updated scopes), then try Use store logo again",
+        );
+      }
+      return null;
+    }
+  }
+
+  diagnostics.push(
+    `theme: logo file "${filename}" was found in theme settings but could not be resolved to a CDN URL`,
+  );
+  return null;
+}
+
+/** Shop brand logo from Admin API (when available on the shop record). */
+async function brandFromShop(admin: AdminClient): Promise<{
+  assets: ShopBrandAssets;
+  diagnostics: string[];
+}> {
+  const diagnostics: string[] = [];
+  const empty = (): { assets: ShopBrandAssets; diagnostics: string[] } => ({
+    assets: { logo: null, color: null },
+    diagnostics,
+  });
+
+  try {
+    const res = await admin.graphql(
+      `#graphql
+      query IntaShopBrandLogo {
+        shop {
+          brand {
+            logo {
+              image {
+                url
+              }
+            }
+          }
+        }
+      }`,
+    );
+    const json = (await res.json()) as {
+      data?: { shop?: { brand?: { logo?: { image?: { url?: string } } } } };
+      errors?: { message?: string }[];
+    };
+    const gqlError = graphqlErrorsMessage(json);
+    if (gqlError) {
+      diagnostics.push(`shop.brand: ${gqlError}`);
+      return empty();
+    }
+    const logoUrl = json.data?.shop?.brand?.logo?.image?.url ?? null;
+    if (!logoUrl) diagnostics.push("shop.brand: no logo on shop record");
+    return { assets: { logo: logoUrl, color: null }, diagnostics };
+  } catch (err) {
+    diagnostics.push(formatDiag("shop.brand", err));
+    return empty();
+  }
 }
 
 async function loadMainThemeSettingsJson(
@@ -420,14 +539,16 @@ async function brandFromThemeSettings(admin: AdminClient): Promise<{
   let logo: string | null = null;
   const logoRef = pickThemeLogoRef(parsed);
   if (logoRef) {
-    logo = await resolveThemeLogoReference(admin, logoRef);
+    logo = await resolveThemeLogoReference(admin, logoRef, diagnostics);
     if (!logo) {
       diagnostics.push(
-        `theme: logo reference found (${logoRef}) but could not resolve to a URL`,
+        `theme: logo reference found (${logoRef}) but URL resolution failed`,
       );
     }
   } else {
-    diagnostics.push("theme: no logo found in settings_data.json");
+    diagnostics.push(
+      "theme: no logo in settings_data.json — set one under Online Store → Themes → Customize → Header",
+    );
   }
 
   return { assets: { logo, color }, diagnostics };
@@ -435,14 +556,19 @@ async function brandFromThemeSettings(admin: AdminClient): Promise<{
 
 /**
  * Loads brand logo and color via Admin API:
- * 1. Checkout branding (Plus/dev) – logo + design system colors
- * 2. Theme settings – logo + colors from main theme's config/settings_data.json
+ * 1. Shop brand record (when exposed on Admin API)
+ * 2. Checkout branding (Plus/dev) – logo + design system colors
+ * 3. Theme settings – logo + colors from main theme's config/settings_data.json
  */
 export async function fetchShopBrandAssets(
   admin: AdminClient,
 ): Promise<ShopBrandAssetsResult> {
   const loadDiagnostics: string[] = [];
   let out: ShopBrandAssets = { logo: null, color: null };
+
+  const shopBrand = await brandFromShop(admin);
+  out = mergeAssets(out, shopBrand.assets);
+  loadDiagnostics.push(...shopBrand.diagnostics);
 
   const checkout = await brandFromCheckout(admin);
   out = mergeAssets(out, checkout.assets);
