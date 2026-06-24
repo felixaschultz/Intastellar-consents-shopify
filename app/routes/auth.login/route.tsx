@@ -158,9 +158,10 @@ export default function Auth() {
       <footer className={styles.footer}>
         <BlockStack gap="200">
           <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
-          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
-          <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
-          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
+          <Link to="/legal/privacy">App Privacy Policy</Link> |
+          <Link to="/legal/terms">App Terms of Use</Link> |
+          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank" rel="noopener noreferrer">General Privacy</Link> |
+          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank" rel="noopener noreferrer">DPA</Link>
           <Text as="p" variant="bodyMd">
             &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
           </Text>

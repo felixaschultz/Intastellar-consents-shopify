@@ -694,11 +694,13 @@ export default function App() {
           <BlockStack as="div" gap="200">
             <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
             <div className={styles.footerLinks}>
-              <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+              <Link to="/legal/privacy">App Privacy Policy</Link>
               <span className={styles.footerDivider} aria-hidden="true">·</span>
-              <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
+              <Link to="/legal/terms">App Terms of Use</Link>
               <span className={styles.footerDivider} aria-hidden="true">·</span>
-              <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank" rel="noopener noreferrer">Data Processing Agreement</Link>
+              <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank" rel="noopener noreferrer">General Privacy</Link>
+              <span className={styles.footerDivider} aria-hidden="true">·</span>
+              <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank" rel="noopener noreferrer">DPA</Link>
             </div>
             <Text as="p" variant="bodyMd">
               &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
