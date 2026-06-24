@@ -1,14 +1,14 @@
-const LANDING_BASE =
-  process.env.SHOPIFY_APP_URL?.replace(/\/$/, "") ||
-  "https://app.consentsmanagement.com";
+import {
+  SHOPIFY_APP_IDENTITY,
+  SHOPIFY_APP_META,
+  SHOPIFY_APP_URL,
+  shopifyAppInstallUrl,
+  shopifyAppSameAsLinks,
+} from "./shopify-app-seo";
 
-export const LANDING_URL = `${LANDING_BASE}/`;
+export const LANDING_URL = SHOPIFY_APP_URL;
 
-export const LANDING_META = {
-  title: "Intastellar Consents — Cookie consent for Shopify stores",
-  description:
-    "Shopify app for GDPR-ready cookie consent banners, Shopify Customer Privacy API sync, and consent analytics with the same consent ID across Shopify and Intastellar.",
-};
+export const LANDING_META = SHOPIFY_APP_META;
 
 export const LANDING_FEATURES = [
   {
@@ -30,6 +30,11 @@ export const LANDING_FEATURES = [
 ] as const;
 
 export const LANDING_FAQ = [
+  {
+    question: "Is Intastellar Consents a Shopify app?",
+    answer:
+      "Yes. Intastellar Consents is an official Shopify app built by Intastellar Solutions International. It includes a Shopify admin app for configuration and a theme app embed for your storefront cookie banner. Install it from app.consentsmanagement.com or the Shopify App Store when listed.",
+  },
   {
     question: "What is Intastellar Consents for Shopify?",
     answer:
@@ -84,7 +89,8 @@ export function buildLandingJsonLd() {
       {
         "@type": "WebSite",
         "@id": `${LANDING_URL}#website`,
-        name: "Intastellar Consents",
+        name: `${SHOPIFY_APP_IDENTITY.name} — ${SHOPIFY_APP_IDENTITY.productType}`,
+        alternateName: SHOPIFY_APP_IDENTITY.alternateNames,
         url: LANDING_URL,
         description: LANDING_META.description,
         inLanguage: "en-US",
@@ -97,26 +103,40 @@ export function buildLandingJsonLd() {
         name: LANDING_META.title,
         description: LANDING_META.description,
         isPartOf: { "@id": `${LANDING_URL}#website` },
-        about: { "@id": `${LANDING_URL}#software` },
+        about: { "@id": `${LANDING_URL}#shopify-app` },
+        mainEntity: { "@id": `${LANDING_URL}#shopify-app` },
         inLanguage: "en-US",
       },
       {
         "@type": "SoftwareApplication",
-        "@id": `${LANDING_URL}#software`,
-        name: "Intastellar Consents",
+        "@id": `${LANDING_URL}#shopify-app`,
+        name: SHOPIFY_APP_IDENTITY.name,
+        alternateName: SHOPIFY_APP_IDENTITY.alternateNames,
         applicationCategory: "BusinessApplication",
-        applicationSubCategory: "Cookie consent management",
-        operatingSystem: "Web",
+        applicationSubCategory: "Shopify app — Cookie consent management",
+        operatingSystem: "Shopify",
+        browserRequirements: "Requires a Shopify store",
+        installUrl: shopifyAppInstallUrl(),
+        downloadUrl: LANDING_URL,
+        softwareHelp: SHOPIFY_APP_IDENTITY.helpUrl,
+        sameAs: shopifyAppSameAsLinks(),
+        brand: {
+          "@type": "Brand",
+          name: SHOPIFY_APP_IDENTITY.name,
+        },
         offers: {
           "@type": "Offer",
           price: "0",
           priceCurrency: "USD",
-          description: "Install via Shopify App Store or direct install link",
+          description: "Free cookie consent banner for Shopify stores",
+          url: LANDING_URL,
         },
         featureList: LANDING_FEATURES.map((f) => f.title),
         description: LANDING_META.description,
         url: LANDING_URL,
+        author: { "@id": "https://www.intastellarsolutions.com/#organization" },
         provider: { "@id": "https://www.intastellarsolutions.com/#organization" },
+        publisher: { "@id": "https://www.intastellarsolutions.com/#organization" },
       },
       {
         "@type": "FAQPage",
@@ -135,10 +155,15 @@ export function buildLandingJsonLd() {
         "@id": "https://www.intastellarsolutions.com/#organization",
         name: "Intastellar Solutions International",
         url: "https://www.intastellarsolutions.com/",
+        sameAs: [
+          "https://www.intastellarconsents.com",
+          LANDING_URL,
+        ],
         logo: {
           "@type": "ImageObject",
           url: "https://www.intastellarconsents.com/assets/icons/intastellar-logo-black.svg",
         },
+        makesOffer: { "@id": `${LANDING_URL}#shopify-app` },
       },
     ],
   };

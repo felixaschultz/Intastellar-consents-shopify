@@ -20,6 +20,7 @@ import { login } from "../../shopify.server";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
 
+import { SHOPIFY_APP_META } from "../../lib/shopify-app-seo";
 import { loginErrorMessage } from "./error.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -36,15 +37,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   };
 };
 
-export const meta = () => {
-  return [
-    { title: "Intastellar Consents: Consent management for your Shopify store" },
-    { description: "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place." },
-    { property: "og:image", content: appScreen },
-    { property: "og:title", content: "Intastellar Consents: Consent management for your Shopify store" },
-    { property: "og:description", content: "Intastellar Consents is a Shopify app that helps you manage your cookie consents and preferences in one place." },
-  ];
-};
+export const meta = () => [
+  { title: `${SHOPIFY_APP_META.title} — Install` },
+  { name: "description", content: SHOPIFY_APP_META.description },
+  { name: "robots", content: "index, follow" },
+  { property: "og:image", content: appScreen },
+  { property: "og:title", content: `${SHOPIFY_APP_META.title} — Install` },
+  { property: "og:description", content: SHOPIFY_APP_META.description },
+  { property: "og:type", content: "website" },
+];
 
 export const links = () => [
   { rel: "stylesheet", href: polarisStyles },

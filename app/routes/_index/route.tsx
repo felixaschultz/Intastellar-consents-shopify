@@ -23,6 +23,7 @@ import {
   LANDING_URL,
 } from "../../lib/landing-content";
 import { APP_LEGAL_LINKS } from "../../lib/legal-content";
+import { SHOPIFY_APP_IDENTITY } from "../../lib/shopify-app-seo";
 
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
 const jsonLdSchema = buildLandingJsonLd();
@@ -148,6 +149,7 @@ export const meta = () => {
   return [
     { title: LANDING_META.title },
     { name: "description", content: LANDING_META.description },
+    { name: "application-name", content: `${SHOPIFY_APP_IDENTITY.name} Shopify App` },
     { name: "robots", content: "index, follow" },
     { tagName: "link", rel: "canonical", href: LANDING_URL },
     { property: "og:image", content: ogImage },
@@ -336,6 +338,20 @@ export default function App() {
               Cookie consent for Shopify with the same consent ID across Shopify
               Customer Privacy API and Intastellar — plus analytics merchants
               actually use.
+            </p>
+            <p className={styles.identityBlurb}>
+              <strong>{SHOPIFY_APP_IDENTITY.name}</strong> is the official{" "}
+              <strong>{SHOPIFY_APP_IDENTITY.productType}</strong> from{" "}
+              {SHOPIFY_APP_IDENTITY.developer}. Install here to add the consent
+              banner to your Shopify storefront; use{" "}
+              <Link
+                to={SHOPIFY_APP_IDENTITY.platformUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Intastellar Consents Platform
+              </Link>{" "}
+              separately for analytics and reporting.
             </p>
           </section>
           <div className={styles.content}>

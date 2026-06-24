@@ -70,6 +70,16 @@ Accounts are hosted on **one.com** under **intastellaraccounts.com**. Set these 
 
 Until `INTASTELLAR_ACCOUNTS_REGISTER_URL` is set, pilot signup and Shopify provisioning still work; account registration is skipped.
 
+### Shopify App Store / entity SEO
+
+Set when the app is listed:
+
+| Variable | Description |
+| -------- | ----------- |
+| `SHOPIFY_APP_STORE_LISTING_URL` | Public App Store URL — added to JSON-LD `sameAs` so search/AI link the product |
+
+Also link **to** `https://app.consentsmanagement.com` from [Shopify integration page](https://www.intastellarsolutions.com/solutions/cookie-consents/integrations/shopify) and intastellarconsents.com with anchor text **“Intastellar Consents Shopify app”**.
+
 ### Register request (minimal)
 
 The app will POST JSON like:

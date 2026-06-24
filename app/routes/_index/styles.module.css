@@ -187,6 +187,24 @@ a:hover {
   max-width: 40rem;
 }
 
+.identityBlurb {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--inta-text-muted);
+  max-width: 40rem;
+  margin: 1rem auto 0;
+  padding: 0.875rem 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--inta-border);
+  border-radius: var(--inta-radius-sm);
+  text-align: left;
+}
+
+.identityBlurb a {
+  display: inline;
+  padding: 0;
+}
+
 .sectionEyebrow {
   display: inline-block;
   font-size: 0.75rem;
