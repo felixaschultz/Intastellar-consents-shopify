@@ -32,3 +32,26 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+enum PilotLeadStatus {
+  PENDING
+  CREATING
+  READY
+  FAILED
+}
+
+model PilotLead {
+  id          String          @id @default(cuid())
+  email       String
+  storeName   String
+  currentCmp  String
+  shopDomain  String?
+  status      PilotLeadStatus @default(PENDING)
+  statusNote  String?
+  pollToken   String          @unique
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([shopDomain])
+  @@index([email])
+}
