@@ -35,11 +35,10 @@ function formatCheckoutGraphQLError(
   operation: "profiles" | "branding",
   gqlMessage: string,
 ): string {
-  const access =
-    gqlMessage.includes("Access denied") && gqlMessage.includes("Plus plan");
+  const accessDenied = /access denied/i.test(gqlMessage);
   const checkoutRelated =
     /checkoutBranding|checkoutProfiles|checkout branding/i.test(gqlMessage);
-  if (access && checkoutRelated) {
+  if (accessDenied && checkoutRelated) {
     return CHECKOUT_BRANDING_ACCESS_HINT;
   }
   return operation === "profiles"
@@ -70,6 +69,69 @@ async function themeFileBodyToUtf8(
 
 function normalizeThemeJsonText(raw: string): string {
   return raw.replace(/^\uFEFF/, "").trim();
+}
+
+/** Shopify theme JSON files may include JSONC block/line comments from the Admin API. */
+function stripJsonComments(json: string): string {
+  let result = "";
+  let i = 0;
+  let inString = false;
+  let escape = false;
+
+  while (i < json.length) {
+    const c = json[i];
+    const next = json[i + 1];
+
+    if (inString) {
+      result += c;
+      if (escape) {
+        escape = false;
+      } else if (c === "\\") {
+        escape = true;
+      } else if (c === '"') {
+        inString = false;
+      }
+      i++;
+      continue;
+    }
+
+    if (c === '"') {
+      inString = true;
+      result += c;
+      i++;
+      continue;
+    }
+
+    if (c === "/" && next === "*") {
+      i += 2;
+      while (i < json.length && !(json[i] === "*" && json[i + 1] === "/")) {
+        i++;
+      }
+      i += 2;
+      continue;
+    }
+
+    if (c === "/" && next === "/") {
+      while (i < json.length && json[i] !== "\n" && json[i] !== "\r") {
+        i++;
+      }
+      continue;
+    }
+
+    result += c;
+    i++;
+  }
+
+  return result.trim();
+}
+
+function parseThemeSettingsJson(raw: string): Record<string, unknown> {
+  const normalized = normalizeThemeJsonText(raw);
+  try {
+    return JSON.parse(normalized) as Record<string, unknown>;
+  } catch {
+    return JSON.parse(stripJsonComments(normalized)) as Record<string, unknown>;
+  }
 }
 
 function mergeAssets(
@@ -683,12 +745,13 @@ async function loadMainThemeSettingsJson(
 
     const content = normalizeThemeJsonText(rawContent);
     try {
-      return { parsed: JSON.parse(content) as Record<string, unknown>, diagnostics };
+      return { parsed: parseThemeSettingsJson(content), diagnostics };
     } catch (parseErr) {
       const hint =
         parseErr instanceof Error ? parseErr.message : String(parseErr);
+      const preview = stripJsonComments(content).slice(0, 120).replace(/\s+/g, " ");
       diagnostics.push(
-        `theme: settings_data.json could not be parsed as JSON (${hint}). First 120 chars: ${content.slice(0, 120).replace(/\s+/g, " ")}`,
+        `theme: settings_data.json could not be parsed as JSON (${hint}). First 120 chars after stripping comments: ${preview}`,
       );
       return { parsed: null, diagnostics };
     }
