@@ -22,6 +22,7 @@ import {
   LANDING_META,
   LANDING_URL,
 } from "../../lib/landing-content";
+import { APP_LEGAL_LINKS } from "../../lib/legal-content";
 
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
 const jsonLdSchema = buildLandingJsonLd();
@@ -496,6 +497,11 @@ export default function App() {
                     >
                       Start free demo
                     </button>
+                    <p className={styles.formLegal}>
+                      By submitting, you agree to the{" "}
+                      <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link> and{" "}
+                      <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>.
+                    </p>
                   </Form>
                 )}
 
@@ -544,6 +550,11 @@ export default function App() {
                       <button className={styles.buttonSecondary} type="submit">
                         Install now
                       </button>
+                      <p className={styles.formLegal}>
+                        By installing, you agree to the{" "}
+                        <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link> and{" "}
+                        <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>.
+                      </p>
                     </Form>
                   </div>
                 ) : null}

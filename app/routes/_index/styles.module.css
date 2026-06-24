@@ -304,6 +304,26 @@ a:hover {
   width: 100%;
 }
 
+.formLegal {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--inta-text-muted);
+  text-align: center;
+}
+
+.formLegal a {
+  color: var(--inta-gold-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline;
+  padding: 0;
+}
+
+.formLegal a:hover {
+  color: var(--inta-gold);
+}
+
 .manualInstallPanel {
   display: flex;
   flex-direction: column;
