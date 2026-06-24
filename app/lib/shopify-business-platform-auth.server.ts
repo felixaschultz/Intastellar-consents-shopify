@@ -36,19 +36,18 @@ type TokenResponse = {
 
 let cachedAccessToken: CachedToken | null = null;
 
+/** Clear cached token (e.g. after Business Platform API 401). */
+export function clearBusinessPlatformTokenCache(): void {
+  cachedAccessToken = null;
+}
+
 export function isAppAutomationToken(token: string): boolean {
   return token.trim().startsWith("atkn_");
 }
 
-/** CLI sends Business Platform tokens as `Bearer <token>` (see Shopify CLI buildHeaders). */
+/** CLI sends Business Platform tokens as `Bearer <token>` unless already shpat/shpua/etc. */
 export function formatBusinessPlatformAuthValue(accessToken: string): string {
   const token = accessToken.trim();
-  if (isAppAutomationToken(token)) {
-    throw new Error(
-      "A raw App Automation Token (atkn_*) cannot be used as a Business Platform API bearer. " +
-        "Set SHOPIFY_APP_AUTOMATION_TOKEN and let the server exchange it, or use SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN.",
-    );
-  }
   return token.match(/^shp(at|ua|ca|tka)/) ? token : `Bearer ${token}`;
 }
 
@@ -76,8 +75,7 @@ function readAutomationTokenFromEnv(): string | null {
 
 function readDirectBusinessPlatformToken(): string | null {
   const direct = process.env.SHOPIFY_BUSINESS_PLATFORM_TOKEN?.trim();
-  if (!direct || isAppAutomationToken(direct)) return null;
-  return direct;
+  return direct || null;
 }
 
 function readPartnerIdentityCredentials(): {
@@ -101,8 +99,9 @@ export function readPartnerOrganizationId(): string | null {
 }
 
 function getRawCredentialToken(): string | null {
+  if (readDirectBusinessPlatformToken()) return "business-platform";
   if (readPartnerIdentityCredentials()) return "identity";
-  return readAutomationTokenFromEnv() ?? readDirectBusinessPlatformToken();
+  return readAutomationTokenFromEnv();
 }
 
 export function isPilotStoreAuthConfigured(): boolean {
@@ -150,12 +149,6 @@ async function exchangeSubjectForBusinessPlatformToken(
     const detail =
       payload.error_description ?? payload.error ?? "token exchange failed";
     throw new Error(`${context} (${res.status}): ${detail}`);
-  }
-
-  if (isAppAutomationToken(payload.access_token)) {
-    throw new Error(
-      `${context} returned another automation token instead of a Business Platform access token.`,
-    );
   }
 
   const expiresInSec =
@@ -227,33 +220,53 @@ async function resolveFromPartnerIdentity(): Promise<CachedToken> {
       credentials.accessToken,
       "Partner identity → Business Platform exchange",
     );
-  } catch (firstErr) {
+  } catch (exchangeErr) {
     try {
-      const identityAccess = await refreshPartnerIdentityToken(credentials);
+      const refreshed = await refreshPartnerIdentityToken(credentials);
       return await exchangeSubjectForBusinessPlatformToken(
-        identityAccess,
+        refreshed,
         "Partner identity → Business Platform exchange",
       );
     } catch (refreshErr) {
+      const exchangeMsg =
+        exchangeErr instanceof Error ? exchangeErr.message : String(exchangeErr);
       const refreshMsg =
         refreshErr instanceof Error ? refreshErr.message : String(refreshErr);
-      const exchangeMsg =
-        firstErr instanceof Error ? firstErr.message : String(firstErr);
       throw new Error(
-        `${refreshMsg} (initial exchange: ${exchangeMsg})`,
+        "Could not obtain a Business Platform token from partner identity credentials. " +
+          `Exchange failed (${exchangeMsg}). Refresh failed (${refreshMsg}). ` +
+          "Run `shopify auth logout`, then `shopify auth login`, then `npm run export:pilot-env`, " +
+          "and copy all four SHOPIFY_* pilot variables into .env together (do not mix old and new tokens).",
       );
     }
   }
 }
 
+function cacheDirectToken(token: string): CachedToken {
+  return {
+    accessToken: token,
+    expiresAtMs: Date.now() + 50 * 60 * 1000,
+  };
+}
+
 /** Returns a valid Business Platform access token (cached until near expiry). */
-export async function resolveBusinessPlatformAccessToken(): Promise<string> {
-  if (cachedAccessToken && cachedAccessToken.expiresAtMs > Date.now()) {
+export async function resolveBusinessPlatformAccessToken(options?: {
+  /** When true, skip SHOPIFY_BUSINESS_PLATFORM_TOKEN and use identity refresh/exchange. */
+  skipDirect?: boolean;
+}): Promise<string> {
+  if (
+    !options?.skipDirect &&
+    cachedAccessToken &&
+    cachedAccessToken.expiresAtMs > Date.now()
+  ) {
     return cachedAccessToken.accessToken;
   }
 
-  const direct = readDirectBusinessPlatformToken();
-  if (direct) return direct;
+  const direct = options?.skipDirect ? null : readDirectBusinessPlatformToken();
+  if (direct) {
+    cachedAccessToken = cacheDirectToken(direct);
+    return direct;
+  }
 
   const identity = readPartnerIdentityCredentials();
   if (identity) {
@@ -268,7 +281,8 @@ export async function resolveBusinessPlatformAccessToken(): Promise<string> {
   }
 
   throw new Error(
-    "Pilot store provisioning is not configured. Set SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN + SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN (recommended), " +
-      "SHOPIFY_APP_AUTOMATION_TOKEN, or a CLI session SHOPIFY_BUSINESS_PLATFORM_TOKEN, plus SHOPIFY_PARTNER_ORG_ID.",
+    "Pilot store provisioning is not configured. Set SHOPIFY_BUSINESS_PLATFORM_TOKEN (from `npm run export:pilot-env`), " +
+      "SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN + SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN, " +
+      "SHOPIFY_APP_AUTOMATION_TOKEN, plus SHOPIFY_PARTNER_ORG_ID.",
   );
 }

@@ -18,7 +18,9 @@
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
-    "diagnose:pilot": "npx --yes tsx scripts/diagnose-pilot-provisioning.ts"
+    "diagnose:pilot": "npx --yes tsx scripts/diagnose-pilot-provisioning.ts",
+    "export:pilot-env": "npx --yes tsx scripts/export-pilot-env.ts",
+    "refresh:pilot-auth": "shopify auth logout && shopify auth login"
   },
   "type": "module",
   "engines": {

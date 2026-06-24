@@ -12,8 +12,32 @@ const PILOT_POLL_GENERIC =
 const PILOT_START_GENERIC =
   "Something went wrong while starting demo setup. Please try again later.";
 
+const PILOT_ORG_CLI_NOT_ENABLED =
+  "Automated demo stores are not enabled for your Shopify Partner organization yet. " +
+  "Create a development store manually in the Partner Dashboard, then use \"Install directly\" below.";
+
+function isOrgCliStoreCreationDisabled(internal: string): boolean {
+  return /not yet enabled for your organization|CLI is not yet enabled/i.test(
+    internal,
+  );
+}
+
 /** Maps internal pilot/store errors to a safe message for landing-page visitors. */
 export function publicPilotStoreError(internal: string): string {
+  if (isOrgCliStoreCreationDisabled(internal)) {
+    if (isDevEnvironment()) {
+      return (
+        "We could not create your demo store: Shopify has not enabled programmatic dev-store " +
+        "creation for Partner org " +
+        (process.env.SHOPIFY_PARTNER_ORG_ID ?? "unknown") +
+        ". Create a dev store at partners.shopify.com → Stores → Add store → Development store, " +
+        "or ask Shopify Partner Support to enable CLI store creation for your org."
+      );
+    }
+    console.error("[pilot] store error (org CLI disabled):", internal);
+    return PILOT_ORG_CLI_NOT_ENABLED;
+  }
+
   if (isDevEnvironment()) {
     return internal.startsWith("We could not create your demo store:")
       ? internal

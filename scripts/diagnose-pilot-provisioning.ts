@@ -51,6 +51,9 @@ function mask(value: string | undefined | null): string {
 }
 
 function credentialSource(): string {
+  if (process.env.SHOPIFY_BUSINESS_PLATFORM_TOKEN?.trim()) {
+    return "business platform token (SHOPIFY_BUSINESS_PLATFORM_TOKEN)";
+  }
   if (process.env.SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN?.trim()) {
     return "partner identity (SHOPIFY_PARTNER_IDENTITY_*)";
   }
@@ -72,6 +75,7 @@ async function main() {
   console.log("Environment");
   console.log(`  SHOPIFY_PARTNER_ORG_ID: ${readPartnerOrganizationId() ?? "(not set)"}`);
   console.log(`  Credential source: ${credentialSource()}`);
+  console.log(`  SHOPIFY_BUSINESS_PLATFORM_TOKEN: ${mask(process.env.SHOPIFY_BUSINESS_PLATFORM_TOKEN)}`);
   console.log(`  SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN: ${mask(process.env.SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN)}`);
   console.log(`  SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN: ${mask(process.env.SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN)}`);
   console.log(`  SHOPIFY_APP_AUTOMATION_TOKEN: ${mask(process.env.SHOPIFY_APP_AUTOMATION_TOKEN)}`);
@@ -118,7 +122,14 @@ async function main() {
 
   if (!res.ok) {
     console.error(`  FAIL — body: ${text.slice(0, 400) || "(empty)"}\n`);
-    if (res.status === 400) {
+    if (res.status === 401) {
+      console.error(
+        "HTTP 401 usually means expired or mismatched tokens in .env. Run:\n" +
+          "  shopify auth logout && shopify auth login\n" +
+          "  npm run export:pilot-env\n" +
+          "Copy all four SHOPIFY_* lines into .env together, then restart the dev server.",
+      );
+    } else if (res.status === 400) {
       console.error(
         "HTTP 400 usually means wrong SHOPIFY_PARTNER_ORG_ID or malformed auth. Verify org id matches partners.shopify.com/ORG_ID/…",
       );

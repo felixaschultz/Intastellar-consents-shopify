@@ -13,6 +13,7 @@
 
 import {
   businessPlatformAuthHeaders,
+  clearBusinessPlatformTokenCache,
   isPilotStoreAuthConfigured,
   readPartnerOrganizationId,
   resolveBusinessPlatformAccessToken,
@@ -49,20 +50,32 @@ async function organizationsGraphql<T>(
 
   const accessToken = await resolveBusinessPlatformAccessToken();
   const url = `https://${BP_FQDN}/organizations/api/unstable/organization/${organizationId}/graphql`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: businessPlatformAuthHeaders(accessToken),
-    body: JSON.stringify({ query, variables }),
-  });
+
+  const doRequest = async (token: string) =>
+    fetch(url, {
+      method: "POST",
+      headers: businessPlatformAuthHeaders(token),
+      body: JSON.stringify({ query, variables }),
+    });
+
+  let res = await doRequest(accessToken);
+
+  if (res.status === 401 || res.status === 403) {
+    clearBusinessPlatformTokenCache();
+    const retryToken = await resolveBusinessPlatformAccessToken({
+      skipDirect: true,
+    });
+    if (retryToken !== accessToken) {
+      res = await doRequest(retryToken);
+    }
+  }
 
   const text = await res.text();
   if (res.status === 401 || res.status === 403) {
     throw new Error(
       `Business Platform API unauthorized (${res.status}). ` +
-        "On Vercel, set SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN and SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN " +
-        "from a `shopify auth login` session (recommended), or create a fresh SHOPIFY_APP_AUTOMATION_TOKEN. " +
-        "Never paste the raw atkn_* value into SHOPIFY_BUSINESS_PLATFORM_TOKEN. " +
-        "Verify SHOPIFY_PARTNER_ORG_ID matches your org (e.g. `jq -r 'to_entries[0].value.orgId' ~/Library/Preferences/shopify-cli-app-nodejs/config.json`).",
+        "Tokens may be expired or mismatched in .env. Run `shopify auth logout`, `shopify auth login`, " +
+        "`npm run export:pilot-env`, and copy all four SHOPIFY_* pilot variables together.",
     );
   }
 
