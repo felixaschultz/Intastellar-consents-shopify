@@ -3,7 +3,8 @@
  * (same backend as `shopify store create dev`).
  *
  * Env (Vercel / production):
- * - SHOPIFY_APP_AUTOMATION_TOKEN — from Dev Dashboard → App → Settings (recommended)
+ * - SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN + SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN (recommended)
+ * - SHOPIFY_APP_AUTOMATION_TOKEN — from Dev Dashboard → App → Settings (fallback)
  * - SHOPIFY_PARTNER_ORG_ID — numeric org id from partners.shopify.com URL
  *
  * Env (local dev alternative):
@@ -11,6 +12,7 @@
  */
 
 import {
+  businessPlatformAuthHeaders,
   isPilotStoreAuthConfigured,
   readPartnerOrganizationId,
   resolveBusinessPlatformAccessToken,
@@ -49,10 +51,7 @@ async function organizationsGraphql<T>(
   const url = `https://${BP_FQDN}/organizations/api/unstable/organization/${organizationId}/graphql`;
   const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Access-Token": accessToken,
-    },
+    headers: businessPlatformAuthHeaders(accessToken),
     body: JSON.stringify({ query, variables }),
   });
 
@@ -60,12 +59,10 @@ async function organizationsGraphql<T>(
   if (res.status === 401 || res.status === 403) {
     throw new Error(
       `Business Platform API unauthorized (${res.status}). ` +
-        "For production (Vercel): set SHOPIFY_APP_AUTOMATION_TOKEN from Dev Dashboard → your app → Settings " +
-        "(do not paste the raw atkn_* value into SHOPIFY_BUSINESS_PLATFORM_TOKEN). " +
-        "For local dev: run `npx shopify auth login`, extract a fresh CLI Business Platform token " +
-        "(CLI session tokens expire after a few hours). " +
-        "Also verify SHOPIFY_PARTNER_ORG_ID matches your org (from partners.shopify.com/ORG_ID/... " +
-        "or `jq -r 'to_entries[0].value.orgId' ~/Library/Preferences/shopify-cli-app-nodejs/config.json`).",
+        "On Vercel, set SHOPIFY_PARTNER_IDENTITY_REFRESH_TOKEN and SHOPIFY_PARTNER_IDENTITY_ACCESS_TOKEN " +
+        "from a `shopify auth login` session (recommended), or create a fresh SHOPIFY_APP_AUTOMATION_TOKEN. " +
+        "Never paste the raw atkn_* value into SHOPIFY_BUSINESS_PLATFORM_TOKEN. " +
+        "Verify SHOPIFY_PARTNER_ORG_ID matches your org (e.g. `jq -r 'to_entries[0].value.orgId' ~/Library/Preferences/shopify-cli-app-nodejs/config.json`).",
     );
   }
 
