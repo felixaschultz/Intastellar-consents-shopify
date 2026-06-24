@@ -77,8 +77,10 @@ Set when the app is listed:
 | Variable | Description |
 | -------- | ----------- |
 | `SHOPIFY_APP_STORE_LISTING_URL` | Public App Store URL — added to JSON-LD `sameAs` so search/AI link the product |
+| `PUBLIC_SITE_URL` | Public marketing site (default `https://consentsplatform.com`) — sitemap, canonical URLs, JSON-LD, install links |
+| `SHOPIFY_APP_URL` | Shopify OAuth / embedded app server (default `https://app.consentsmanagement.com`) — must match `shopify.app.toml` |
 
-Also link **to** `https://app.consentsmanagement.com` from [Shopify integration page](https://www.intastellarsolutions.com/solutions/cookie-consents/integrations/shopify) and intastellarconsents.com with anchor text **“Intastellar Consents Shopify app”**.
+Also link **to** `https://consentsplatform.com` from [Shopify integration page](https://www.intastellarsolutions.com/solutions/cookie-consents/integrations/shopify) and intastellarconsents.com with anchor text **“Intastellar Consents Shopify app”**.
 
 ### Register request (minimal)
 
@@ -103,7 +105,7 @@ Response may include `{ "accountId": "...", "setupUrl": "https://intastellaracco
   "email": "you@company.com",
   "storeName": "Acme Demo",
   "shopDomain": "acme-demo.myshopify.com",
-  "installUrl": "https://app.consentsmanagement.com/auth/login?shop=...",
+  "installUrl": "https://consentsplatform.com/auth/login?shop=...",
   "intastellarAccountId": "...",
   "intastellarSetupUrl": "https://intastellaraccounts.com/...",
   "pilotLeadId": "clx..."

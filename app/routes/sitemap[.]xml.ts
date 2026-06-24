@@ -1,11 +1,9 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { SHOPIFY_APP_URL } from "../lib/shopify-app-seo";
+import { publicSiteBase } from "../lib/shopify-app-seo";
 
 const PUBLIC_PATHS = ["/", "/auth/login", "/legal", "/legal/privacy", "/legal/terms"];
 
-export const loader = ({ request }: LoaderFunctionArgs) => {
-  const origin = new URL(request.url).origin;
-  const base = SHOPIFY_APP_URL.replace(/\/$/, "") || origin;
+export const loader = () => {
+  const base = publicSiteBase();
   const lastmod = new Date().toISOString().slice(0, 10);
 
   const urls = PUBLIC_PATHS.map(

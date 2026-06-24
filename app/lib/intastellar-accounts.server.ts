@@ -9,6 +9,8 @@
  *   INTASTELLAR_ACCOUNTS_SETUP_URL     — optional “finish setup” link fallback
  */
 
+import { publicSiteBase } from "./shopify-app-seo";
+
 export type IntastellarAccountRegistrationInput = {
   email: string;
   storeName: string;
@@ -199,8 +201,5 @@ export async function notifyDemoStoreReady(
 }
 
 export function buildPilotInstallUrl(shopDomain: string): string {
-  const appBase =
-    process.env.SHOPIFY_APP_URL?.trim().replace(/\/$/, "") ||
-    "https://app.consentsmanagement.com";
-  return `${appBase}/auth/login?shop=${encodeURIComponent(shopDomain)}`;
+  return `${publicSiteBase()}/auth/login?shop=${encodeURIComponent(shopDomain)}`;
 }

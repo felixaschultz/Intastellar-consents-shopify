@@ -1,23 +1,40 @@
 /**
  * Canonical SEO / entity naming for the Intastellar Consents Shopify app.
- * Use these strings consistently in titles, JSON-LD, and on-page copy so search
- * engines and AI assistants can match "Intastellar Consents" → Shopify app.
+ *
+ * Two domains, one deployment:
+ *   PUBLIC_SITE_URL     — consentsplatform.com (landing, SEO, legal, install entry)
+ *   SHOPIFY_APP_URL     — app.consentsmanagement.com (Shopify OAuth / embedded app)
  */
 
-const APP_BASE =
-  process.env.SHOPIFY_APP_URL?.replace(/\/$/, "") ||
-  "https://app.consentsmanagement.com";
+function normalizeBase(url: string | undefined): string | null {
+  const trimmed = url?.trim().replace(/\/$/, "");
+  return trimmed || null;
+}
 
-export const SHOPIFY_APP_URL = `${APP_BASE}/`;
+/** Public marketing / install landing (consentsplatform.com). */
+export function publicSiteBase(): string {
+  return (
+    normalizeBase(process.env.PUBLIC_SITE_URL) ?? "https://consentsplatform.com"
+  );
+}
+
+/** Shopify app server URL for OAuth callbacks (app.consentsmanagement.com). */
+export function shopifyAppServerBase(): string {
+  return (
+    normalizeBase(process.env.SHOPIFY_APP_URL) ?? "https://app.consentsmanagement.com"
+  );
+}
+
+export const PUBLIC_SITE_URL = `${publicSiteBase()}/`;
+
+/** @deprecated Prefer PUBLIC_SITE_URL for SEO/landing; server URL is shopifyAppServerBase(). */
+export const SHOPIFY_APP_URL = PUBLIC_SITE_URL;
 
 export const SHOPIFY_APP_IDENTITY = {
-  /** Primary product name */
   name: "Intastellar Consents",
-  /** Explicit product type — repeat in titles and schema */
   productType: "Shopify app",
   fullTitle: "Intastellar Consents | Official Shopify App for Cookie Consent",
   shortTitle: "Intastellar Consents — Shopify App",
-  /** Legacy title still indexed elsewhere; keep as alternateName in schema */
   legacyTitle: "Intastellar Consents: Consent management for your Shopify store",
   description:
     "Intastellar Consents is the official Shopify app by Intastellar Solutions for GDPR-ready cookie consent banners, Shopify Customer Privacy API sync, and consent analytics.",
@@ -29,30 +46,35 @@ export const SHOPIFY_APP_IDENTITY = {
   ],
   developer: "Intastellar Solutions International",
   installPath: "/auth/login",
-  helpUrl:
-    "https://developers.intastellarsolutions.com/cookie-solutions/docs",
+  helpUrl: "https://inta.dev",
   marketingUrl:
     "https://www.intastellarsolutions.com/solutions/cookie-consents",
   shopifyIntegrationUrl:
     "https://www.intastellarsolutions.com/solutions/cookie-consents/integrations/shopify",
   platformUrl: "https://www.intastellarconsents.com",
+  publicSiteHost: "consentsplatform.com",
+  appServerHost: "app.consentsmanagement.com",
 } as const;
 
-/** Public URLs that identify this product (App Store URL via env when listed). */
 export function shopifyAppSameAsLinks(): string[] {
   const links = [
-    SHOPIFY_APP_URL,
+    PUBLIC_SITE_URL,
     SHOPIFY_APP_IDENTITY.shopifyIntegrationUrl,
     SHOPIFY_APP_IDENTITY.marketingUrl,
     SHOPIFY_APP_IDENTITY.platformUrl,
   ];
   const appStore = process.env.SHOPIFY_APP_STORE_LISTING_URL?.trim();
   if (appStore) links.unshift(appStore);
+  const serverBase = shopifyAppServerBase();
+  if (serverBase !== publicSiteBase()) {
+    links.push(`${serverBase}/`);
+  }
   return links;
 }
 
+/** Merchant-facing install URL on the public site. */
 export function shopifyAppInstallUrl(): string {
-  return `${APP_BASE}${SHOPIFY_APP_IDENTITY.installPath}`;
+  return `${publicSiteBase()}${SHOPIFY_APP_IDENTITY.installPath}`;
 }
 
 export const SHOPIFY_APP_META = {

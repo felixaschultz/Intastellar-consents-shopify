@@ -1,4 +1,4 @@
-/** Shared legal constants for the Shopify app (app.consentsmanagement.com). */
+/** Shared legal constants for the Intastellar Consents Shopify app (consentsplatform.com). */
 
 export const LEGAL_LAST_UPDATED = "24 June 2026";
 

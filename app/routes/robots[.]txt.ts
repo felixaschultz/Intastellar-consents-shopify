@@ -1,13 +1,13 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import { publicSiteBase } from "../lib/shopify-app-seo";
 
-export const loader = ({ request }: LoaderFunctionArgs) => {
-  const origin = new URL(request.url).origin;
+export const loader = () => {
+  const sitemapOrigin = publicSiteBase();
   const body = `User-agent: *
 Allow: /
 Allow: /legal/
 Allow: /auth/login
 
-Sitemap: ${origin}/sitemap.xml
+Sitemap: ${sitemapOrigin}/sitemap.xml
 `;
 
   return new Response(body, {

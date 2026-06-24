@@ -58,7 +58,8 @@ export function LegalDocumentLayout({
         </p>
         <div className={styles.notice}>
           <strong>Supplemental document.</strong> This policy applies specifically
-          to the {APP_NAME} Shopify app at{" "}
+          to the {APP_NAME} Shopify app. Public pages and install are at{" "}
+          <code>consentsplatform.com</code>; the embedded Shopify admin runs at{" "}
           <code>app.consentsmanagement.com</code>. It supplements — and does not
           replace — Intastellar&apos;s general legal documents linked at the bottom
           of this page.

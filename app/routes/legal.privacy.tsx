@@ -40,7 +40,8 @@ export default function AppPrivacyPolicyPage() {
         processes personal data when you use the {APP_NAME} application for
         Shopify merchants (the &quot;App&quot;), including our public landing
         page, OAuth install flow, embedded Shopify admin, and related services
-        hosted at <code>app.consentsmanagement.com</code>.
+        at <code>consentsplatform.com</code> and{" "}
+        <code>app.consentsmanagement.com</code>.
       </p>
       <p>
         For how Intastellar processes data across its websites, consent platform,
@@ -181,6 +182,7 @@ export default function AppPrivacyPolicyPage() {
         </li>
         <li>
           <strong>Vercel</strong> — application hosting for{" "}
+          <code>consentsplatform.com</code> and{" "}
           <code>app.consentsmanagement.com</code>
         </li>
         <li>

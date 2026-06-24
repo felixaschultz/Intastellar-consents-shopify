@@ -33,7 +33,7 @@ export const LANDING_FAQ = [
   {
     question: "Is Intastellar Consents a Shopify app?",
     answer:
-      "Yes. Intastellar Consents is an official Shopify app built by Intastellar Solutions International. It includes a Shopify admin app for configuration and a theme app embed for your storefront cookie banner. Install it from app.consentsmanagement.com or the Shopify App Store when listed.",
+      "Yes. Intastellar Consents is an official Shopify app built by Intastellar Solutions International. It includes a Shopify admin app for configuration and a theme app embed for your storefront cookie banner. Install it from consentsplatform.com or the Shopify App Store when listed.",
   },
   {
     question: "What is Intastellar Consents for Shopify?",
