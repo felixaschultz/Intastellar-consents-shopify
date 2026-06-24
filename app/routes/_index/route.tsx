@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
 import { PILOT_CMP_OPTIONS } from "../../lib/pilot-lead-cmp-options";
 import { isPilotStoreProvisioningConfigured } from "../../lib/partner-dev-store.server";
+import { isDevEnvironment, publicPilotStartError } from "../../lib/public-messages.server";
 import { startPilotSignup } from "../../lib/pilot-lead.server";
 
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
@@ -94,6 +95,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     showForm: Boolean(login),
     polarisTranslations,
     pilotProvisioningEnabled: isPilotStoreProvisioningConfigured(),
+    showDevHints: isDevEnvironment(),
     cmpOptions: PILOT_CMP_OPTIONS,
     showManualInstall,
   };
@@ -142,7 +144,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({
         intent: "pilot" as const,
         ok: false as const,
-        message: `We could not start your demo store setup: ${message}`,
+        message: publicPilotStartError(message),
       });
     }
   }
@@ -212,6 +214,7 @@ export default function App() {
     showForm,
     polarisTranslations,
     pilotProvisioningEnabled,
+    showDevHints,
     cmpOptions,
     showManualInstall: showManualInstallFromLoader,
   } = useLoaderData<typeof loader>();
@@ -317,11 +320,16 @@ export default function App() {
                       create it for you, install the app, and open the admin so you
                       can configure the banner in minutes.
                     </Text>
-                    {!pilotProvisioningEnabled ? (
+                    {!pilotProvisioningEnabled && showDevHints ? (
                       <Text as="p" variant="bodySm" tone="subdued">
                         Automated demo setup runs when partner provisioning is
                         enabled on the server. You can still install on an existing
                         development store below.
+                      </Text>
+                    ) : !pilotProvisioningEnabled ? (
+                      <Text as="p" variant="bodySm" tone="subdued">
+                        Demo signup is temporarily unavailable. Install on your
+                        existing Shopify store below.
                       </Text>
                     ) : null}
                   </div>
@@ -388,7 +396,9 @@ export default function App() {
                           </span>
                         ) : (
                           <span className={styles.helpText}>
-                            Used as the name of your Shopify development store
+                            {showDevHints
+                              ? "Used as the name of your Shopify development store"
+                              : "This will be the name of your demo store"}
                           </span>
                         )}
                       </label>
@@ -474,7 +484,7 @@ export default function App() {
                   <div id="install-direct" className={styles.manualInstallPanel}>
                     <Text as="p" variant="bodyMd">
                       Enter your <code>your-store.myshopify.com</code> address to
-                      install on an existing development store.
+                      install on an existing Shopify store.
                     </Text>
                     <Form className={styles.form} method="post" action="?index">
                       <input type="hidden" name="intent" value="install" />
@@ -493,12 +503,12 @@ export default function App() {
                           <span className={[styles.errorText, styles.helpText].join(" ")}>
                             {installErrors.shop}
                           </span>
-                        ) : (
+                        ) : showDevHints ? (
                           <span className={styles.helpText}>
                             Development stores on your Partner account work before
                             App Store approval
                           </span>
-                        )}
+                        ) : null}
                       </label>
                       <button className={styles.buttonSecondary} type="submit">
                         Install now

@@ -7,6 +7,12 @@ import {
   pollStoreCreationStatus,
 } from "./partner-dev-store.server";
 import { formatPilotCmp } from "./pilot-lead-cmp-options";
+import {
+  publicPilotNotConfiguredMessage,
+  publicPilotPollError,
+  publicPilotStartError,
+  publicPilotStoreError,
+} from "./public-messages.server";
 
 export type PilotSignupInput = {
   email: string;
@@ -76,8 +82,7 @@ export async function startPilotSignup(
   if (!isPilotStoreProvisioningConfigured()) {
     return {
       ok: false,
-      message:
-        "Automated demo store setup is not configured yet. Use “Install on an existing store” below, or contact Intastellar for a pilot invite.",
+      message: publicPilotNotConfiguredMessage(),
     };
   }
 
@@ -108,7 +113,7 @@ export async function startPilotSignup(
       await updateLead(lead.id, { status: "FAILED", statusNote: message });
       return {
         ok: false,
-        message: `We could not create your demo store: ${message}`,
+        message: publicPilotStoreError(message),
       };
     }
   } catch (err) {
@@ -117,7 +122,7 @@ export async function startPilotSignup(
     console.error("[pilot-lead] startPilotSignup failed", err);
     return {
       ok: false,
-      message: `We could not start your demo store setup: ${message}`,
+      message: publicPilotStartError(message),
     };
   }
 }
@@ -137,10 +142,11 @@ export async function pollPilotLead(
   if (!lead) return null;
 
   if (lead.status === "FAILED") {
+    const internal = lead.statusNote ?? "Store setup failed";
     return {
       status: "FAILED",
       shopDomain: lead.shopDomain,
-      message: lead.statusNote ?? "Store setup failed",
+      message: publicPilotPollError(internal),
       installPath: null,
     };
   }
@@ -185,7 +191,7 @@ export async function pollPilotLead(
       return {
         status: "FAILED",
         shopDomain,
-        message: note,
+        message: publicPilotPollError(note),
         installPath: null,
       };
     }
@@ -198,10 +204,11 @@ export async function pollPilotLead(
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not check store status";
+    console.error("[pilot-lead] pollPilotLead failed", err);
     return {
       status: "CREATING",
       shopDomain,
-      message,
+      message: publicPilotPollError(message),
       installPath: null,
     };
   }

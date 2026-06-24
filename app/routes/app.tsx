@@ -51,11 +51,13 @@ export function ErrorBoundary() {
     return (
       <div style={{ padding: 16, fontFamily: "system-ui, sans-serif" }}>
         <h1>Something went wrong</h1>
-        <p>{error.message}</p>
-        <p style={{ color: "#666" }}>
-                If this mentions Prisma or the database, set shopify_DATABASE_URL on
-                Vercel to a PostgreSQL connection string and redeploy.
-        </p>
+        <p>{import.meta.env.DEV ? error.message : "Please try again or reinstall the app from your Shopify admin."}</p>
+        {import.meta.env.DEV ? (
+          <p style={{ color: "#666" }}>
+            If this mentions Prisma or the database, set shopify_DATABASE_URL on
+            Vercel to a PostgreSQL connection string and redeploy.
+          </p>
+        ) : null}
       </div>
     );
   }
