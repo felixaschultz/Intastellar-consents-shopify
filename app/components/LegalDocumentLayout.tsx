@@ -59,7 +59,7 @@ export function LegalDocumentLayout({
         <div className={styles.notice}>
           <strong>Supplemental document.</strong> This policy applies specifically
           to the {APP_NAME} Shopify app at{" "}
-          <code>consentsmanagement.com</code>. It supplements — and does not
+          <code>app.consentsmanagement.com</code>. It supplements — and does not
           replace — Intastellar&apos;s general legal documents linked at the bottom
           of this page.
         </div>
