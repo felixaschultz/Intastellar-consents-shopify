@@ -1,209 +1,130 @@
 import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
-import {
-  AppProvider as PolarisAppProvider,
-  Button,
-  Card,
-  FormLayout,
-  Page,
-  Text,
-  TextField,
-  Image,
-  BlockStack,
-} from "@shopify/polaris";
-import polarisTranslations from "@shopify/polaris/locales/en.json";
-import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
-import styles from "../_index/styles.module.css";
 import { login } from "../../shopify.server";
-
 import logo from "../../assets/combined-intastellar-shopify.svg";
-import appScreen from "../../assets/app-screen.png";
-
-import { SHOPIFY_APP_META } from "../../lib/shopify-app-seo";
+import { PUBLIC_SITE_URL, SHOPIFY_APP_META } from "../../lib/shopify-app-seo";
+import { APP_LEGAL_LINKS } from "../../lib/legal-content";
 import { loginErrorMessage } from "./error.server";
+import styles from "./styles.module.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const errors = loginErrorMessage(await login(request));
+  const url = new URL(request.url);
+  const shopFromQuery = url.searchParams.get("shop")?.trim() ?? "";
 
-  return { errors, polarisTranslations };
+  return { errors, shopFromQuery };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const errors = loginErrorMessage(await login(request));
-
-  return {
-    errors,
-  };
+  return { errors };
 };
 
 export const meta = () => [
-  { title: `${SHOPIFY_APP_META.title} — Install` },
-  { name: "description", content: SHOPIFY_APP_META.description },
+  { title: `${SHOPIFY_APP_META.title} — Log in` },
+  {
+    name: "description",
+    content:
+      "Log in to Intastellar Consents for Shopify. Enter your store domain to open the app in Shopify admin and manage cookie consent.",
+  },
   { name: "robots", content: "index, follow" },
-  { property: "og:image", content: appScreen },
-  { property: "og:title", content: `${SHOPIFY_APP_META.title} — Install` },
-  { property: "og:description", content: SHOPIFY_APP_META.description },
-  { property: "og:type", content: "website" },
+  { tagName: "link", rel: "canonical", href: `${PUBLIC_SITE_URL}auth/login` },
 ];
 
-export const links = () => [
-  { rel: "stylesheet", href: polarisStyles },
-  { rel: "stylesheet", href: styles },
-  { rel: "apple-touch-icon", sizes: "57x57", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-57x57.png" },
-  { rel: "apple-touch-icon", sizes: "60x60", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-60x60.png" },
-  { rel: "apple-touch-icon", sizes: "72x72", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-72x72.png" },
-  { rel: "apple-touch-icon", sizes: "76x76", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-76x76.png" },
-  { rel: "apple-touch-icon", sizes: "114x114", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-114x114.png" },
-  { rel: "apple-touch-icon", sizes: "120x120", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-120x120.png" },
-  { rel: "apple-touch-icon", sizes: "144x144", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-144x144.png" },
-  { rel: "apple-touch-icon", sizes: "152x152", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-152x152.png" },
-  { rel: "apple-touch-icon", sizes: "180x180", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-180x180.png" },
-  { rel: "icon", type: "image/png", sizes: "192x192", href: "https://www.intastellarsolutions.com/assets/icons/fav/android-icon-192x192.png" },
-  { rel: "icon", type: "image/png", sizes: "32x32", href: "https://www.intastellarsolutions.com/assets/icons/fav/favicon-32x32.png" },
-  { rel: "icon", type: "image/png", sizes: "96x96", href: "https://www.intastellarsolutions.com/assets/icons/fav/favicon-96x96.png" },
-  { rel: "icon", type: "image/png", sizes: "16x16", href: "https://www.intastellarsolutions.com/assets/icons/fav/favicon-16x16.png" },
-];
-export default function Auth() {
-  const loaderData = useLoaderData<typeof loader>();
+export default function AuthLoginPage() {
+  const { errors, shopFromQuery } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const [shop, setShop] = useState("");
-  const { errors } = actionData || loaderData;
+  const [shop, setShop] = useState(shopFromQuery);
+  const fieldErrors = actionData?.errors ?? errors;
 
   return (
-    <PolarisAppProvider i18n={loaderData.polarisTranslations}>
-      <div className={styles.index}>
-        <header>
-          <Link className={styles.logoLink} to="/">
-            <Image source={logo} alt="Intastellar Consents" className={styles.logoImage} />
-            <span className={styles.comingSoon}>Coming Soon</span>
-          </Link>
-        </header>
-        <h1 className={styles.heading}>
-          Consent management for your Shopify store - for free
-        </h1>
-        <div className={styles.content}>
-          <section>
-            <BlockStack gap="200">
-              <Text as="p" variant="bodyMd">
-                Start integrating Intastellar Consents into your Shopify store in minutes. The use of the Intastellar Consents app & banner is free for all Shopify stores.
-              </Text>
-            </BlockStack>
-            <Form className={styles.form} method="post" action="/auth/login">
-              <TextField
-                type="text"
-                name="shop"
-                label="Shop domain"
-                value={shop}
-                onChange={setShop}
-                autoComplete="on"
-                error={errors.shop}
-              />
-              <button className={styles.button} type="submit">Log in</button>
-            </Form>
-          </section>
-          <section className={styles.appScreen}>
-            <Image source={
-              appScreen
-            } alt="Intastellar Consents" className={styles.featuresImage} />
-            <Text as="p" variant="bodyMd">
-              Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
-              <Link to="https://www.intastellarsolutions.com/solutions/cookie-consents" target="_blank">Learn more about Intastellar Consents</Link>
-            </Text>
-          </section>
-        </div>
-        <BlockStack gap="200">
-            <ul className={styles.list}>
-              {/* Add the features of the Intastellar Consents app here */}
-              <li>
-                GDPR, CCPA & DMA compliant
-              </li>
-              <li>
-                Hosted securely in the EU
-              </li>
-              <li>
-                Google Consent Mode (incl. Advanced)
-              </li>
-              <li>
-                Shopify Customer Privacy API
-              </li>
-            </ul>
-        </BlockStack>
-        <BlockStack gap="200">
-            <div className={styles.stats}>
-              <div className={styles.stat}>
-                <span className={styles.statNumber}>276K+</span>
-                <span className={styles.statLabel}>Consent decisions processed</span>
-                <span className={styles.statDescription}>— Across live websites</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statNumber}>65%</span>
-                <span className={styles.statLabel}>Average consent acceptance rate</span>
-                <span className={styles.statDescription}>— With clear, compliant UX</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statNumber}>149</span>
-                <span className={styles.statLabel}>Countries</span>
-                <span className={styles.statDescription}>— Region-aware consent handling</span>
-              </div>
-            </div>
-        </BlockStack>
-        <div className={styles.clientLogos}>
-          <Image source="https://www.cykelfaergen.info/assets/logo/logo.svg" alt="Cykelfærgen Flensborg fjord" className={styles.clientLogo} />
-          <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software" className={styles.clientLogo} />
-          <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-          <Image source="https://inta.dev/waterless/wordpress/wp-content/uploads/2025/09/cropped-waterless-logo-2.png" alt="Waterless" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-          <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-        </div>
-      </div>
-      <footer className={styles.footer}>
-        <BlockStack gap="200">
-          <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
-          <Link to="/legal/privacy">App Privacy Policy</Link> |
-          <Link to="/legal/terms">App Terms of Use</Link> |
-          <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank" rel="noopener noreferrer">General Privacy</Link> |
-          <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank" rel="noopener noreferrer">DPA</Link>
-          <Text as="p" variant="bodyMd">
-            &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
-          </Text>
-        </BlockStack>
-      </footer>
-      {/* <Page>
-        <Link to="/">
-          <Image source={logo} alt="Intastellar Consents" className={styles.loginLogoImage} />
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <Link to="/" className={styles.homeLink}>
+          ← Back to home
         </Link>
-        <Card>
-          <Form method="post">
-            <FormLayout>
-              <Text variant="headingMd" as="h2">
-                Log in
-              </Text>
-              <TextField
+      </header>
+
+      <main className={styles.main}>
+        <div className={styles.card}>
+          <Link to="/" className={styles.logoLink}>
+            <img
+              src={logo}
+              alt="Intastellar Consents for Shopify"
+              className={styles.logoImage}
+            />
+          </Link>
+
+          <h1 className={styles.title}>Log in</h1>
+          <p className={styles.lead}>
+            Enter your Shopify store domain to open Intastellar Consents in your
+            admin and manage your cookie consent banner.
+          </p>
+
+          <Form className={styles.form} method="post" action="/auth/login">
+            <div>
+              <label className={styles.fieldLabel} htmlFor="shop">
+                Shop domain
+              </label>
+              <input
+                id="shop"
+                className={`${styles.input}${fieldErrors.shop ? ` ${styles.inputError}` : ""}`}
                 type="text"
                 name="shop"
-                label="Shop domain"
-                helpText="e.g. your-store.myshopify.com or your custom domain (e.g. yourstore.com)"
                 value={shop}
-                onChange={setShop}
-                autoComplete="on"
-                error={errors.shop}
+                onChange={(e) => setShop(e.target.value)}
+                autoComplete="url"
+                placeholder="your-store.myshopify.com"
+                aria-invalid={fieldErrors.shop ? "true" : "false"}
+                aria-describedby={fieldErrors.shop ? "shop-error" : "shop-help"}
+                required
               />
-              <Button submit>Log in</Button>
-            </FormLayout>
+              {fieldErrors.shop ? (
+                <p id="shop-error" className={styles.fieldError} role="alert">
+                  {fieldErrors.shop}
+                </p>
+              ) : (
+                <p id="shop-help" className={styles.fieldHelp}>
+                  Use your .myshopify.com address or a custom domain connected to
+                  your store.
+                </p>
+              )}
+            </div>
+
+            <button className={styles.submit} type="submit">
+              Continue with Shopify
+            </button>
           </Form>
-        </Card>
-        <footer className={styles.footer}>
-          <BlockStack gap="200">
-            <Image source="https://www.intastellar-consents.com/assets/icons/intastellar-logo-black.svg" alt="Intastellar Solutions, International" className={styles.footerLogoImage} />
-            <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank">Privacy Policy</Link> | 
-            <Link to="https://www.intastellarsolutions.com/about/legal/terms" target="_blank">Terms of Service</Link> | 
-            <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank">Data Processing Agreement</Link>
-            <Text as="p" variant="bodyMd">
-              &copy; {new Date().getFullYear()} Intastellar Solutions, International. All rights reserved.
-            </Text>
-          </BlockStack>
-        </footer>
-      </Page> */}
-    </PolarisAppProvider>
+
+          <div className={styles.divider} aria-hidden="true">
+            or
+          </div>
+
+          <nav className={styles.secondaryLinks} aria-label="Related links">
+            <Link to="/">New to Intastellar Consents? View the landing page</Link>
+            <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link>
+            <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>
+          </nav>
+        </div>
+      </main>
+
+      <footer className={styles.footer}>
+        <nav className={styles.footerLinks} aria-label="Legal">
+          <Link to={APP_LEGAL_LINKS.privacy}>App Privacy</Link>
+          <Link to={APP_LEGAL_LINKS.terms}>App Terms</Link>
+          <a
+            href="https://www.intastellarsolutions.com/about/legal/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            General Privacy
+          </a>
+        </nav>
+        <p className={styles.footerCopy}>
+          © {new Date().getFullYear()} Intastellar Solutions, International
+        </p>
+      </footer>
+    </div>
   );
 }

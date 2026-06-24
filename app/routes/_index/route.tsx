@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useLoaderData, useFetcher, useSearchParams } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData, useFetcher } from "@remix-run/react";
 import { AppProvider, BlockStack, Image, Text } from "@shopify/polaris";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
@@ -8,7 +8,6 @@ import { login } from "../../shopify.server";
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
-import { loginErrorMessage } from "../auth.login/error.server";
 import { useEffect, useState } from "react";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
 import { PILOT_CMP_OPTIONS } from "../../lib/pilot-lead-cmp-options";
@@ -72,8 +71,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
-  const showManualInstall =
-    url.searchParams.get("install") === "direct";
+  if (url.searchParams.get("install") === "direct") {
+    throw redirect("/auth/login");
+  }
 
   return {
     showForm: Boolean(login),
@@ -81,7 +81,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     pilotProvisioningEnabled: isPilotStoreProvisioningConfigured(),
     showDevHints: isDevEnvironment(),
     cmpOptions: PILOT_CMP_OPTIONS,
-    showManualInstall,
   };
 };
 
@@ -133,12 +132,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
   }
 
-  const errors = loginErrorMessage(await login(request));
-
-  return {
-    intent: "install" as const,
-    errors,
-  };
+  return json({ intent: "unknown" as const, ok: false as const });
 };
 
 export const meta = () => {
@@ -211,10 +205,8 @@ export default function App() {
     pilotProvisioningEnabled,
     showDevHints,
     cmpOptions,
-    showManualInstall: showManualInstallFromLoader,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const [searchParams] = useSearchParams();
   const pollFetcher = useFetcher<typeof import("../pilot-lead.poll").loader>();
   const [pilotCmp, setPilotCmp] = useState("none");
   const [provisioning, setProvisioning] = useState<{
@@ -223,14 +215,6 @@ export default function App() {
     message: string;
   } | null>(null);
 
-  const installErrors =
-    actionData && "intent" in actionData && actionData.intent === "install"
-      ? actionData.errors
-      : undefined;
-  const showManualInstall =
-    searchParams.get("install") === "direct" ||
-    showManualInstallFromLoader ||
-    Boolean(installErrors);
   const pilotResult =
     actionData && "intent" in actionData && actionData.intent === "pilot"
       ? actionData
@@ -284,13 +268,6 @@ export default function App() {
         ? pollFetcher.data.message
         : null;
 
-  useEffect(() => {
-    if (!showManualInstall) return;
-    document.getElementById("install-direct")?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
-  }, [showManualInstall]);
   return (
     <AppProvider i18n={polarisTranslations}>
       <div className={styles.page}>
@@ -298,20 +275,27 @@ export default function App() {
           Skip to main content
         </a>
         <header className={styles.siteHeader}>
-          <div className={styles.logoWrap}>
-            <Link
-              className={styles.logoLink}
-              to="https://www.intastellarsolutions.com/solutions/cookie-consents"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                source={logo}
-                alt="Intastellar Consents for Shopify"
-                className={styles.logoImage}
-              />
-            </Link>
-            <span className={styles.comingSoon}>Coming Soon</span>
+          <div className={styles.siteHeaderInner}>
+            <div className={styles.logoWrap}>
+              <Link
+                className={styles.logoLink}
+                to="https://www.intastellarsolutions.com/solutions/cookie-consents"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  source={logo}
+                  alt="Intastellar Consents for Shopify"
+                  className={styles.logoImage}
+                />
+              </Link>
+              <span className={styles.comingSoon}>Coming Soon</span>
+            </div>
+            <div className={styles.headerActions}>
+              <Link to="/auth/login" className={styles.headerLoginBtn}>
+                Log in
+              </Link>
+            </div>
           </div>
         </header>
         <main id="main-content" className={styles.index}>
@@ -372,12 +356,14 @@ export default function App() {
                       <Text as="p" variant="bodySm" tone="subdued">
                         Automated demo setup runs when partner provisioning is
                         enabled on the server. You can still install on an existing
-                        development store below.
+                        development store via{" "}
+                        <Link to="/auth/login">Log in</Link>.
                       </Text>
                     ) : !pilotProvisioningEnabled ? (
                       <Text as="p" variant="bodySm" tone="subdued">
-                        Demo signup is temporarily unavailable. Install on your
-                        existing Shopify store below.
+                        Demo signup is temporarily unavailable.{" "}
+                        <Link to="/auth/login">Log in</Link> to install on your
+                        existing Shopify store.
                       </Text>
                     ) : null}
                   </div>
@@ -522,58 +508,10 @@ export default function App() {
                 )}
 
                 <div className={styles.formFooter}>
-                  {showManualInstall ? (
-                    <Link to="/" className={styles.textButton}>
-                      Hide manual install
-                    </Link>
-                  ) : (
-                    <Link to="?install=direct" className={styles.textButton}>
-                      Already have a Shopify store? Install directly
-                    </Link>
-                  )}
+                  <Link to="/auth/login" className={styles.textButton}>
+                    Already have a Shopify store? Install directly
+                  </Link>
                 </div>
-
-                {showManualInstall ? (
-                  <div id="install-direct" className={styles.manualInstallPanel}>
-                    <Text as="p" variant="bodyMd">
-                      Enter your <code>your-store.myshopify.com</code> address to
-                      install on an existing Shopify store.
-                    </Text>
-                    <Form className={styles.form} method="post" action="?index">
-                      <input type="hidden" name="intent" value="install" />
-                      <label className={styles.label}>
-                        <span className={styles.labelTitle}>Shop domain</span>
-                        <input
-                          placeholder="e.g. my-shop.myshopify.com"
-                          className={[
-                            styles.input,
-                            installErrors?.shop ? styles.error : "",
-                          ].join(" ")}
-                          type="text"
-                          name="shop"
-                        />
-                        {installErrors?.shop ? (
-                          <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {installErrors.shop}
-                          </span>
-                        ) : showDevHints ? (
-                          <span className={styles.helpText}>
-                            Development stores on your Partner account work before
-                            App Store approval
-                          </span>
-                        ) : null}
-                      </label>
-                      <button className={styles.buttonSecondary} type="submit">
-                        Install now
-                      </button>
-                      <p className={styles.formLegal}>
-                        By installing, you agree to the{" "}
-                        <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link> and{" "}
-                        <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>.
-                      </p>
-                    </Form>
-                  </div>
-                ) : null}
               </BlockStack>
             )}
             <Text as="p" variant="bodyMd" tone="subdued">
