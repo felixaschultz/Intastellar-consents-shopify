@@ -60,8 +60,12 @@ async function organizationsGraphql<T>(
   if (res.status === 401 || res.status === 403) {
     throw new Error(
       `Business Platform API unauthorized (${res.status}). ` +
-        "Use SHOPIFY_APP_AUTOMATION_TOKEN from Dev Dashboard (not the raw atkn value as the API bearer). " +
-        "Verify SHOPIFY_PARTNER_ORG_ID matches your Partner organization.",
+        "For production (Vercel): set SHOPIFY_APP_AUTOMATION_TOKEN from Dev Dashboard → your app → Settings " +
+        "(do not paste the raw atkn_* value into SHOPIFY_BUSINESS_PLATFORM_TOKEN). " +
+        "For local dev: run `npx shopify auth login`, extract a fresh CLI Business Platform token " +
+        "(CLI session tokens expire after a few hours). " +
+        "Also verify SHOPIFY_PARTNER_ORG_ID matches your org (from partners.shopify.com/ORG_ID/... " +
+        "or `jq -r 'to_entries[0].value.orgId' ~/Library/Preferences/shopify-cli-app-nodejs/config.json`).",
     );
   }
 

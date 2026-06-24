@@ -12,11 +12,9 @@ const SHOPIFY_CLI_CLIENT_ID = "fbdb2649-e327-4907-8f67-908d24cfd7e3";
 /** Business Platform API audience id (production). */
 const BUSINESS_PLATFORM_AUDIENCE = "32ff8ee5-82b8-4d93-9f8a-c6997cefb7dc";
 
-const BUSINESS_PLATFORM_SCOPES = [
-  "https://api.shopify.com/auth/destinations.readonly",
-  "https://api.shopify.com/auth/organization.store-management",
-  "https://api.shopify.com/auth/organization.on-demand-user-access",
-].join(" ");
+/** Scopes requested during automation-token exchange (matches Shopify CLI). */
+const BUSINESS_PLATFORM_EXCHANGE_SCOPE =
+  "https://api.shopify.com/auth/destinations.readonly";
 
 type CachedToken = { accessToken: string; expiresAtMs: number };
 
@@ -68,7 +66,7 @@ async function exchangeAutomationToken(
     subject_token_type: "urn:ietf:params:oauth:token-type:access_token",
     client_id: SHOPIFY_CLI_CLIENT_ID,
     audience: BUSINESS_PLATFORM_AUDIENCE,
-    scope: BUSINESS_PLATFORM_SCOPES,
+    scope: BUSINESS_PLATFORM_EXCHANGE_SCOPE,
     subject_token: automationToken,
   });
 
@@ -96,9 +94,17 @@ async function exchangeAutomationToken(
   if (!res.ok || !payload.access_token) {
     const detail =
       payload.error_description ?? payload.error ?? text.slice(0, 200);
+    const invalidSubject =
+      typeof detail === "string" &&
+      detail.toLowerCase().includes("subject_token");
+    const hint = invalidSubject
+      ? "Your App Automation Token is expired, revoked, or was copied incorrectly. " +
+        "Create a new one in Dev Dashboard → Intastellar Consents → Settings → App automation token, " +
+        "then set SHOPIFY_APP_AUTOMATION_TOKEN (not SHOPIFY_BUSINESS_PLATFORM_TOKEN) on Vercel."
+      : "Create a new token in Dev Dashboard → your app → Settings → App automation token " +
+        "and set SHOPIFY_APP_AUTOMATION_TOKEN.";
     throw new Error(
-      `App Automation Token could not be exchanged for Business Platform access (${res.status}): ${detail}. ` +
-        "Create a new token in Dev Dashboard → your app → Settings → App automation token.",
+      `App Automation Token could not be exchanged for Business Platform access (${res.status}): ${detail}. ${hint}`,
     );
   }
 
