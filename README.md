@@ -46,6 +46,62 @@ CLI will link `client_id`, tunnel URL, and `redirect_urls` in `shopify.app.toml`
 | `npm run build`    | Remix production build               |
 | `npx shopify app build` | Validate app + extension bundle |
 
+## Pilot demo + Intastellar Accounts
+
+When a visitor submits **Start free demo**, the app:
+
+1. Saves a `PilotLead` row (email, store name, CMP).
+2. Calls **Intastellar Accounts** to register the email (pending account).
+3. Provisions a Shopify development store (when Partner API is enabled).
+4. When the store is ready, calls Intastellar Accounts to **email the user** with the install link and a link to finish Intastellar account setup.
+
+Shopify OAuth remains the install path for the embedded app; Intastellar Accounts is for the Consents Platform dashboard.
+
+### Env vars (Intastellar Accounts — intastellaraccounts.com)
+
+Accounts are hosted on **one.com** under **intastellaraccounts.com**. Set these when the API endpoint is ready:
+
+| Variable | Required | Description |
+| -------- | -------- | ----------- |
+| `INTASTELLAR_ACCOUNTS_REGISTER_URL` | For signup | **Full URL** to POST when a pilot submits the demo form (body includes `email` + pilot metadata). Creates the Intastellar Account. |
+| `INTASTELLAR_ACCOUNTS_DEMO_READY_URL` | For email | **Full URL** to POST when the Shopify demo store is ready (Accounts sends “store ready + finish setup” email). |
+| `INTASTELLAR_ACCOUNTS_API_KEY` | Optional | Bearer token if the API requires server auth |
+| `INTASTELLAR_ACCOUNTS_SETUP_URL` | Optional | Fallback link for “finish account setup” (default: `https://intastellaraccounts.com/setup?email=…`) |
+
+Until `INTASTELLAR_ACCOUNTS_REGISTER_URL` is set, pilot signup and Shopify provisioning still work; account registration is skipped.
+
+### Register request (minimal)
+
+The app will POST JSON like:
+
+```json
+{
+  "email": "you@company.com",
+  "storeName": "Acme Demo",
+  "currentCmp": "Cookiebot",
+  "source": "shopify_pilot",
+  "pilotLeadId": "clx..."
+}
+```
+
+Response may include `{ "accountId": "...", "setupUrl": "https://intastellaraccounts.com/..." }` — both fields are optional; the app stores whatever is returned.
+
+### Demo-ready request (when second endpoint exists)
+
+```json
+{
+  "email": "you@company.com",
+  "storeName": "Acme Demo",
+  "shopDomain": "acme-demo.myshopify.com",
+  "installUrl": "https://app.consentsmanagement.com/auth/login?shop=...",
+  "intastellarAccountId": "...",
+  "intastellarSetupUrl": "https://intastellaraccounts.com/...",
+  "pilotLeadId": "clx..."
+}
+```
+
+If register and demo-ready are the same service, you can expose one or two paths on intastellaraccounts.com — plug the full URLs into env when ready.
+
 ---
 
 This repo was bootstrapped from [Shopify’s Remix app template](https://github.com/Shopify/shopify-app-template-remix).

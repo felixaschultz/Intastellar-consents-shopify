@@ -8,6 +8,11 @@ import {
 } from "./partner-dev-store.server";
 import { formatPilotCmp } from "./pilot-lead-cmp-options";
 import {
+  buildPilotInstallUrl,
+  notifyDemoStoreReady,
+  registerPilotWithIntastellarAccounts,
+} from "./intastellar-accounts.server";
+import {
   publicPilotNotConfiguredMessage,
   publicPilotPollError,
   publicPilotStartError,
@@ -65,10 +70,90 @@ export function validatePilotSignupInput(
 async function updateLead(
   id: string,
   data: Partial<
-    Pick<PilotLead, "status" | "statusNote" | "shopDomain" | "currentCmp">
+    Pick<
+      PilotLead,
+      | "status"
+      | "statusNote"
+      | "shopDomain"
+      | "currentCmp"
+      | "intastellarAccountId"
+      | "intastellarSetupUrl"
+      | "intastellarAccountStatus"
+      | "intastellarAccountNote"
+      | "demoReadyEmailSentAt"
+    >
   >,
 ) {
   await db.pilotLead.update({ where: { id }, data });
+}
+
+async function registerIntastellarAccountForLead(
+  lead: Pick<PilotLead, "id" | "email" | "storeName" | "currentCmp">,
+): Promise<void> {
+  const registration = await registerPilotWithIntastellarAccounts({
+    email: lead.email,
+    storeName: lead.storeName,
+    currentCmp: lead.currentCmp,
+    pilotLeadId: lead.id,
+  });
+
+  if (registration.ok) {
+    await updateLead(lead.id, {
+      intastellarAccountId: registration.accountId,
+      intastellarSetupUrl: registration.setupUrl,
+      intastellarAccountStatus: "registered",
+    });
+    return;
+  }
+
+  if (registration.skipped) {
+    await updateLead(lead.id, {
+      intastellarAccountStatus: "skipped",
+      intastellarAccountNote: registration.message,
+    });
+    return;
+  }
+
+  await updateLead(lead.id, {
+    intastellarAccountStatus: "failed",
+    intastellarAccountNote: registration.message,
+  });
+}
+
+async function sendDemoReadyEmailIfNeeded(
+  lead: Pick<
+    PilotLead,
+    | "id"
+    | "email"
+    | "storeName"
+    | "shopDomain"
+    | "intastellarAccountId"
+    | "intastellarSetupUrl"
+    | "demoReadyEmailSentAt"
+  >,
+): Promise<void> {
+  if (!lead.shopDomain || lead.demoReadyEmailSentAt) return;
+
+  const notification = await notifyDemoStoreReady({
+    email: lead.email,
+    storeName: lead.storeName,
+    shopDomain: lead.shopDomain,
+    installUrl: buildPilotInstallUrl(lead.shopDomain),
+    intastellarAccountId: lead.intastellarAccountId,
+    intastellarSetupUrl: lead.intastellarSetupUrl,
+    pilotLeadId: lead.id,
+  });
+
+  if (notification.ok || notification.skipped) {
+    await updateLead(lead.id, { demoReadyEmailSentAt: new Date() });
+    return;
+  }
+
+  console.error(
+    "[pilot-lead] demo-ready email failed for lead",
+    lead.id,
+    notification.message,
+  );
 }
 
 export async function startPilotSignup(
@@ -101,6 +186,8 @@ export async function startPilotSignup(
         status: "PENDING",
       },
     });
+
+    await registerIntastellarAccountForLead(lead);
 
     try {
       await updateLead(lead.id, { status: "CREATING" });
@@ -152,6 +239,7 @@ export async function pollPilotLead(
   }
 
   if (lead.status === "READY" && lead.shopDomain) {
+    await sendDemoReadyEmailIfNeeded(lead);
     return {
       status: "READY",
       shopDomain: lead.shopDomain,
@@ -174,6 +262,10 @@ export async function pollPilotLead(
     const creationStatus = await pollStoreCreationStatus(shopDomain);
     if (creationStatus === "COMPLETE") {
       await updateLead(lead.id, { status: "READY" });
+      const readyLead = await db.pilotLead.findUnique({ where: { id: lead.id } });
+      if (readyLead) {
+        await sendDemoReadyEmailIfNeeded(readyLead);
+      }
       return {
         status: "READY",
         shopDomain,

@@ -347,7 +347,9 @@ export default function App() {
                     <Text as="p" variant="bodyMd">
                       Try Intastellar Consents on a free Shopify demo store — we
                       create it for you, install the app, and open the admin so you
-                      can configure the banner in minutes.
+                      can configure the banner in minutes. We&apos;ll also register
+                      your email with Intastellar Accounts so you can finish setup
+                      and access the Consents Platform later.
                     </Text>
                     {!pilotProvisioningEnabled && showDevHints ? (
                       <Text as="p" variant="bodySm" tone="subdued">

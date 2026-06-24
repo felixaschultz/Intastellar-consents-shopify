@@ -41,16 +41,21 @@ enum PilotLeadStatus {
 }
 
 model PilotLead {
-  id          String          @id @default(cuid())
-  email       String
-  storeName   String
-  currentCmp  String
-  shopDomain  String?
-  status      PilotLeadStatus @default(PENDING)
-  statusNote  String?
-  pollToken   String          @unique
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id                      String          @id @default(cuid())
+  email                   String
+  storeName               String
+  currentCmp              String
+  shopDomain              String?
+  status                  PilotLeadStatus @default(PENDING)
+  statusNote              String?
+  pollToken               String          @unique
+  intastellarAccountId    String?
+  intastellarSetupUrl     String?
+  intastellarAccountStatus String?
+  intastellarAccountNote  String?
+  demoReadyEmailSentAt    DateTime?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 
   @@index([shopDomain])
   @@index([email])
