@@ -6,7 +6,7 @@ redirect_urls = [
   "https://app.consentsmanagement.com/auth/callback",
   "https://app.consentsmanagement.com/auth/shopify/callback",
 ]
-scopes = "read_checkout_branding_settings,read_themes"
+scopes = "read_checkout_branding_settings,read_files,read_themes"
 api_version = "2024-10"
 
 [commands]

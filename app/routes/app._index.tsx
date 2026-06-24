@@ -13,6 +13,7 @@ import {
   Select,
   InlineStack,
   Banner,
+  Image,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
@@ -472,18 +473,56 @@ export default function Index() {
                         </BlockStack>
                       </Box>
                     </InlineStack>
-                    <TextField
-                      label="Logo URL"
-                      name="logo"
-                      value={config.settings.logo}
-                      onChange={(v) => updateSettings({ logo: v })}
-                      autoComplete="off"
-                      helpText={
-                        shopLogoUrl
-                          ? "Prefilled from your shop brand settings when empty."
-                          : undefined
-                      }
-                    />
+                    <BlockStack gap="300">
+                      <TextField
+                        label="Logo URL"
+                        name="logo"
+                        value={config.settings.logo}
+                        onChange={(v) => updateSettings({ logo: v })}
+                        autoComplete="off"
+                        helpText={
+                          shopLogoUrl
+                            ? "We detected a logo from your theme or checkout branding. Use the button below to apply it, or paste any https:// URL."
+                            : "Paste an absolute https:// URL to your store logo."
+                        }
+                      />
+                      {config.settings.logo.trim() ? (
+                        <Box
+                          padding="300"
+                          background="bg-surface-secondary"
+                          borderRadius="200"
+                        >
+                          <BlockStack gap="200">
+                            <Text as="p" variant="bodySm" fontWeight="medium">
+                              Logo preview
+                            </Text>
+                            <Image
+                              source={config.settings.logo.trim()}
+                              alt={`${shop.name} logo`}
+                              width={160}
+                            />
+                          </BlockStack>
+                        </Box>
+                      ) : null}
+                      {shopLogoUrl ? (
+                        <InlineStack gap="200" blockAlign="center">
+                          <Button
+                            type="button"
+                            onClick={() =>
+                              updateSettings({ logo: shopLogoUrl })
+                            }
+                            disabled={config.settings.logo === shopLogoUrl}
+                          >
+                            Use shop logo
+                          </Button>
+                          {config.settings.logo === shopLogoUrl ? (
+                            <Text as="span" variant="bodySm" tone="success">
+                              Using detected shop logo
+                            </Text>
+                          ) : null}
+                        </InlineStack>
+                      ) : null}
+                    </BlockStack>
                     <InlineStack gap="400" wrap blockAlign="start">
                       <Box minWidth="200px">
                         <Select

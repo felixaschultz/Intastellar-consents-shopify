@@ -99,7 +99,6 @@ function pickCheckoutColor(global: {
   return null;
 }
 
-/** Recursively finds hex colors in theme settings, preferring button/accent/brand. */
 function pickThemeColor(obj: unknown): string | null {
   if (!obj || typeof obj !== "object") return null;
   const pairs: { key: string; value: string }[] = [];
@@ -223,11 +222,80 @@ async function brandFromCheckout(admin: AdminClient): Promise<{
   }
 }
 
-/** Fetches brand color from main theme's settings_data.json (Admin API). */
-async function colorFromThemeSettings(admin: AdminClient): Promise<{
-  color: string | null;
-  diagnostics: string[];
-}> {
+/** Finds a logo reference in theme settings_data.json (URL or shopify://shop_images/…). */
+function pickThemeLogoRef(obj: unknown): string | null {
+  if (!obj || typeof obj !== "object") return null;
+  const record = obj as Record<string, unknown>;
+
+  const current = record.current;
+  const presets = record.presets;
+  if (typeof current === "string" && presets && typeof presets === "object") {
+    const preset = (presets as Record<string, unknown>)[current];
+    if (preset && typeof preset === "object") {
+      const logo = (preset as Record<string, unknown>).logo;
+      if (typeof logo === "string" && logo.trim()) return logo.trim();
+    }
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (key === "logo" && typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const nested = pickThemeLogoRef(value);
+      if (nested) return nested;
+    }
+  }
+  return null;
+}
+
+async function resolveThemeLogoReference(
+  admin: AdminClient,
+  ref: string,
+): Promise<string | null> {
+  if (/^https?:\/\//i.test(ref)) return ref;
+
+  const shopImage = ref.match(/^shopify:\/\/shop_images\/(.+)$/i);
+  if (!shopImage) return null;
+
+  const filename = shopImage[1];
+  const res = await admin.graphql(
+    `#graphql
+    query IntaShopImageFile($query: String!) {
+      files(first: 1, query: $query) {
+        nodes {
+          ... on MediaImage {
+            image {
+              url
+            }
+          }
+          ... on GenericFile {
+            url
+          }
+        }
+      }
+    }`,
+    { variables: { query: `filename:${filename}` } },
+  );
+  const json = (await res.json()) as {
+    data?: {
+      files?: {
+        nodes?: Array<{
+          image?: { url?: string };
+          url?: string;
+        }>;
+      };
+    };
+    errors?: { message?: string }[];
+  };
+  if (graphqlErrorsMessage(json)) return null;
+  const node = json.data?.files?.nodes?.[0];
+  return node?.image?.url ?? node?.url ?? null;
+}
+
+async function loadMainThemeSettingsJson(
+  admin: AdminClient,
+): Promise<{ parsed: Record<string, unknown> | null; diagnostics: string[] }> {
   const diagnostics: string[] = [];
 
   try {
@@ -246,12 +314,12 @@ async function colorFromThemeSettings(admin: AdminClient): Promise<{
     const themesGql = graphqlErrorsMessage(themesJson);
     if (themesGql) {
       diagnostics.push(`themes: ${themesGql}`);
-      return { color: null, diagnostics };
+      return { parsed: null, diagnostics };
     }
     const themeId = themesJson.data?.themes?.nodes?.[0]?.id;
     if (!themeId) {
       diagnostics.push("theme: no MAIN theme found");
-      return { color: null, diagnostics };
+      return { parsed: null, diagnostics };
     }
 
     const filesRes = await admin.graphql(
@@ -290,7 +358,7 @@ async function colorFromThemeSettings(admin: AdminClient): Promise<{
     const filesGql = graphqlErrorsMessage(filesJson);
     if (filesGql) {
       diagnostics.push(`theme files: ${filesGql}`);
-      return { color: null, diagnostics };
+      return { parsed: null, diagnostics };
     }
     const nodes = filesJson.data?.theme?.files?.nodes ?? [];
     const body = nodes[0]?.body;
@@ -299,48 +367,76 @@ async function colorFromThemeSettings(admin: AdminClient): Promise<{
       diagnostics.push(
         "theme: config/settings_data.json body missing or unsupported format (expected text, base64, or URL from Admin API)",
       );
-      return { color: null, diagnostics };
+      return { parsed: null, diagnostics };
     }
 
     const content = normalizeThemeJsonText(rawContent);
-    let parsed: unknown;
     try {
-      parsed = JSON.parse(content);
+      return { parsed: JSON.parse(content) as Record<string, unknown>, diagnostics };
     } catch (parseErr) {
       const hint =
         parseErr instanceof Error ? parseErr.message : String(parseErr);
       diagnostics.push(
         `theme: settings_data.json could not be parsed as JSON (${hint}). First 120 chars: ${content.slice(0, 120).replace(/\s+/g, " ")}`,
       );
-      return { color: null, diagnostics };
+      return { parsed: null, diagnostics };
     }
-
-    const obj = parsed as Record<string, unknown>;
-    const current = obj.current;
-    const presets = obj.presets;
-
-    let color: string | null = null;
-    if (typeof current === "string" && presets && typeof presets === "object") {
-      const preset = (presets as Record<string, unknown>)[current];
-      if (preset) color = pickThemeColor(preset);
-    }
-    if (!color) color = pickThemeColor(obj);
-    if (!color) {
-      diagnostics.push(
-        "theme: no hex colors found in settings_data.json (theme may use a different structure)",
-      );
-    }
-    return { color, diagnostics };
   } catch (err) {
     diagnostics.push(formatDiag("theme settings", err));
-    return { color: null, diagnostics };
+    return { parsed: null, diagnostics };
   }
+}
+
+/** Logo + color from main theme settings_data.json (read_themes). */
+async function brandFromThemeSettings(admin: AdminClient): Promise<{
+  assets: ShopBrandAssets;
+  diagnostics: string[];
+}> {
+  const diagnostics: string[] = [];
+  const empty = (): { assets: ShopBrandAssets; diagnostics: string[] } => ({
+    assets: { logo: null, color: null },
+    diagnostics,
+  });
+
+  const { parsed, diagnostics: loadDiag } =
+    await loadMainThemeSettingsJson(admin);
+  diagnostics.push(...loadDiag);
+  if (!parsed) return empty();
+
+  let color: string | null = null;
+  const current = parsed.current;
+  const presets = parsed.presets;
+  if (typeof current === "string" && presets && typeof presets === "object") {
+    const preset = (presets as Record<string, unknown>)[current];
+    if (preset) color = pickThemeColor(preset);
+  }
+  if (!color) color = pickThemeColor(parsed);
+  if (!color) {
+    diagnostics.push(
+      "theme: no hex colors found in settings_data.json (theme may use a different structure)",
+    );
+  }
+
+  let logo: string | null = null;
+  const logoRef = pickThemeLogoRef(parsed);
+  if (logoRef) {
+    logo = await resolveThemeLogoReference(admin, logoRef);
+    if (!logo) {
+      diagnostics.push(
+        `theme: logo reference found (${logoRef}) but could not resolve to a URL`,
+      );
+    }
+  } else {
+    diagnostics.push("theme: no logo found in settings_data.json");
+  }
+
+  return { assets: { logo, color }, diagnostics };
 }
 
 /**
  * Loads brand logo and color via Admin API:
  * 1. Checkout branding (Plus/dev) – logo + design system colors
- * 2. Theme settings – brand colors from main theme's config/settings_data.json
+ * 2. Theme settings – logo + colors from main theme's config/settings_data.json
  */
 export async function fetchShopBrandAssets(
   admin: AdminClient,
@@ -352,11 +448,9 @@ export async function fetchShopBrandAssets(
   out = mergeAssets(out, checkout.assets);
   loadDiagnostics.push(...checkout.diagnostics);
 
-  if (!out.color) {
-    const theme = await colorFromThemeSettings(admin);
-    if (theme.color) out = { ...out, color: theme.color };
-    loadDiagnostics.push(...theme.diagnostics);
-  }
+  const theme = await brandFromThemeSettings(admin);
+  out = mergeAssets(out, theme.assets);
+  loadDiagnostics.push(...theme.diagnostics);
 
   return { ...out, loadDiagnostics };
 }

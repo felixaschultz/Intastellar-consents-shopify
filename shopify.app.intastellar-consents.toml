@@ -33,7 +33,7 @@ uri = "/webhooks/shop/redact"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_checkout_branding_settings,read_themes"
+scopes = "read_checkout_branding_settings,read_files,read_themes"
 
 [auth]
 redirect_urls = [

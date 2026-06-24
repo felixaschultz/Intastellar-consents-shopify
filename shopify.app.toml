@@ -11,7 +11,7 @@ automatically_update_urls_on_dev = true
 include_config_on_deploy = true
 
 [access_scopes]
-scopes = "read_checkout_branding_settings,read_themes"
+scopes = "read_checkout_branding_settings,read_files,read_themes"
 optional_scopes = [ ]
 use_legacy_install_flow = false
 
