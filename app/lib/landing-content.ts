@@ -115,15 +115,10 @@ export function buildLandingJsonLd() {
         applicationCategory: "BusinessApplication",
         applicationSubCategory: "Shopify app — Cookie consent management",
         operatingSystem: "Shopify",
-        browserRequirements: "Requires a Shopify store",
         installUrl: shopifyAppInstallUrl(),
         downloadUrl: LANDING_URL,
         softwareHelp: SHOPIFY_APP_IDENTITY.helpUrl,
         sameAs: shopifyAppSameAsLinks(),
-        brand: {
-          "@type": "Brand",
-          name: SHOPIFY_APP_IDENTITY.name,
-        },
         offers: {
           "@type": "Offer",
           price: "0",
@@ -163,7 +158,6 @@ export function buildLandingJsonLd() {
           "@type": "ImageObject",
           url: "https://www.intastellarconsents.com/assets/icons/intastellar-logo-black.svg",
         },
-        makesOffer: { "@id": `${LANDING_URL}#shopify-app` },
       },
     ],
   };
