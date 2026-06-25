@@ -36,7 +36,7 @@ import { throwGraphqlFailure } from "../lib/admin-graphql.server";
 import { IntastellarOnboardingModal } from "../components/IntastellarOnboardingModal";
 import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
 
-const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js";
+const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js?utm_source=shopify&utm_medium=app&utm_campaign=shopify_app";
 const DOCS_URL = SHOPIFY_APP_IDENTITY.developerDocsUrl;
 const HELP_URL = SHOPIFY_APP_IDENTITY.helpCenterUrl;
 
