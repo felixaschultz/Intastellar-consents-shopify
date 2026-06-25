@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useLoaderData, useFetcher } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { AppProvider, BlockStack, Image, Text } from "@shopify/polaris";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
@@ -8,12 +8,10 @@ import { login } from "../../shopify.server";
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
 import { PILOT_CMP_OPTIONS } from "../../lib/pilot-lead-cmp-options";
-import { isPilotStoreProvisioningConfigured } from "../../lib/partner-dev-store.server";
-import { isDevEnvironment, publicPilotStartError } from "../../lib/public-messages.server";
-import { startPilotSignup } from "../../lib/pilot-lead.server";
+import { isPilotSignupConfigured, startPilotSignup } from "../../lib/pilot-lead.server";
 import {
   buildLandingJsonLd,
   LANDING_FAQ,
@@ -23,7 +21,7 @@ import {
 } from "../../lib/landing-content";
 import { APP_LEGAL_LINKS } from "../../lib/legal-content";
 import { SHOPIFY_APP_IDENTITY, INTASTELLAR_SUPPORT_LINKS } from "../../lib/shopify-app-seo";
-
+import { publicPilotStartError, isDevEnvironment } from "../../lib/public-messages.server";
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
 const jsonLdSchema = buildLandingJsonLd();
 
@@ -78,7 +76,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return {
     showForm: Boolean(login),
     polarisTranslations,
-    pilotProvisioningEnabled: isPilotStoreProvisioningConfigured(),
+    pilotSignupEnabled: isPilotSignupConfigured(),
     showDevHints: isDevEnvironment(),
     cmpOptions: PILOT_CMP_OPTIONS,
   };
@@ -114,9 +112,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({
         intent: "pilot" as const,
         ok: true as const,
-        pollToken: result.pollToken,
-        shopDomain: result.shopDomain,
         email: result.email,
+        message: result.message,
       });
     } catch (err) {
       console.error("[index] pilot action failed", err);
@@ -202,71 +199,25 @@ export default function App() {
   const {
     showForm,
     polarisTranslations,
-    pilotProvisioningEnabled,
+    pilotSignupEnabled,
     showDevHints,
     cmpOptions,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const pollFetcher = useFetcher<typeof import("../pilot-lead.poll").loader>();
   const [pilotCmp, setPilotCmp] = useState("none");
-  const [provisioning, setProvisioning] = useState<{
-    pollToken: string;
-    shopDomain: string;
-    message: string;
-  } | null>(null);
 
   const pilotResult =
     actionData && "intent" in actionData && actionData.intent === "pilot"
       ? actionData
       : null;
 
-  useEffect(() => {
-    if (pilotResult?.ok && "pollToken" in pilotResult) {
-      setProvisioning({
-        pollToken: pilotResult.pollToken,
-        shopDomain: pilotResult.shopDomain,
-        message: "Setting up your demo store…",
-      });
-    }
-  }, [pilotResult]);
+  const pilotSubmitted =
+    pilotResult?.ok && "message" in pilotResult ? pilotResult : null;
 
-  useEffect(() => {
-    if (!provisioning) return;
-    const interval = window.setInterval(() => {
-      pollFetcher.load(
-        `/pilot-lead/poll?token=${encodeURIComponent(provisioning.pollToken)}`,
-      );
-    }, 2500);
-    pollFetcher.load(
-      `/pilot-lead/poll?token=${encodeURIComponent(provisioning.pollToken)}`,
-    );
-    return () => window.clearInterval(interval);
-  }, [provisioning?.pollToken]);
-
-  useEffect(() => {
-    const data = pollFetcher.data;
-    if (!data?.ok || !provisioning) return;
-    if (data.status === "READY" && data.installPath) {
-      window.location.href = data.installPath;
-      return;
-    }
-    if (data.status === "FAILED") {
-      setProvisioning(null);
-      return;
-    }
-    if (data.message && data.message !== provisioning.message) {
-      setProvisioning((prev) =>
-        prev ? { ...prev, message: data.message } : prev,
-      );
-    }
-  }, [pollFetcher.data, provisioning]);
-
-  const pollFailed =
-    pollFetcher.data && !pollFetcher.data.ok
-      ? pollFetcher.data.message
-      : pollFetcher.data?.ok && pollFetcher.data.status === "FAILED"
-        ? pollFetcher.data.message
-        : null;
+  const pilotFieldErrors =
+    pilotResult && !pilotResult.ok && "fieldErrors" in pilotResult
+      ? (pilotResult.fieldErrors ?? {})
+      : {};
 
   return (
     <AppProvider i18n={polarisTranslations}>
@@ -346,20 +297,20 @@ export default function App() {
                   <div className={styles.formIntro}>
                     <p className={styles.formCardTitle}>Start free demo</p>
                     <Text as="p" variant="bodyMd">
-                      Try Intastellar Consents on a free Shopify demo store — we
-                      create it for you, install the app, and open the admin so you
-                      can configure the banner in minutes. We&apos;ll also register
-                      your email with Intastellar Accounts so you can finish setup
-                      and access the Consents Platform later.
+                      Request a free Shopify demo store with Intastellar Consents
+                      pre-installed. We&apos;ll set it up for you and email you
+                      when it&apos;s ready — usually within one business day. We&apos;ll
+                      also register your email with Intastellar Accounts so you can
+                      finish setup and access the Consents Platform later.
                     </Text>
-                    {!pilotProvisioningEnabled && showDevHints ? (
+                    {!pilotSignupEnabled && showDevHints ? (
                       <Text as="p" variant="bodySm" tone="subdued">
-                        Automated demo setup runs when partner provisioning is
-                        enabled on the server. You can still install on an existing
-                        development store via{" "}
+                        Demo signup runs when <code>PILOT_OPERATOR_EMAIL</code> and{" "}
+                        <code>RESEND_API_KEY</code> are set on the server. You can
+                        still install on an existing development store via{" "}
                         <Link to="/auth/login">Log in</Link>.
                       </Text>
-                    ) : !pilotProvisioningEnabled ? (
+                    ) : !pilotSignupEnabled ? (
                       <Text as="p" variant="bodySm" tone="subdued">
                         Demo signup is temporarily unavailable.{" "}
                         <Link to="/auth/login">Log in</Link> to install on your
@@ -369,14 +320,17 @@ export default function App() {
                   </div>
                 </BlockStack>
 
-                {provisioning ? (
+                {pilotSubmitted ? (
                   <div className={styles.pilotStatus}>
                     <Text as="p" variant="bodyMd" fontWeight="semibold">
-                      {provisioning.message}
+                      Request received
+                    </Text>
+                    <Text as="p" variant="bodyMd">
+                      {pilotSubmitted.message}
                     </Text>
                     <Text as="p" variant="bodySm" tone="subdued">
-                      {provisioning.shopDomain} — you&apos;ll be redirected to
-                      approve the app when the store is ready.
+                      We&apos;ll contact you at {pilotSubmitted.email} when your
+                      demo store is ready.
                     </Text>
                   </div>
                 ) : (
@@ -400,16 +354,16 @@ export default function App() {
                         <input
                           className={[
                             styles.input,
-                            pilotResult?.fieldErrors?.email ? styles.error : "",
+                            pilotFieldErrors?.email ? styles.error : "",
                           ].join(" ")}
                           type="email"
                           name="email"
                           autoComplete="email"
                           placeholder="you@company.com"
                         />
-                        {pilotResult?.fieldErrors?.email ? (
+                        {pilotFieldErrors?.email ? (
                           <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {pilotResult.fieldErrors.email}
+                            {pilotFieldErrors.email}
                           </span>
                         ) : null}
                       </label>
@@ -418,15 +372,15 @@ export default function App() {
                         <input
                           className={[
                             styles.input,
-                            pilotResult?.fieldErrors?.storeName ? styles.error : "",
+                            pilotFieldErrors?.storeName ? styles.error : "",
                           ].join(" ")}
                           type="text"
                           name="storeName"
                           placeholder="e.g. Acme Demo Store"
                         />
-                        {pilotResult?.fieldErrors?.storeName ? (
+                        {pilotFieldErrors?.storeName ? (
                           <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {pilotResult.fieldErrors.storeName}
+                            {pilotFieldErrors.storeName}
                           </span>
                         ) : (
                           <span className={styles.helpText}>
@@ -444,7 +398,7 @@ export default function App() {
                           className={[
                             styles.input,
                             styles.select,
-                            pilotResult?.fieldErrors?.currentCmp ? styles.error : "",
+                            pilotFieldErrors?.currentCmp ? styles.error : "",
                           ].join(" ")}
                           name="currentCmp"
                           value={pilotCmp}
@@ -456,9 +410,9 @@ export default function App() {
                             </option>
                           ))}
                         </select>
-                        {pilotResult?.fieldErrors?.currentCmp ? (
+                        {pilotFieldErrors?.currentCmp ? (
                           <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {pilotResult.fieldErrors.currentCmp}
+                            {pilotFieldErrors.currentCmp}
                           </span>
                         ) : null}
                       </label>
@@ -468,15 +422,15 @@ export default function App() {
                           <input
                             className={[
                               styles.input,
-                              pilotResult?.fieldErrors?.cmpOther ? styles.error : "",
+                              pilotFieldErrors?.cmpOther ? styles.error : "",
                             ].join(" ")}
                             type="text"
                             name="cmpOther"
                             placeholder="e.g. Custom in-house banner"
                           />
-                          {pilotResult?.fieldErrors?.cmpOther ? (
+                          {pilotFieldErrors?.cmpOther ? (
                             <span className={[styles.errorText, styles.helpText].join(" ")}>
-                              {pilotResult.fieldErrors.cmpOther}
+                              {pilotFieldErrors.cmpOther}
                             </span>
                           ) : null}
                         </label>
@@ -487,15 +441,10 @@ export default function App() {
                         {pilotResult.message}
                       </p>
                     ) : null}
-                    {pollFailed ? (
-                      <p className={[styles.errorText, styles.formErrorBanner].join(" ")}>
-                        {pollFailed}
-                      </p>
-                    ) : null}
                     <button
                       className={styles.button}
                       type="submit"
-                      disabled={!pilotProvisioningEnabled}
+                      disabled={!pilotSignupEnabled}
                     >
                       Start free demo
                     </button>

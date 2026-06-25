@@ -66,8 +66,8 @@ export function publicPilotPollError(internal: string): string {
 export function publicPilotNotConfiguredMessage(): string {
   if (isDevEnvironment()) {
     return (
-      "Automated demo store setup is not configured yet. Use “Install on an existing store” below, " +
-      "or contact Intastellar for a pilot invite."
+      "Demo signup is not configured yet. Set PILOT_OPERATOR_EMAIL and RESEND_API_KEY on the server, " +
+      "or use “Install on an existing store” below."
     );
   }
   return (

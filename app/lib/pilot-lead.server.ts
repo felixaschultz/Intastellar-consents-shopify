@@ -1,11 +1,6 @@
-import { createHmac, randomBytes } from "node:crypto";
-import type { PilotLead, PilotLeadStatus } from "@prisma/client";
+import type { PilotLead } from "@prisma/client";
+import { randomBytes } from "node:crypto";
 import db from "../db.server";
-import {
-  createAppDevelopmentStore,
-  isPilotStoreProvisioningConfigured,
-  pollStoreCreationStatus,
-} from "./partner-dev-store.server";
 import { formatPilotCmp } from "./pilot-lead-cmp-options";
 import {
   buildPilotInstallUrl,
@@ -13,10 +8,12 @@ import {
   registerPilotWithIntastellarAccounts,
 } from "./intastellar-accounts.server";
 import {
+  isPilotSignupConfigured,
+  notifyOperatorOfPilotLead,
+} from "./pilot-notify.server";
+import {
   publicPilotNotConfiguredMessage,
-  publicPilotPollError,
   publicPilotStartError,
-  publicPilotStoreError,
 } from "./public-messages.server";
 
 export type PilotSignupInput = {
@@ -29,13 +26,13 @@ export type PilotSignupInput = {
 export type PilotSignupResult =
   | {
       ok: true;
-      pollToken: string;
-      shopDomain: string;
       email: string;
+      message: string;
     }
   | { ok: false; message: string; fieldErrors?: Record<string, string> };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SHOP_DOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/;
 
 function createPollToken(): string {
   return randomBytes(24).toString("hex");
@@ -81,6 +78,7 @@ async function updateLead(
       | "intastellarAccountStatus"
       | "intastellarAccountNote"
       | "demoReadyEmailSentAt"
+      | "operatorNotifiedAt"
     >
   >,
 ) {
@@ -164,7 +162,7 @@ export async function startPilotSignup(
     return { ok: false, message: "Please fix the errors below.", fieldErrors };
   }
 
-  if (!isPilotStoreProvisioningConfigured()) {
+  if (!isPilotSignupConfigured()) {
     return {
       ok: false,
       message: publicPilotNotConfiguredMessage(),
@@ -189,20 +187,32 @@ export async function startPilotSignup(
 
     await registerIntastellarAccountForLead(lead);
 
-    try {
-      await updateLead(lead.id, { status: "CREATING" });
-      const { shopDomain } = await createAppDevelopmentStore(storeName);
-      await updateLead(lead.id, { shopDomain, status: "CREATING" });
-      return { ok: true, pollToken, shopDomain, email };
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not create development store";
-      await updateLead(lead.id, { status: "FAILED", statusNote: message });
+    const notification = await notifyOperatorOfPilotLead(lead);
+    if (notification.ok) {
+      await updateLead(lead.id, { operatorNotifiedAt: new Date() });
+    } else {
+      console.error(
+        "[pilot-lead] operator notification failed for lead",
+        lead.id,
+        notification.message,
+      );
+      await updateLead(lead.id, {
+        statusNote: `Operator email failed: ${notification.message}`,
+      });
       return {
         ok: false,
-        message: publicPilotStoreError(message),
+        message: publicPilotStartError(
+          "We saved your request but could not notify our team. Please try again or contact Intastellar.",
+        ),
       };
     }
+
+    return {
+      ok: true,
+      email,
+      message:
+        "Thanks — we received your request. We'll email you when your demo store is ready (usually within one business day).",
+    };
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not save your pilot request";
@@ -214,109 +224,62 @@ export async function startPilotSignup(
   }
 }
 
-export type PilotPollResult = {
-  status: PilotLeadStatus | "COMPLETE";
-  shopDomain: string | null;
-  message: string;
-  installPath: string | null;
-};
-
-export async function pollPilotLead(
-  pollToken: string,
-  shopDomainParam?: string,
-): Promise<PilotPollResult | null> {
-  const lead = await db.pilotLead.findUnique({ where: { pollToken } });
-  if (!lead) return null;
-
-  if (lead.status === "FAILED") {
-    const internal = lead.statusNote ?? "Store setup failed";
-    return {
-      status: "FAILED",
-      shopDomain: lead.shopDomain,
-      message: publicPilotPollError(internal),
-      installPath: null,
-    };
-  }
-
-  if (lead.status === "READY" && lead.shopDomain) {
-    await sendDemoReadyEmailIfNeeded(lead);
-    return {
-      status: "READY",
-      shopDomain: lead.shopDomain,
-      message: "Your demo store is ready",
-      installPath: `/auth/login?shop=${encodeURIComponent(lead.shopDomain)}`,
-    };
-  }
-
-  const shopDomain = lead.shopDomain ?? shopDomainParam ?? null;
-  if (!shopDomain) {
-    return {
-      status: lead.status,
-      shopDomain: null,
-      message: "Waiting for store domain…",
-      installPath: null,
-    };
-  }
-
-  try {
-    const creationStatus = await pollStoreCreationStatus(shopDomain);
-    if (creationStatus === "COMPLETE") {
-      await updateLead(lead.id, { status: "READY" });
-      const readyLead = await db.pilotLead.findUnique({ where: { id: lead.id } });
-      if (readyLead) {
-        await sendDemoReadyEmailIfNeeded(readyLead);
-      }
-      return {
-        status: "READY",
-        shopDomain,
-        message: "Your demo store is ready",
-        installPath: `/auth/login?shop=${encodeURIComponent(shopDomain)}`,
-      };
-    }
-    if (
-      creationStatus === "FAILED" ||
-      creationStatus === "TIMED_OUT" ||
-      creationStatus === "USER_ERROR"
-    ) {
-      const note = `Store provisioning failed (${creationStatus})`;
-      await updateLead(lead.id, { status: "FAILED", statusNote: note });
-      return {
-        status: "FAILED",
-        shopDomain,
-        message: publicPilotPollError(note),
-        installPath: null,
-      };
-    }
-    return {
-      status: "CREATING",
-      shopDomain,
-      message: friendlyCreationStatus(creationStatus),
-      installPath: null,
-    };
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Could not check store status";
-    console.error("[pilot-lead] pollPilotLead failed", err);
-    return {
-      status: "CREATING",
-      shopDomain,
-      message: publicPilotPollError(message),
-      installPath: null,
-    };
-  }
+function normalizeShopDomain(shop: string): string | null {
+  const trimmed = shop.trim().toLowerCase();
+  if (!trimmed) return null;
+  const withDomain = trimmed.includes(".")
+    ? trimmed
+    : `${trimmed}.myshopify.com`;
+  return SHOP_DOMAIN_PATTERN.test(withDomain) ? withDomain : null;
 }
 
-function friendlyCreationStatus(status: string): string {
-  switch (status) {
-    case "CALLING_CORE":
-      return "Starting your demo store…";
-    case "AWAITING_CORE_STORE_READY":
-      return "Shopify is preparing your storefront…";
-    case "FINALIZING":
-      return "Almost ready…";
-    default:
-      return "Setting up your demo store…";
+export type MarkPilotLeadReadyResult =
+  | { ok: true; installUrl: string; email: string }
+  | { ok: false; message: string };
+
+/** Called by the operator after manually creating the dev store. */
+export async function markPilotLeadReady(
+  leadId: string,
+  shopDomainInput: string,
+): Promise<MarkPilotLeadReadyResult> {
+  const shopDomain = normalizeShopDomain(shopDomainInput);
+  if (!shopDomain) {
+    return {
+      ok: false,
+      message: "Invalid shop domain. Use format: your-store.myshopify.com",
+    };
   }
+
+  const lead = await db.pilotLead.findUnique({ where: { id: leadId } });
+  if (!lead) {
+    return { ok: false, message: "Pilot lead not found" };
+  }
+
+  if (lead.status === "READY" && lead.shopDomain === shopDomain) {
+    await sendDemoReadyEmailIfNeeded(lead);
+    return {
+      ok: true,
+      installUrl: buildPilotInstallUrl(shopDomain),
+      email: lead.email,
+    };
+  }
+
+  await updateLead(lead.id, {
+    shopDomain,
+    status: "READY",
+    statusNote: null,
+  });
+
+  const readyLead = await db.pilotLead.findUnique({ where: { id: lead.id } });
+  if (readyLead) {
+    await sendDemoReadyEmailIfNeeded(readyLead);
+  }
+
+  return {
+    ok: true,
+    installUrl: buildPilotInstallUrl(shopDomain),
+    email: lead.email,
+  };
 }
 
 export async function findPilotLeadByShop(
@@ -329,9 +292,4 @@ export async function findPilotLeadByShop(
   });
 }
 
-/** Optional signed token for poll endpoint hardening (pollToken is already secret). */
-export function signPollToken(pollToken: string): string {
-  const secret = process.env.SHOPIFY_API_SECRET ?? "";
-  if (!secret) return pollToken;
-  return createHmac("sha256", secret).update(pollToken).digest("hex");
-}
+export { isPilotSignupConfigured };

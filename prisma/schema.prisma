@@ -54,6 +54,7 @@ model PilotLead {
   intastellarAccountStatus String?
   intastellarAccountNote  String?
   demoReadyEmailSentAt    DateTime?
+  operatorNotifiedAt      DateTime?
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 

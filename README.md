@@ -51,11 +51,22 @@ CLI will link `client_id`, tunnel URL, and `redirect_urls` in `shopify.app.toml`
 When a visitor submits **Start free demo**, the app:
 
 1. Saves a `PilotLead` row (email, store name, CMP).
-2. Calls **Intastellar Accounts** to register the email (pending account).
-3. Provisions a Shopify development store (when Partner API is enabled).
-4. When the store is ready, calls Intastellar Accounts to **email the user** with the install link and a link to finish Intastellar account setup.
+2. Calls **Intastellar Accounts** to register the email (when configured).
+3. **Emails you** (the operator) so you can create the dev store manually in the Partner Dashboard.
+4. When you mark the store ready, calls Intastellar Accounts to **email the visitor** with the install link.
 
 Shopify OAuth remains the install path for the embedded app; Intastellar Accounts is for the Consents Platform dashboard.
+
+### Env vars (pilot signup)
+
+| Variable | Required | Description |
+| -------- | -------- | ----------- |
+| `PILOT_OPERATOR_EMAIL` | Yes | Your inbox — notified on each demo request |
+| `RESEND_API_KEY` | Yes | [Resend](https://resend.com) API key for operator emails |
+| `PILOT_EMAIL_FROM` | Optional | Verified sender (default: `Intastellar Consents <notifications@consentsmanagement.com>`) |
+| `PILOT_OPERATOR_SECRET` | Recommended | Secret for `/pilot-lead/complete` links in operator emails |
+
+After you create the dev store, open the complete link from the email (or visit `/pilot-lead/complete?secret=…&id=…&shop=store.myshopify.com`) to notify the visitor.
 
 ### Env vars (Intastellar Accounts — intastellaraccounts.com)
 
@@ -68,7 +79,7 @@ Accounts are hosted on **one.com** under **intastellaraccounts.com**. Set these 
 | `INTASTELLAR_ACCOUNTS_API_KEY` | Optional | Bearer token if the API requires server auth |
 | `INTASTELLAR_ACCOUNTS_SETUP_URL` | Optional | Fallback link for “finish account setup” (default: `https://intastellaraccounts.com/setup?email=…`) |
 
-Until `INTASTELLAR_ACCOUNTS_REGISTER_URL` is set, pilot signup and Shopify provisioning still work; account registration is skipped.
+Until `INTASTELLAR_ACCOUNTS_REGISTER_URL` is set, pilot signup still works; account registration is skipped.
 
 ### Shopify App Store / entity SEO
 
