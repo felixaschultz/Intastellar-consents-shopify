@@ -271,7 +271,7 @@ export default function App() {
             </h1>
             <p className={styles.lead}>
               Cookie consent for Shopify with the same consent ID across Shopify
-              Customer Privacy API and Intastellar Consents — plus analytics merchants
+              Customer Privacy API and Intastellar Consents - plus analytics merchants
               actually use.
             </p>
             <p className={styles.identityBlurb}>
@@ -461,11 +461,6 @@ export default function App() {
                 </div>
               </BlockStack>
             )}
-            <Text as="p" variant="bodyMd" tone="subdued">
-              <span className={styles.tagline}>
-                Without clear consent data, you&apos;re guessing.
-              </span>
-            </Text>
           </section>
           {/* <Text as="p" variant="bodyMd">
               Want to access your visitors consent data? Try our <Link to="https://www.intastellarconsents.com" target="_blank">Intastellar Consents Platform.</Link>
