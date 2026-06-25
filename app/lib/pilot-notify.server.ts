@@ -48,7 +48,7 @@ function buildCompleteUrl(leadId: string, shopDomain: string): string | null {
 function formatLeadEmailHtml(lead: Pick<PilotLead, "id" | "email" | "storeName" | "currentCmp" | "createdAt">): string {
   const created = lead.createdAt.toISOString();
   const partnerStoresUrl = "https://partners.shopify.com/current/stores";
-  const completeExample = buildCompleteUrl(lead.id, "your-store.myshopify.com");
+  const completeExample = buildCompleteUrl(lead.id, escapeHtml(lead.storeName) +".myshopify.com");
   const completeHint = completeExample
     ? `<p>After you create the store, open this link (replace the shop domain if needed):</p>
        <p><a href="${escapeHtml(completeExample)}">${escapeHtml(completeExample)}</a></p>`
