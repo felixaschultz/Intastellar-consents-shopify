@@ -59,6 +59,8 @@ export const SHOPIFY_APP_IDENTITY = {
   installPath: "/auth/login",
   helpCenterUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
   developerDocsUrl: INTASTELLAR_SUPPORT_LINKS.developerDocs.url,
+  linkedinUrl: "https://www.linkedin.com/company/intastellar-solutions/",
+  linkedinProductUrl: "https://www.linkedin.com/products/intastellarsolutions-intastellar-consents/",
   /** Merchant help — used in JSON-LD `softwareHelp`. */
   helpUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
   marketingUrl:
@@ -78,6 +80,8 @@ export function shopifyAppSameAsLinks(): string[] {
     SHOPIFY_APP_IDENTITY.shopifyIntegrationUrl,
     SHOPIFY_APP_IDENTITY.marketingUrl,
     SHOPIFY_APP_IDENTITY.platformUrl,
+    SHOPIFY_APP_IDENTITY.linkedinUrl,
+    SHOPIFY_APP_IDENTITY.linkedinProductUrl,
   ];
   const appStore = process.env.SHOPIFY_APP_STORE_LISTING_URL?.trim();
   if (appStore) links.unshift(appStore);
