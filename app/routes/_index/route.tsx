@@ -295,13 +295,11 @@ export default function App() {
               <BlockStack gap="400">
                 <BlockStack gap="200">
                   <div className={styles.formIntro}>
-                    <p className={styles.formCardTitle}>Start free demo</p>
+                    <p className={styles.formCardTitle}>Request a development store</p>
                     <Text as="p" variant="bodyMd">
-                      Request a free Shopify demo store with Intastellar Consents
+                      Request a Shopify development store with Intastellar Consents
                       pre-installed. We&apos;ll set it up for you and email you
-                      when it&apos;s ready — usually within one business day. We&apos;ll
-                      also register your email with Intastellar Accounts so you can
-                      finish setup and access the Consents Platform later.
+                      when it&apos;s ready — usually within one business day.
                     </Text>
                     {!pilotSignupEnabled && showDevHints ? (
                       <Text as="p" variant="bodySm" tone="subdued">
@@ -446,7 +444,7 @@ export default function App() {
                       type="submit"
                       disabled={!pilotSignupEnabled}
                     >
-                      Start free demo
+                      Request a development store
                     </button>
                     <p className={styles.formLegal}>
                       By submitting, you agree to the{" "}
