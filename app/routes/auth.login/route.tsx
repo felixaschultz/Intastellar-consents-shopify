@@ -107,22 +107,6 @@ export default function AuthLoginPage() {
 
           <nav className={styles.secondaryLinks} aria-label="Related links">
             <Link to="/">New to Intastellar Consents? View the landing page</Link>
-            <a
-              href={INTASTELLAR_SUPPORT_LINKS.helpCenter.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {INTASTELLAR_SUPPORT_LINKS.helpCenter.label}
-            </a>
-            <a
-              href={INTASTELLAR_SUPPORT_LINKS.developerDocs.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {INTASTELLAR_SUPPORT_LINKS.developerDocs.label}
-            </a>
-            <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link>
-            <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>
           </nav>
         </div>
       </main>
