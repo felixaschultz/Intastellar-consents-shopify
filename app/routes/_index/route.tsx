@@ -32,8 +32,7 @@ const landingIntaConfig = {
     target: "_blank",
   },
   settings: {
-    rootDomain:
-      process.env.VITE_INTA_LANDING_ROOT_DOMAIN || "consentsplatform.com",
+    rootDomain: process.env.VITE_INTA_LANDING_ROOT_DOMAIN || "consentsplatform.com",
     company: "Intastellar Solutions, International",
     color: "rgb(163, 133, 64)",
     language: "auto",
@@ -42,7 +41,7 @@ const landingIntaConfig = {
     design: "bannerV2",
     requiredCookies: [],
     keepInLocalStorage: [],
-    logo: "/assets/combined-intastellar-shopify.svg",
+    logo: "https://consentsplatform.com/assets/combined-intastellar-shopify-9l5Y1w6a.svg",
   },
 };
 
