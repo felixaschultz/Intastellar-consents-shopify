@@ -56,7 +56,7 @@ export const handle = {
   headScripts: [
     {
       src: "https://consents.cdn.intastellarsolutions.com/uc.js",
-      async: false,
+      async: true,
     },
   ],
 };
