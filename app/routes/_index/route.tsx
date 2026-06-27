@@ -239,7 +239,7 @@ export default function App() {
                   className={styles.logoImage}
                 />
               </Link>
-              <span className={styles.comingSoon}>Coming Soon</span>
+              <span className={styles.comingSoon}>Now available via demo store · Shopify App Store listing in progress</span>
             </div>
             <div className={styles.headerActions}>
               <Link to="/auth/login" className={styles.headerLoginBtn}>
