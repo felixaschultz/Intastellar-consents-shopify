@@ -538,7 +538,7 @@ export default function App() {
           <Image source="https://asasoftware.aero/wp-content/uploads/2020/04/ASA.svg" alt="ASA Software logo" className={styles.clientLogo} />
           <Image source="https://laesoe-booking.dk/images/logo.png" alt="Laesoe Booking logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
           <Image source="https://waterless.dk/wp-content/uploads/2025/11/Waterless-scandinavia.png" alt="Waterless Scandinavia logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
-          <Image source="https://www.wbrbh.de/wp-content/uploads/2026/02/horsthemke.webp" alt="Horst Heimke logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
+          <Image source="https://vojens-bc.dk/wp-content/uploads/2026/05/vbc-logo-v2-319.png" alt="Vojens Badminton Club logo" className={[styles.clientLogo, styles.largerLogo].join(" ")} />
           </div>
         </section>
 
