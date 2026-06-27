@@ -35,6 +35,13 @@ export function buildLlmTxt(): string {
     `- Cookie consents marketing: ${SHOPIFY_APP_IDENTITY.marketingUrl}`,
     `- Intastellar Consents Platform (analytics): ${SHOPIFY_APP_IDENTITY.platformUrl}`,
     `- Developer: https://www.intastellarsolutions.com/`,
+    `- LinkedIn: https://www.linkedin.com/company/intastellar-solutions/`,
+    `- LinkedIn Product: https://www.linkedin.com/products/intastellarsolutions-intastellar-consents/`,
+    `- Product Hunt: https://www.producthunt.com/products/intastellar-consents`,
+    `- Saas Hub: https://www.saashub.com/intastellar-consents`,
+    `- G2: https://www.g2.com/products/intastellar-consents`,
+    `- GitHub: https://github.com/felixaschultz/intastellar-consents-banner`,
+    `- GitHub: https://github.com/Intastellar-Solutions-International/intastellar-consents-platform`,
     appServer !== base ? `- Embedded app server (OAuth): ${appServer}/` : null,
   ]
     .filter(Boolean)

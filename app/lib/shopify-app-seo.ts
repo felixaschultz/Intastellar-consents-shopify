@@ -61,6 +61,12 @@ export const SHOPIFY_APP_IDENTITY = {
   developerDocsUrl: INTASTELLAR_SUPPORT_LINKS.developerDocs.url,
   linkedinUrl: "https://www.linkedin.com/company/intastellar-solutions/",
   linkedinProductUrl: "https://www.linkedin.com/products/intastellarsolutions-intastellar-consents/",
+  productHuntUrl: "https://www.producthunt.com/products/intastellar-consents",
+  saasHubUrl: "https://www.saashub.com/intastellar-consents",
+  g2Url: "https://www.g2.com/products/intastellar-consents",
+  githubUrl: "https://github.com/felixaschultz/intastellar-consents-banner",
+  githubUrl2: "https://github.com/Intastellar-Solutions-International/intastellar-consents-platform",
+  wordpressPluginUrl: "https://wordpress.org/plugins/intastellar-gdpr-cookie-banner/",
   /** Merchant help — used in JSON-LD `softwareHelp`. */
   helpUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
   marketingUrl:
@@ -82,6 +88,11 @@ export function shopifyAppSameAsLinks(): string[] {
     SHOPIFY_APP_IDENTITY.platformUrl,
     SHOPIFY_APP_IDENTITY.linkedinUrl,
     SHOPIFY_APP_IDENTITY.linkedinProductUrl,
+    SHOPIFY_APP_IDENTITY.productHuntUrl,
+    SHOPIFY_APP_IDENTITY.saasHubUrl,
+    SHOPIFY_APP_IDENTITY.g2Url,
+    SHOPIFY_APP_IDENTITY.githubUrl,
+    SHOPIFY_APP_IDENTITY.githubUrl2
   ];
   const appStore = process.env.SHOPIFY_APP_STORE_LISTING_URL?.trim();
   if (appStore) links.unshift(appStore);
