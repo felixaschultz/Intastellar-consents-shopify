@@ -1,6 +1,6 @@
 import { publicSiteBase } from "../lib/shopify-app-seo";
 
-const PUBLIC_PATHS = ["/", "/auth/login", "/legal", "/legal/privacy", "/legal/terms"];
+const PUBLIC_PATHS = ["/", "/auth/login", "/legal", "/legal/privacy", "/legal/terms", "/shopify-customer-privacy-api"];
 
 export const loader = () => {
   const base = publicSiteBase();
