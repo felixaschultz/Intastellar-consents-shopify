@@ -79,7 +79,9 @@ export default function ShopifyCustomerPrivacyApi() {
       },
     ]}>
       <section>
-        <p></p>
+        <p>Shopify's Customer Privacy API is the system Shopify uses to record what each visitor agreed to — analytics, marketing, preferences — and share that decision with your store's apps and pixels. It's what tells Google Analytics or Meta Pixel whether a visitor consented before those tools fire.</p>
+        <p>The problem is that most consent apps sync loosely with it, which means your banner and Shopify's consent log can end up recording different things.</p>
+        <p>Intastellar Consents solves this by sharing a single consent ID across both systems from the moment a visitor makes their choice. What your banner records and what Shopify records are always the same — and you can see acceptance rates, regional patterns, and trends in Intastellar Consents that Shopify's log alone doesn't surface.</p>
       </section>
       <section>
         <h2>What is Shopify's Customer Privacy API?</h2>
