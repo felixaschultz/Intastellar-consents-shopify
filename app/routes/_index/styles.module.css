@@ -270,6 +270,7 @@ a:hover {
   font-size: clamp(1.375rem, 3vw, 1.75rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 2rem;
   color: var(--inta-dark);
   margin: 0 0 2rem;
 }

@@ -578,6 +578,7 @@ export default function App() {
             same consent ID across Shopify and Intastellar Consents — turning a static legal
             record into something you can actually use.
           </p>
+            <Link to="/shopify-customer-privacy-api">Learn more about Shopify Customer Privacy API and how Intastellar Consents syncs with it</Link>
           </article>
         </section>
 
