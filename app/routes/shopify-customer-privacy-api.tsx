@@ -81,26 +81,38 @@ export default function ShopifyCustomerPrivacyApi() {
       <section>
         <p>Shopify's Customer Privacy API is the system Shopify uses to record what each visitor agreed to — analytics, marketing, preferences — and share that decision with your store's apps and pixels. It's what tells Google Analytics or Meta Pixel whether a visitor consented before those tools fire.</p>
         <p>The problem is that most consent apps sync loosely with it, which means your banner and Shopify's consent log can end up recording different things.</p>
-        <p>Intastellar Consents solves this by sharing a single consent ID across both systems from the moment a visitor makes their choice. What your banner records and what Shopify records are always the same — and you can see acceptance rates, regional patterns, and trends in Intastellar Consents that Shopify's log alone doesn't surface.</p>
+        <p>Intastellar Consents solves this by sharing a single consent ID across both systems from the moment a visitor makes their choice. What your banner records and what Shopify records are always the same — and you can see acceptance rates, regional patterns, and trends that Shopify's log alone doesn't surface.</p>
       </section>
       <section>
         <h2>What is Shopify's Customer Privacy API?</h2>
-        <p>Shopify's Customer Privacy API is a tool that allows merchants to manage customer privacy data. It is a way for merchants to store and manage customer privacy data in a way that is compliant with GDPR and other privacy laws.</p>
+        <p>It's Shopify's built-in framework for recording visitor consent decisions and sharing them across your store's ecosystem — themes, apps, and pixels. When a visitor accepts or declines your cookie banner, the API stores their choice and assigns them a consent ID. Shopify-compatible tools like Google Analytics and Meta Pixel read from that ID before deciding whether to fire.
+        It handles the storage side of consent well. What it doesn't do is help you understand it.</p>
       </section>
       <section>
-        <h2>How Intastellar Consents syncs with it?</h2>
-        <p>Intastellar Consents syncs with Shopify's Customer Privacy API by using the same consent ID for both Shopify and Intastellar Consents. This allows merchants to see the same consent data in both Shopify and Intastellar Consents.</p>
+        <h2>What Shopify's consent log doesn't show you</h2>
+        <ul>
+            <li>What percentage of your visitors actually accept consent</li>
+            <li>Whether EU visitors behave differently from US visitors</li>
+            <li>Whether a banner change improved your acceptance rate over time</li>
+            <li>How consent rates affect your ad tracking and conversion data</li>
+        </ul>
+        <p>The data exists in Shopify — it's just not built for insight. That's where most merchants end up guessing whether their consent setup is actually working.</p>
       </section>
       <section>
-        <h2>Why is this important?</h2>
-        <p></p>
+        <h2>How Intastellar Consents syncs with Shopify's Customer Privacy API</h2>
+        <p>Most consent apps write to the Customer Privacy API as an afterthought — a loose sync after their own banner fires. That creates a gap between what your CMP recorded and what Shopify logged.
+        Intastellar Consents uses a shared consent ID from the start. The moment a visitor makes their choice, both Shopify and Intastellar Consents record the same decision under the same ID — no reconciliation needed, no mismatches.</p>
+        <p>From there, the Intastellar Consents dashboard gives you what Shopify's log can't: acceptance rates by region, behavior trends over time, and exportable reports when you need them for compliance or campaign planning.</p>
       </section>
       <section>
-        <h2>What Shopify's built-in consent tracking doesn't give you</h2>
-        <p></p>
-      </section>
-      <section>
-        <h2>Compatible with the tools you already use</h2>
+        <h2>Works with the tools already on your store</h2>
+        <ul>
+            <li>Google Consent Mode v2 (including Advanced)</li>
+            <li>Microsoft UET Consent Mode</li>
+            <li>Meta Pixel</li>
+            <li>HubSpot Cookie API</li>
+            <li>Shopify Customer Privacy API (native sync)</li>
+        </ul>
       </section>
     </LegalDocumentLayout>
   );
