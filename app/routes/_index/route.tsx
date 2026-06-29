@@ -620,6 +620,8 @@ export default function App() {
                 {INTASTELLAR_SUPPORT_LINKS.developerDocs.label}
               </a>
               <span className={styles.footerDivider} aria-hidden="true">·</span>
+              <Link to="/shopify-customer-privacy-api">Shopify Customer Privacy API</Link>
+              <span className={styles.footerDivider} aria-hidden="true">·</span>
               <Link to="https://www.intastellarsolutions.com/about/legal/privacy" target="_blank" rel="noopener noreferrer">General Privacy</Link>
               <span className={styles.footerDivider} aria-hidden="true">·</span>
               <Link to="https://www.intastellarsolutions.com/about/legal/dpa" target="_blank" rel="noopener noreferrer">DPA</Link>
