@@ -13,6 +13,11 @@
   padding: 1rem 1.5rem;
   border-bottom: 1px solid rgba(26, 26, 26, 0.08);
   background: #fff;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .headerInner {

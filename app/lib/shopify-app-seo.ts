@@ -42,6 +42,7 @@ export const INTASTELLAR_SUPPORT_LINKS = {
 } as const;
 
 export const SHOPIFY_APP_IDENTITY = {
+  logoUrl: "/assets/combined-intastellar-shopify.svg",
   name: "Intastellar Consents",
   productType: "Shopify app",
   fullTitle: "Intastellar Consents | Official Shopify App for Cookie Consent",

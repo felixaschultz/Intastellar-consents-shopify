@@ -7,21 +7,25 @@ import {
   LEGAL_COMPANY,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
-import { INTASTELLAR_SUPPORT_LINKS } from "../lib/shopify-app-seo";
+import { INTASTELLAR_SUPPORT_LINKS, SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
 import styles from "../routes/legal/styles.module.css";
+import { Image } from "@shopify/polaris";
+import logo from "../assets/combined-intastellar-shopify.svg";
 
 type Props = {
   title: string;
   docLabel: string;
   children: ReactNode;
   relatedLinks?: { href: string; label: string; external?: boolean }[];
+  supplementalNotice?: boolean;
 };
 
 export function LegalDocumentLayout({
   title,
-  docLabel,
+  docLabel = "",
   children,
   relatedLinks = [],
+  supplementalNotice = true,
 }: Props) {
   const defaultRelated = [
     {
@@ -50,22 +54,32 @@ export function LegalDocumentLayout({
           <Link to="/" className={styles.homeLink}>
             ← {APP_NAME} for Shopify
           </Link>
-          <span className={styles.docType}>{docLabel}</span>
         </div>
+        {docLabel && <span className={styles.docType}>{docLabel}</span>}
+        {/* Logo in header */}
+        <Image
+          source={logo}
+          alt="Intastellar Consents for Shopify"
+          width={350}
+          height={100}
+          className={styles.logo}
+        />
       </header>
       <main className={styles.main}>
         <h1 className={styles.title}>{title}</h1>
         <p className={styles.meta}>
           Last updated {LEGAL_LAST_UPDATED} · {LEGAL_COMPANY}
         </p>
-        <div className={styles.notice}>
-          <strong>Supplemental document.</strong> This policy applies specifically
-          to the {APP_NAME} Shopify app. Public pages and install are at{" "}
-          <code>consentsplatform.com</code>; the embedded Shopify admin runs at{" "}
-          <code>app.consentsmanagement.com</code>. It supplements — and does not
-          replace — {LEGAL_COMPANY}&apos;s general legal documents linked at the bottom
-          of this page.
-        </div>
+        {supplementalNotice && (
+          <div className={styles.notice}>
+            <strong>Supplemental document.</strong> This policy applies specifically
+            to the {APP_NAME} Shopify app. Public pages and install are at{" "}
+            <code>consentsplatform.com</code>; the embedded Shopify admin runs at{" "}
+            <code>app.consentsmanagement.com</code>. It supplements — and does not
+            replace — {LEGAL_COMPANY}&apos;s general legal documents linked at the bottom
+            of this page.
+          </div>
+        )}
         <article className={styles.prose}>{children}</article>
         {allRelated.length > 0 ? (
           <section className={styles.related} aria-labelledby="related-legal">
