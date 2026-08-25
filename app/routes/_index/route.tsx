@@ -58,6 +58,14 @@ export const handle = {
       src: "https://consents.cdn.intastellarsolutions.com/uc.js",
       async: true,
     },
+    {
+      src: "https://analytics.consentsmanagement.com/api/a",
+      async: true,
+      defer: true,
+      attributes: {
+        dataSiteId: "lXZGCLTHEjB6_QwT"
+      }
+    }
   ],
 };
 
