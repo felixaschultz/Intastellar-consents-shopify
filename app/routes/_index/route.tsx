@@ -63,7 +63,7 @@ export const handle = {
       async: true,
       defer: true,
       attributes: {
-        dataSiteId: "lXZGCLTHEjB6_QwT"
+        site: "lXZGCLTHEjB6_QwT"
       }
     }
   ],

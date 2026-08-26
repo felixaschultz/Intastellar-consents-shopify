@@ -61,15 +61,22 @@ export default function App() {
             }}
           />
         ) : null}
-        {headScripts.map((script) => (
-          <script
-            key={script.src}
-            src={script.src}
-            async={script.async}
-            defer={script.defer}
-            data-website-id={script.attributes?.dataWebsiteId}
-          />
-        ))}
+        {headScripts.map((script) => {
+          const dataAttrs = script.attributes
+            ? Object.fromEntries(
+                Object.entries(script.attributes).map(([k, v]) => [`data-${k}`, v])
+              )
+            : {};
+          return (
+            <script
+              key={script.src}
+              src={script.src}
+              async={script.async}
+              defer={script.defer}
+              {...dataAttrs}
+            />
+          );
+        })}
         {gtmId ? (
           <link rel="preconnect" href="https://www.googletagmanager.com" />
         ) : null}
