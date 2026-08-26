@@ -12,7 +12,7 @@ type LandingHeadHandle = {
   jsonLdSchema?: Record<string, unknown>;
   /** Inline `window.INTA` for the marketing landing page only (not embedded /app). */
   intaConfig?: Record<string, unknown>;
-  headScripts?: { src: string; async?: boolean; defer?: boolean }[];
+  headScripts?: { src: string; async?: boolean; defer?: boolean; attributes?: Record<string, string> }[];
 };
 
 function sanitizeGtmContainerId(raw: string | undefined): string | undefined {
@@ -67,6 +67,7 @@ export default function App() {
             src={script.src}
             async={script.async}
             defer={script.defer}
+            data-website-id={script.attributes?.dataWebsiteId}
           />
         ))}
         {gtmId ? (
