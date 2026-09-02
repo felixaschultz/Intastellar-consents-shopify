@@ -11,7 +11,12 @@ import appScreen from "../../assets/app-screen.png";
 import { useState } from "react";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
 import { PILOT_CMP_OPTIONS } from "../../lib/pilot-lead-cmp-options";
-import { isPilotSignupConfigured, startPilotSignup } from "../../lib/pilot-lead.server";
+import {
+  generateFormToken,
+  isPilotSignupConfigured,
+  startPilotSignup,
+  verifyFormToken,
+} from "../../lib/pilot-lead.server";
 import {
   buildLandingJsonLd,
   LANDING_FAQ,
@@ -86,6 +91,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     pilotSignupEnabled: isPilotSignupConfigured(),
     showDevHints: isDevEnvironment(),
     cmpOptions: PILOT_CMP_OPTIONS,
+    formToken: generateFormToken(),
   };
 };
 
@@ -100,12 +106,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         return json({ intent: "pilot" as const, ok: false as const, message: "Thanks." });
       }
 
+      const formToken = String(form.get("_ft") ?? "");
+      if (!verifyFormToken(formToken)) {
+        return json({ intent: "pilot" as const, ok: false as const, message: "Thanks." });
+      }
+
+      const clientIp =
+        request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+        request.headers.get("x-real-ip") ??
+        undefined;
+
       const result = await startPilotSignup({
         email: String(form.get("email") ?? ""),
         storeName: String(form.get("storeName") ?? ""),
         cmpValue: String(form.get("currentCmp") ?? ""),
         cmpOther: String(form.get("cmpOther") ?? ""),
-      });
+      }, clientIp);
 
       if (!result.ok) {
         return json({
@@ -209,6 +225,7 @@ export default function App() {
     pilotSignupEnabled,
     showDevHints,
     cmpOptions,
+    formToken,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [pilotCmp, setPilotCmp] = useState("none");
@@ -345,6 +362,7 @@ export default function App() {
                     action="?index"
                   >
                     <input type="hidden" name="intent" value="pilot" />
+                    <input type="hidden" name="_ft" value={formToken} />
                     <input
                       type="text"
                       name="company_website"

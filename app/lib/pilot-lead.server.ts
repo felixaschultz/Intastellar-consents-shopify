@@ -1,5 +1,5 @@
 import type { PilotLead } from "@prisma/client";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 import db from "../db.server";
 import { formatPilotCmp } from "./pilot-lead-cmp-options";
 import {
@@ -34,6 +34,62 @@ export type PilotSignupResult =
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SHOP_DOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/;
 
+const BLOCKED_EMAIL_DOMAINS = new Set([
+  "mail.ru", "bk.ru", "inbox.ru", "list.ru", "internet.ru", "rambler.ru",
+  "yandex.ru", "ya.ru",
+]);
+
+// ── Form timing token ────────────────────────────────────────────────────────
+// Signs a millisecond timestamp so bots that POST directly (without loading the
+// page) or that submit in < 3 s are silently rejected.
+const FORM_TOKEN_KEY = Buffer.from(
+  (process.env.SHOPIFY_API_SECRET ?? "dev-only-secret").padEnd(32, "0").slice(0, 32),
+);
+const MIN_FORM_AGE_MS = 3_000;
+const MAX_FORM_AGE_MS = 4 * 60 * 60_000;
+
+export function generateFormToken(): string {
+  const ts = Date.now().toString();
+  const sig = createHmac("sha256", FORM_TOKEN_KEY).update(ts).digest("hex");
+  return `${ts}.${sig}`;
+}
+
+export function verifyFormToken(token: string): boolean {
+  try {
+    const dot = token.lastIndexOf(".");
+    if (dot < 0) return false;
+    const ts = token.slice(0, dot);
+    const sig = token.slice(dot + 1);
+    const expected = createHmac("sha256", FORM_TOKEN_KEY).update(ts).digest("hex");
+    const a = Buffer.from(expected, "hex");
+    const b = Buffer.from(sig, "hex");
+    if (a.length !== b.length || !timingSafeEqual(a, b)) return false;
+    const age = Date.now() - Number(ts);
+    return age >= MIN_FORM_AGE_MS && age <= MAX_FORM_AGE_MS;
+  } catch {
+    return false;
+  }
+}
+
+// ── In-memory IP rate limiter ─────────────────────────────────────────────────
+const ipLog = new Map<string, number[]>();
+const RATE_WINDOW_MS = 60 * 60_000; // 1 hour
+const RATE_MAX = 3;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const cutoff = now - RATE_WINDOW_MS;
+  const times = (ipLog.get(ip) ?? []).filter((t) => t > cutoff);
+  if (times.length >= RATE_MAX) return false;
+  ipLog.set(ip, [...times, now]);
+  if (ipLog.size > 5_000) {
+    for (const [k, v] of ipLog) {
+      if (v.every((t) => t <= cutoff)) ipLog.delete(k);
+    }
+  }
+  return true;
+}
+
 function createPollToken(): string {
   return randomBytes(24).toString("hex");
 }
@@ -48,6 +104,8 @@ export function validatePilotSignupInput(
 
   if (!email) errors.email = "Email is required";
   else if (!EMAIL_PATTERN.test(email)) errors.email = "Enter a valid email address";
+  else if (BLOCKED_EMAIL_DOMAINS.has(email.split("@")[1]?.toLowerCase() ?? ""))
+    errors.email = "Please use a work or business email address";
 
   if (!storeName) errors.storeName = "Store name is required";
   else if (storeName.length < 2) {
@@ -156,10 +214,15 @@ async function sendDemoReadyEmailIfNeeded(
 
 export async function startPilotSignup(
   input: PilotSignupInput,
+  clientIp?: string,
 ): Promise<PilotSignupResult> {
   const fieldErrors = validatePilotSignupInput(input);
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, message: "Please fix the errors below.", fieldErrors };
+  }
+
+  if (clientIp && !checkRateLimit(clientIp)) {
+    return { ok: false, message: "Too many requests. Please try again later." };
   }
 
   if (!isPilotSignupConfigured()) {
