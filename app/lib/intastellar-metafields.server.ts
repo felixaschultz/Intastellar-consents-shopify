@@ -35,6 +35,7 @@ export type IntaSettings = {
   company: string;
   arrange: "ltr" | "rtl";
   color: string;
+  novaBackgroundColor: string;
   logo: string;
   design: string;
   language: BannerLanguage;
@@ -60,6 +61,7 @@ export function defaultIntaConfig(shop: {
       company: shop.name,
       arrange: "ltr",
       color: "#1a1a1a",
+      novaBackgroundColor: "#ffffff",
       logo: "",
       design: "overlay",
       language: "auto",

@@ -345,7 +345,7 @@ function collectLogoRefsFromTree(
       out.push({ ref: trimmed, priority: 30, source: keyPath });
       return out;
     }
-    if (/^shopify:\/\//i.test(trimmed)) {
+    if (/^shopify:\/\//i.test(trimmed) && !/^shopify:\/\/apps\//i.test(trimmed)) {
       const priority = LOGO_KEY_PATTERN.test(keyPath)
         ? 40
         : /shop_images|\/files\//i.test(trimmed)

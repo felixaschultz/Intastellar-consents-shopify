@@ -227,6 +227,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           ? ("rtl" as const)
           : ("ltr" as const),
       color: String(form.get("color") ?? "").trim(),
+      novaBackgroundColor: String(form.get("novaBackgroundColor") ?? "").trim(),
       logo: String(form.get("logo") ?? "").trim(),
       design: String(form.get("design") ?? "").trim(),
       language: normalizeBannerLanguage(form.get("language")),
@@ -254,6 +255,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
   if (!config.settings.color) {
     config.settings.color = defaultIntaConfig(shopCtx).settings.color;
+  }
+  if (!config.settings.novaBackgroundColor) {
+    config.settings.novaBackgroundColor =
+      defaultIntaConfig(shopCtx).settings.novaBackgroundColor;
   }
 
   const result = await saveAppInstallationIntaConfig(
@@ -712,6 +717,70 @@ export default function Index() {
                           }
                         />
                       </Box>
+                      {config.settings.design === "nova" ? (
+                        <Box minWidth="200px">
+                          <BlockStack gap="200">
+                            <Text as="span" variant="bodyMd" fontWeight="medium">
+                              Nova Background Color
+                            </Text>
+                            <InlineStack gap="200" blockAlign="center">
+                              <label
+                                htmlFor="nova-background-color-picker"
+                                style={{ lineHeight: 0 }}
+                              >
+                                <input
+                                  id="nova-background-color-picker"
+                                  type="color"
+                                  value={
+                                    /^#[0-9A-Fa-f]{6}$/.test(
+                                      config.settings.novaBackgroundColor,
+                                    )
+                                      ? config.settings.novaBackgroundColor
+                                      : "#ffffff"
+                                  }
+                                  onChange={(e) =>
+                                    updateSettings({
+                                      novaBackgroundColor: e.target.value,
+                                    })
+                                  }
+                                  aria-label="Nova background color"
+                                  style={{
+                                    width: 44,
+                                    height: 36,
+                                    padding: 2,
+                                    border: "1px solid var(--p-color-border)",
+                                    borderRadius: "var(--p-border-radius-200)",
+                                    cursor: "pointer",
+                                    backgroundColor: "transparent",
+                                  }}
+                                />
+                              </label>
+                              <Box minWidth="110px">
+                                <TextField
+                                  labelHidden
+                                  label="Hex"
+                                  name="novaBackgroundColor"
+                                  value={config.settings.novaBackgroundColor}
+                                  onChange={(v) =>
+                                    updateSettings({ novaBackgroundColor: v })
+                                  }
+                                  autoComplete="off"
+                                  placeholder="#ffffff"
+                                />
+                              </Box>
+                            </InlineStack>
+                            <Text as="p" variant="bodySm" tone="subdued">
+                              Background color used by the Nova banner layout.
+                            </Text>
+                          </BlockStack>
+                        </Box>
+                      ) : (
+                        <input
+                          type="hidden"
+                          name="novaBackgroundColor"
+                          value={config.settings.novaBackgroundColor}
+                        />
+                      )}
                     </InlineStack>
                     <TextField
                       label="Google Analytics / gtag ID"
