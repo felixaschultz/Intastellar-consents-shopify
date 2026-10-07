@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { AppProvider, BlockStack, Image, Text } from "@shopify/polaris";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
@@ -8,15 +8,7 @@ import { login } from "../../shopify.server";
 import styles from "./styles.module.css";
 import logo from "../../assets/combined-intastellar-shopify.svg";
 import appScreen from "../../assets/app-screen.png";
-import { useState } from "react";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
-import { PILOT_CMP_OPTIONS } from "../../lib/pilot-lead-cmp-options";
-import {
-  generateFormToken,
-  isPilotSignupConfigured,
-  startPilotSignup,
-  verifyFormToken,
-} from "../../lib/pilot-lead.server";
 import {
   buildLandingJsonLd,
   LANDING_FAQ,
@@ -26,7 +18,6 @@ import {
 } from "../../lib/landing-content";
 import { APP_LEGAL_LINKS } from "../../lib/legal-content";
 import { SHOPIFY_APP_IDENTITY, INTASTELLAR_SUPPORT_LINKS } from "../../lib/shopify-app-seo";
-import { publicPilotStartError, isDevEnvironment } from "../../lib/public-messages.server";
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
 const jsonLdSchema = buildLandingJsonLd();
 
@@ -88,71 +79,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return {
     showForm: Boolean(login),
     polarisTranslations,
-    pilotSignupEnabled: isPilotSignupConfigured(),
-    showDevHints: isDevEnvironment(),
-    cmpOptions: PILOT_CMP_OPTIONS,
-    formToken: generateFormToken(),
   };
-};
-
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const form = await request.formData();
-  const intent = String(form.get("intent") ?? "");
-
-  if (intent === "pilot") {
-    try {
-      const honeypot = String(form.get("company_website") ?? "").trim();
-      if (honeypot) {
-        return json({ intent: "pilot" as const, ok: false as const, message: "Thanks." });
-      }
-
-      const formToken = String(form.get("_ft") ?? "");
-      if (!verifyFormToken(formToken)) {
-        return json({ intent: "pilot" as const, ok: false as const, message: "Thanks." });
-      }
-
-      const clientIp =
-        request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-        request.headers.get("x-real-ip") ??
-        undefined;
-
-      const result = await startPilotSignup({
-        email: String(form.get("email") ?? ""),
-        storeName: String(form.get("storeName") ?? ""),
-        cmpValue: String(form.get("currentCmp") ?? ""),
-        cmpOther: String(form.get("cmpOther") ?? ""),
-      }, clientIp);
-
-      if (!result.ok) {
-        return json({
-          intent: "pilot" as const,
-          ok: false as const,
-          message: result.message,
-          fieldErrors: result.fieldErrors ?? {},
-        });
-      }
-
-      return json({
-        intent: "pilot" as const,
-        ok: true as const,
-        email: result.email,
-        message: result.message,
-      });
-    } catch (err) {
-      console.error("[index] pilot action failed", err);
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.";
-      return json({
-        intent: "pilot" as const,
-        ok: false as const,
-        message: publicPilotStartError(message),
-      });
-    }
-  }
-
-  return json({ intent: "unknown" as const, ok: false as const });
 };
 
 export const meta = () => {
@@ -222,26 +149,7 @@ export default function App() {
   const {
     showForm,
     polarisTranslations,
-    pilotSignupEnabled,
-    showDevHints,
-    cmpOptions,
-    formToken,
   } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const [pilotCmp, setPilotCmp] = useState("none");
-
-  const pilotResult =
-    actionData && "intent" in actionData && actionData.intent === "pilot"
-      ? actionData
-      : null;
-
-  const pilotSubmitted =
-    pilotResult?.ok && "message" in pilotResult ? pilotResult : null;
-
-  const pilotFieldErrors =
-    pilotResult && !pilotResult.ok && "fieldErrors" in pilotResult
-      ? (pilotResult.fieldErrors ?? {})
-      : {};
 
   return (
     <AppProvider i18n={polarisTranslations}>
@@ -319,171 +227,39 @@ export default function App() {
               <BlockStack gap="400">
                 <BlockStack gap="200">
                   <div className={styles.formIntro}>
-                    <p className={styles.formCardTitle}>Request a development store</p>
+                    <p className={styles.formCardTitle}>Install the app</p>
                     <Text as="p" variant="bodyMd">
-                      Request a Shopify development store with Intastellar Consents
-                      pre-installed. We&apos;ll set it up for you and email you
-                      when it&apos;s ready — usually within one business day.
+                      Enter your Shopify store domain to install Intastellar
+                      Consents and open it in your Shopify admin.
                     </Text>
-                    {!pilotSignupEnabled && showDevHints ? (
-                      <Text as="p" variant="bodySm" tone="subdued">
-                        Demo signup runs when <code>PILOT_OPERATOR_EMAIL</code> and{" "}
-                        <code>RESEND_API_KEY</code> are set on the server. You can
-                        still install on an existing development store via{" "}
-                        <Link to="/auth/login">Log in</Link>.
-                      </Text>
-                    ) : !pilotSignupEnabled ? (
-                      <Text as="p" variant="bodySm" tone="subdued">
-                        Demo signup is temporarily unavailable.{" "}
-                        <Link to="/auth/login">Log in</Link> to install on your
-                        existing Shopify store.
-                      </Text>
-                    ) : null}
                   </div>
                 </BlockStack>
 
-                {pilotSubmitted ? (
-                  <div className={styles.pilotStatus}>
-                    <Text as="p" variant="bodyMd" fontWeight="semibold">
-                      Request received
-                    </Text>
-                    <Text as="p" variant="bodyMd">
-                      {pilotSubmitted.message}
-                    </Text>
-                    <Text as="p" variant="bodySm" tone="subdued">
-                      We&apos;ll contact you at {pilotSubmitted.email} when your
-                      demo store is ready.
-                    </Text>
-                  </div>
-                ) : (
-                  <Form
-                    className={[styles.form, styles.pilotForm].join(" ")}
-                    method="post"
-                    action="?index"
-                  >
-                    <input type="hidden" name="intent" value="pilot" />
-                    <input type="hidden" name="_ft" value={formToken} />
+                <Form className={styles.form} method="post" action="/auth/login">
+                  <label className={styles.label}>
+                    <span className={styles.labelTitle}>Shop domain</span>
                     <input
+                      className={styles.input}
                       type="text"
-                      name="company_website"
-                      className={styles.honeypot}
-                      tabIndex={-1}
-                      autoComplete="off"
-                      aria-hidden="true"
+                      name="shop"
+                      autoComplete="url"
+                      placeholder="your-store.myshopify.com"
+                      required
                     />
-                    <div className={styles.pilotFormGrid}>
-                      <label className={styles.label}>
-                        <span className={styles.labelTitle}>Work email</span>
-                        <input
-                          className={[
-                            styles.input,
-                            pilotFieldErrors?.email ? styles.error : "",
-                          ].join(" ")}
-                          type="email"
-                          name="email"
-                          autoComplete="email"
-                          placeholder="you@company.com"
-                        />
-                        {pilotFieldErrors?.email ? (
-                          <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {pilotFieldErrors.email}
-                          </span>
-                        ) : null}
-                      </label>
-                      <label className={styles.label}>
-                        <span className={styles.labelTitle}>Store name</span>
-                        <input
-                          className={[
-                            styles.input,
-                            pilotFieldErrors?.storeName ? styles.error : "",
-                          ].join(" ")}
-                          type="text"
-                          name="storeName"
-                          placeholder="e.g. Acme Demo Store"
-                        />
-                        {pilotFieldErrors?.storeName ? (
-                          <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {pilotFieldErrors.storeName}
-                          </span>
-                        ) : (
-                          <span className={styles.helpText}>
-                            {showDevHints
-                              ? "Used as the name of your Shopify development store"
-                              : "This will be the name of your demo store"}
-                          </span>
-                        )}
-                      </label>
-                      <label className={[styles.label, styles.fieldFull].join(" ")}>
-                        <span className={styles.labelTitle}>
-                          Current cookie banner (CMP)
-                        </span>
-                        <select
-                          className={[
-                            styles.input,
-                            styles.select,
-                            pilotFieldErrors?.currentCmp ? styles.error : "",
-                          ].join(" ")}
-                          name="currentCmp"
-                          value={pilotCmp}
-                          onChange={(e) => setPilotCmp(e.target.value)}
-                        >
-                          {cmpOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                        {pilotFieldErrors?.currentCmp ? (
-                          <span className={[styles.errorText, styles.helpText].join(" ")}>
-                            {pilotFieldErrors.currentCmp}
-                          </span>
-                        ) : null}
-                      </label>
-                      {pilotCmp === "other" ? (
-                        <label className={[styles.label, styles.fieldFull].join(" ")}>
-                          <span className={styles.labelTitle}>Which CMP?</span>
-                          <input
-                            className={[
-                              styles.input,
-                              pilotFieldErrors?.cmpOther ? styles.error : "",
-                            ].join(" ")}
-                            type="text"
-                            name="cmpOther"
-                            placeholder="e.g. Custom in-house banner"
-                          />
-                          {pilotFieldErrors?.cmpOther ? (
-                            <span className={[styles.errorText, styles.helpText].join(" ")}>
-                              {pilotFieldErrors.cmpOther}
-                            </span>
-                          ) : null}
-                        </label>
-                      ) : null}
-                    </div>
-                    {pilotResult && !pilotResult.ok && "message" in pilotResult ? (
-                      <p className={[styles.errorText, styles.formErrorBanner].join(" ")}>
-                        {pilotResult.message}
-                      </p>
-                    ) : null}
-                    <button
-                      className={styles.button}
-                      type="submit"
-                      disabled={!pilotSignupEnabled}
-                    >
-                      Request a development store
-                    </button>
-                    <p className={styles.formLegal}>
-                      By submitting, you agree to the{" "}
-                      <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link> and{" "}
-                      <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>.
-                    </p>
-                  </Form>
-                )}
-
-                <div className={styles.formFooter}>
-                  <Link to="/auth/login" className={styles.textButton}>
-                    Already have a Shopify store? Install directly
-                  </Link>
-                </div>
+                    <span className={styles.helpText}>
+                      Use your .myshopify.com address or a custom domain
+                      connected to your store.
+                    </span>
+                  </label>
+                  <button className={styles.button} type="submit">
+                    Continue with Shopify
+                  </button>
+                  <p className={styles.formLegal}>
+                    By continuing, you agree to the{" "}
+                    <Link to={APP_LEGAL_LINKS.terms}>App Terms of Use</Link> and{" "}
+                    <Link to={APP_LEGAL_LINKS.privacy}>App Privacy Policy</Link>.
+                  </p>
+                </Form>
               </BlockStack>
             )}
           </section>
