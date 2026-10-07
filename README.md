@@ -91,7 +91,7 @@ Set when the app is listed:
 | `PUBLIC_SITE_URL` | Public marketing site (default `https://consentsplatform.com`) — sitemap, canonical URLs, JSON-LD, install links |
 | `SHOPIFY_APP_URL` | Shopify OAuth / embedded app server (default `https://app.consentsmanagement.com`) — must match `shopify.app.toml` |
 
-Also link **to** `https://consentsplatform.com` from [Shopify integration page](https://www.intastellarsolutions.com/solutions/cookie-consents/integrations/shopify) and intastellarconsents.com with anchor text **“Intastellar Consents Shopify app”**.
+Also link **to** `https://consentsplatform.com` from [Shopify integration page](https://www.intastellar.eu/integrations/shopify) and intastellarconsents.com with anchor text **“Intastellar Consents Shopify app”**.
 
 ### Register request (minimal)
 

@@ -71,9 +71,9 @@ export const SHOPIFY_APP_IDENTITY = {
   /** Merchant help — used in JSON-LD `softwareHelp`. */
   helpUrl: INTASTELLAR_SUPPORT_LINKS.helpCenter.url,
   marketingUrl:
-    "https://www.intastellarsolutions.com/solutions/cookie-consents",
+    "https://www.intastellar.eu",
   shopifyIntegrationUrl:
-    "https://www.intastellarsolutions.com/solutions/cookie-consents/integrations/shopify",
+    "https://www.intastellar.eu/integrations/shopify",
   platformUrl: "https://www.intastellarconsents.com",
   publicSiteHost: "consentsplatform.com",
   appServerHost: "app.consentsmanagement.com",
