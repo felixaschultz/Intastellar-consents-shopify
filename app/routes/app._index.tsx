@@ -420,9 +420,24 @@ export default function Index() {
     setRequiredCookiesRows((rows) => rows.filter((_, i) => i !== index));
   }, []);
 
+  // Changing an iframe's srcDoc forces the browser to tear down and reload
+  // that whole document (re-running the external uc.js banner script). Doing
+  // that synchronously on every keystroke is expensive and shows up as input
+  // lag, so only rebuild the preview after typing/edits pause for a moment.
+  const [debouncedPreviewConfig, setDebouncedPreviewConfig] =
+    useState(previewConfig);
+
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setDebouncedPreviewConfig(previewConfig),
+      400,
+    );
+    return () => clearTimeout(timer);
+  }, [previewConfig]);
+
   const previewSrcDoc = useMemo(
-    () => buildPreviewSrcDoc(previewConfig),
-    [previewConfig],
+    () => buildPreviewSrcDoc(debouncedPreviewConfig),
+    [debouncedPreviewConfig],
   );
 
   const saving =
