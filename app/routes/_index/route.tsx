@@ -204,7 +204,7 @@ export default function App() {
           <Link to="#top" className={styles.logoLink}>
             <img
               src="https://intastellar.eu/assets/logos/intastellar-consents-logo.svg"
-              alt="Intastellar Consents"
+              alt="Intastellar Consents by Intastellar Solutions, International"
               className={styles.logoImage}
             />
             <span className={styles.forShopifyPill}>for Shopify</span>
