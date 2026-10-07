@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Form, Link } from "@remix-run/react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 import appScreen from "../../assets/app-screen.png";
 import IntastellarShopifyGuideVideo from "../../assets/vid/Intastellar Consents - Shopify Install Guide.mp4";
@@ -102,11 +103,7 @@ export const meta = () => {
 };
 
 export const links = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-  },
+  { rel: "preconnect", href: "https://intastellar.eu" },
   { rel: "apple-touch-icon", sizes: "57x57", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-57x57.png" },
   { rel: "apple-touch-icon", sizes: "60x60", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-60x60.png" },
   { rel: "apple-touch-icon", sizes: "72x72", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-72x72.png" },
@@ -123,6 +120,47 @@ export const links = () => [
 ];
 
 const COMPLIANCE_BADGES = ["GDPR", "CCPA/CPRA", "LGPD", "POPIA", "PDPA", "DMA"];
+
+/** Defers the 22MB install-guide video until it's about to scroll into view, so it never competes with above-the-fold resources. */
+function LazyInstallVideo() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node || shouldLoad) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+
+  return (
+    <div ref={containerRef} className={styles.installDemoFrame}>
+      {shouldLoad ? (
+        <video
+          src={IntastellarShopifyGuideVideo}
+          width="100%"
+          height="342"
+          className={styles.installDemoVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-label="How to install Intastellar Consents on Shopify"
+        />
+      ) : null}
+    </div>
+  );
+}
 
 function FeatureIcon({ index }: { index: number }) {
   const icons: Array<{ viewBox?: string; paths: string[]; extra?: JSX.Element }> = [
@@ -492,19 +530,7 @@ export default function App() {
             </div>
           </div>
           <div className={styles.installDemo}>
-            <div className={styles.installDemoFrame}>
-              <video
-                src={IntastellarShopifyGuideVideo}
-                width="100%"
-                height="342"
-                className={styles.installDemoVideo}
-                autoPlay
-                muted
-                loop
-                playsInline
-                aria-label="How to install Intastellar Consents on Shopify"
-              />
-            </div>
+            <LazyInstallVideo />
             <p className={styles.installDemoCaption}>
               The install flow, start to finish, inside Shopify admin.
             </p>

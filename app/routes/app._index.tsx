@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import {
@@ -112,21 +112,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     admin,
     shopCtx,
   );
-  let shopLogoUrl: string | null = null;
-  let shopBrandColor: string | null = null;
-  let shopLogoDiagnostics: string[] = [];
-  try {
-    const result = await fetchShopBrandAssets(admin);
-    shopLogoUrl = result.logo;
-    shopBrandColor = result.color;
-    if (!shopLogoUrl) {
-      shopLogoDiagnostics = result.loadDiagnostics;
-    }
-  } catch (err) {
-    shopLogoDiagnostics = [
-      err instanceof Error ? err.message : "Could not load shop brand assets",
-    ];
-  }
 
   const themeEditorEmbedUrl =
     buildThemeEditorAppEmbedUrl(
@@ -138,9 +123,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const shopifyConsentLogOverviewUrl = `https://${shopNode.myshopifyDomain}/admin/settings/privacy/consent-log`;
   return {
     config,
-    shopLogoUrl,
-    shopBrandColor,
-    shopLogoDiagnostics,
     shop: {
       myshopifyDomain: shopNode.myshopifyDomain as string,
       name: shopCtx.name,
@@ -285,9 +267,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Index() {
   const {
     config: initial,
-    shopLogoUrl,
-    shopBrandColor,
-    shopLogoDiagnostics,
     themeEditorEmbedUrl,
     shopifyConsentLogOverviewUrl,
     shop,
@@ -296,21 +275,26 @@ export default function Index() {
   const fetcher = useFetcher<typeof action>();
   const logoFetcher = useFetcher<typeof action>();
   const [detectedShopLogo, setDetectedShopLogo] = useState<string | null>(
-    shopLogoUrl,
+    null,
   );
   const [logoLoadError, setLogoLoadError] = useState<string | null>(null);
   const [logoLoadDiagnostics, setLogoLoadDiagnostics] = useState<string[]>([]);
+  const [shopBrandColor, setShopBrandColor] = useState<string | null>(null);
+  // true until the first (automatic) detection resolves; distinguishes the
+  // passive on-mount attempt (prefill empty fields only) from an explicit
+  // "Use store logo" click (always apply).
+  const autoDetectRef = useRef(true);
 
+  // Runs after the initial paint instead of blocking the loader — logo/color
+  // auto-detection needs several sequential Admin API round-trips.
   useEffect(() => {
-    if (shopLogoUrl) setDetectedShopLogo(shopLogoUrl);
-  }, [shopLogoUrl]);
+    logoFetcher.submit({ intent: "loadShopLogo" }, { method: "post" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initialConfig = useMemo((): IntaConfig => {
-    const patched = { ...initial, settings: { ...initial.settings } };
-    if (!patched.settings.logo && shopLogoUrl) patched.settings.logo = shopLogoUrl;
-    if (!patched.settings.color && shopBrandColor) patched.settings.color = shopBrandColor;
-    return patched;
-  }, [initial, shopLogoUrl, shopBrandColor]);
+    return { ...initial, settings: { ...initial.settings } };
+  }, [initial]);
 
   const [config, setConfig] = useState<IntaConfig>(initialConfig);
   const [requiredCookiesRows, setRequiredCookiesRows] = useState<
@@ -335,27 +319,35 @@ export default function Index() {
   useEffect(() => {
     const data = logoFetcher.data;
     if (!data || !("intent" in data) || data.intent !== "loadShopLogo") return;
+    const isAutoDetect = autoDetectRef.current;
+    autoDetectRef.current = false;
+
     if (data.ok && "logo" in data) {
       setDetectedShopLogo(data.logo);
+      setShopBrandColor(data.color ?? null);
       setLogoLoadError(null);
       setLogoLoadDiagnostics([]);
       setConfig((c) => ({
         ...c,
         settings: {
           ...c.settings,
-          logo: data.logo,
-          ...(data.color ? { color: data.color } : {}),
+          logo: isAutoDetect ? c.settings.logo || data.logo : data.logo,
+          color: isAutoDetect
+            ? c.settings.color || data.color || c.settings.color
+            : data.color || c.settings.color,
         },
       }));
       return;
     }
     if (!data.ok && "message" in data) {
-      setLogoLoadError(data.message);
-      setLogoLoadDiagnostics(
+      const diagnostics =
         "diagnostics" in data && Array.isArray(data.diagnostics)
           ? data.diagnostics
-          : [],
-      );
+          : [];
+      setLogoLoadDiagnostics(diagnostics);
+      if (!isAutoDetect) {
+        setLogoLoadError(data.message);
+      }
     }
   }, [logoFetcher.data]);
 
@@ -594,7 +586,7 @@ export default function Index() {
                       ) : null}
                       {!logoLoadError &&
                       !detectedShopLogo &&
-                      shopLogoDiagnostics.length > 0 ? (
+                      logoLoadDiagnostics.length > 0 ? (
                         <Banner tone="info">
                           <BlockStack gap="200">
                             <p>
@@ -607,7 +599,7 @@ export default function Index() {
                                 Details
                               </Text>
                               <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
-                                {shopLogoDiagnostics.map((line) => (
+                                {logoLoadDiagnostics.map((line) => (
                                   <li key={line}>
                                     <Text as="span" variant="bodySm">
                                       {line}

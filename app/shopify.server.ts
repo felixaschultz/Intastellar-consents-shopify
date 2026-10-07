@@ -24,7 +24,7 @@ function headersForRebuiltFormData(request: Request): Headers {
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
-  apiVersion: ApiVersion.January25,
+  apiVersion: ApiVersion.January26,
   scopes: scopesFromEnv.length > 0 ? scopesFromEnv : undefined,
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
@@ -86,7 +86,7 @@ async function loginWithResolvedShopDomain(request: Request) {
 
 export default shopify;
 export { ApiVersion };
-export const apiVersion = ApiVersion.January25;
+export const apiVersion = ApiVersion.January26;
 export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;
 export const authenticate = shopify.authenticate;
 export const unauthenticated = shopify.unauthenticated;

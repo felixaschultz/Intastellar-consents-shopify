@@ -631,50 +631,6 @@ async function resolveThemeLogoReference(
   return null;
 }
 
-/** Shop brand logo from Admin API (when available on the shop record). */
-async function brandFromShop(admin: AdminClient): Promise<{
-  assets: ShopBrandAssets;
-  diagnostics: string[];
-}> {
-  const diagnostics: string[] = [];
-  const empty = (): { assets: ShopBrandAssets; diagnostics: string[] } => ({
-    assets: { logo: null, color: null },
-    diagnostics,
-  });
-
-  try {
-    const res = await admin.graphql(
-      `#graphql
-      query IntaShopBrandLogo {
-        shop {
-          brand {
-            logo {
-              image {
-                url
-              }
-            }
-          }
-        }
-      }`,
-    );
-    const json = (await res.json()) as {
-      data?: { shop?: { brand?: { logo?: { image?: { url?: string } } } } };
-      errors?: { message?: string }[];
-    };
-    const gqlError = graphqlErrorsMessage(json);
-    if (gqlError) {
-      diagnostics.push(`shop.brand: ${gqlError}`);
-      return empty();
-    }
-    const logoUrl = json.data?.shop?.brand?.logo?.image?.url ?? null;
-    if (!logoUrl) diagnostics.push("shop.brand: no logo on shop record");
-    return { assets: { logo: logoUrl, color: null }, diagnostics };
-  } catch (err) {
-    diagnostics.push(formatDiag("shop.brand", err));
-    return empty();
-  }
-}
-
 async function loadMainThemeSettingsJson(
   admin: AdminClient,
 ): Promise<{ parsed: Record<string, unknown> | null; diagnostics: string[] }> {
@@ -823,19 +779,14 @@ async function brandFromThemeSettings(admin: AdminClient): Promise<{
 
 /**
  * Loads brand logo and color via Admin API:
- * 1. Shop brand record (when exposed on Admin API)
- * 2. Checkout branding (Plus/dev) – logo + design system colors
- * 3. Theme settings – logo + colors from main theme's config/settings_data.json
+ * 1. Checkout branding (Plus/dev) – logo + design system colors
+ * 2. Theme settings – logo + colors from main theme's config/settings_data.json
  */
 export async function fetchShopBrandAssets(
   admin: AdminClient,
 ): Promise<ShopBrandAssetsResult> {
   const loadDiagnostics: string[] = [];
   let out: ShopBrandAssets = { logo: null, color: null };
-
-  const shopBrand = await brandFromShop(admin);
-  out = mergeAssets(out, shopBrand.assets);
-  loadDiagnostics.push(...shopBrand.diagnostics);
 
   const checkout = await brandFromCheckout(admin);
   out = mergeAssets(out, checkout.assets);
