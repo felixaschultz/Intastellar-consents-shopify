@@ -1,5 +1,4 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
 import { LegalDocumentLayout } from "../components/LegalDocumentLayout";
 import {
   APP_LEGAL_LINKS,
