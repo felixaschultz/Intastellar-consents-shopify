@@ -44,6 +44,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 a {
   color: var(--inta-gold-dark);
   text-decoration: none;
@@ -262,6 +268,12 @@ a:hover {
   border: 1px solid var(--inta-border);
   border-radius: var(--inta-radius);
   box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+  scroll-margin-top: 6rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.installForm:target {
+  box-shadow: 0 0 0 3px var(--inta-gold-ring), 0 10px 30px rgba(17, 24, 39, 0.06);
 }
 
 .installLabel {
@@ -308,6 +320,7 @@ a:hover {
 
 .installButton:hover {
   filter: brightness(1.05);
+  color: var(--inta-ink);
 }
 
 .formLegal {
@@ -974,12 +987,26 @@ a:hover {
   border: 1px solid #d1d5db;
   color: var(--inta-ink);
   font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pricingCta:hover {
+  color: var(--inta-ink);
+  border-color: var(--inta-gold);
+  background: var(--inta-gold-wash);
 }
 
 .pricingCtaPrimary {
   border: none;
   background: var(--inta-gold);
   color: var(--inta-ink);
+  transition: filter 0.15s ease;
+}
+
+.pricingCtaPrimary:hover {
+  filter: brightness(1.05);
+  color: var(--inta-ink);
+  background: var(--inta-gold);
 }
 
 /* ---------- FAQ ---------- */
