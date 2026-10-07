@@ -701,6 +701,8 @@ export default function Index() {
                             { label: "Overlay", value: "overlay" },
                             { label: "Full width banner", value: "banner" },
                             { label: "Banner", value: "bannerV2" },
+                            { label: "Premium", value: "premium" },
+                            { label: "Nova", value: "nova" },
                           ]}
                           value={config.settings.design}
                           onChange={(v) =>
