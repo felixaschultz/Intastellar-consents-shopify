@@ -14,9 +14,9 @@ export const GENERAL_LEGAL_DOC_LABELS = {
 export const LEGAL_CONTACT_EMAIL = "privacy@intastellar.com";
 
 export const GENERAL_LEGAL_LINKS = {
-  privacy: "https://www.intastellarsolutions.com/about/legal/privacy",
-  terms: "https://www.intastellarsolutions.com/about/legal/terms",
-  dpa: "https://www.intastellarsolutions.com/about/legal/dpa",
+  privacy: "https://www.intastellar.eu/legal/privacy",
+  terms: "https://www.intastellar.eu/legal/terms",
+  dpa: "https://www.intastellar.eu/legal/dpa",
 } as const;
 
 export const APP_LEGAL_LINKS = {

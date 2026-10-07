@@ -75,7 +75,7 @@ export function buildLandingJsonLd() {
         url: LANDING_URL,
         description: LANDING_META.description,
         inLanguage: "en-US",
-        publisher: { "@id": "https://www.intastellarsolutions.com/#organization" },
+        publisher: { "@id": "https://www.intastellar.eu/#organization" },
       },
       {
         "@type": "WebPage",
@@ -110,9 +110,9 @@ export function buildLandingJsonLd() {
         featureList: LANDING_FEATURES.map((f) => f.title),
         description: LANDING_META.description,
         url: LANDING_URL,
-        author: { "@id": "https://www.intastellarsolutions.com/#organization" },
-        provider: { "@id": "https://www.intastellarsolutions.com/#organization" },
-        publisher: { "@id": "https://www.intastellarsolutions.com/#organization" },
+        author: { "@id": "https://www.intastellar.eu/#organization" },
+        provider: { "@id": "https://www.intastellar.eu/#organization" },
+        publisher: { "@id": "https://www.intastellar.eu/#organization" },
       },
       {
         "@type": "FAQPage",
@@ -128,9 +128,9 @@ export function buildLandingJsonLd() {
       },
       {
         "@type": "Organization",
-        "@id": "https://www.intastellarsolutions.com/#organization",
+        "@id": "https://www.intastellar.eu/#organization",
         name: "Intastellar Solutions, International",
-        url: "https://www.intastellarsolutions.com/",
+        url: "https://www.intastellar.eu/",
         sameAs: [
           "https://www.intastellarconsents.com",
           LANDING_URL,

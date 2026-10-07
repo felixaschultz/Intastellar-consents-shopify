@@ -34,7 +34,7 @@ async function myshopifyHostFromAdminRedirect(hostname: string): Promise<string 
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), 10_000);
   const headers = {
-    "User-Agent": "IntastellarConsents-ShopifyApp/1.0 (+https://www.intastellarsolutions.com)",
+    "User-Agent": "IntastellarConsents-ShopifyApp/1.0 (+https://www.intastellar.eu)",
   };
   try {
     const res = await fetch(`https://${hostname}/admin`, {
