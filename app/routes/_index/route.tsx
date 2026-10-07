@@ -43,7 +43,7 @@ const landingIntaConfig = {
     language: "auto",
     gtagId: "G-86T4LDB766",
     arrange: "rtl",
-    design: "bannerV2",
+    design: "nova",
     requiredCookies: [],
     keepInLocalStorage: [],
     logo: "https://consentsplatform.com/assets/combined-intastellar-shopify-9l5Y1w6a.svg",
