@@ -165,14 +165,15 @@ export function parseOnboardingState(
   }
 }
 
-/** Single round-trip: banner config, onboarding flag, installation id (for home / loader). */
-export async function loadAppInstallationHomeData(
-  admin: AdminClient,
-  shop: { name: string; primaryDomainHost: string },
-): Promise<{
-  config: IntaConfig;
-  onboarding: OnboardingState;
+/**
+ * Pure network half of `loadAppInstallationHomeData` — no `shop` dependency,
+ * so callers can `Promise.all` it alongside an independent shop-info query
+ * instead of awaiting them back-to-back.
+ */
+export async function fetchAppInstallationHomeRaw(admin: AdminClient): Promise<{
   installationId: string;
+  bannerRaw: string | undefined;
+  onboardingRaw: string | undefined;
 }> {
   const res = await admin.graphql(
     `#graphql
@@ -207,12 +208,27 @@ export async function loadAppInstallationHomeData(
       { status: 500 },
     );
   }
-  const bannerRaw = inst?.bannerConfig?.value as string | undefined;
-  const onboardingRaw = inst?.onboardingState?.value as string | undefined;
   return {
-    config: parseIntaConfigFromMetafieldValue(bannerRaw, shop),
-    onboarding: parseOnboardingState(onboardingRaw),
     installationId,
+    bannerRaw: inst?.bannerConfig?.value as string | undefined,
+    onboardingRaw: inst?.onboardingState?.value as string | undefined,
+  };
+}
+
+/** Single round-trip: banner config, onboarding flag, installation id (for home / loader). */
+export async function loadAppInstallationHomeData(
+  admin: AdminClient,
+  shop: { name: string; primaryDomainHost: string },
+): Promise<{
+  config: IntaConfig;
+  onboarding: OnboardingState;
+  installationId: string;
+}> {
+  const raw = await fetchAppInstallationHomeRaw(admin);
+  return {
+    config: parseIntaConfigFromMetafieldValue(raw.bannerRaw, shop),
+    onboarding: parseOnboardingState(raw.onboardingRaw),
+    installationId: raw.installationId,
   };
 }
 

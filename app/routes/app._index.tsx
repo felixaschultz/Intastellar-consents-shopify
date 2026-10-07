@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import {
@@ -19,7 +19,9 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import {
   defaultIntaConfig,
-  loadAppInstallationHomeData,
+  fetchAppInstallationHomeRaw,
+  parseIntaConfigFromMetafieldValue,
+  parseOnboardingState,
   parseRequiredCookiesFromFormJson,
   saveAppInstallationIntaConfig,
   saveOnboardingState,
@@ -33,8 +35,15 @@ import {
 import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
 import { buildThemeEditorAppEmbedUrl } from "../lib/theme-app-extension.server";
 import { throwGraphqlFailure } from "../lib/admin-graphql.server";
-import { IntastellarOnboardingModal } from "../components/IntastellarOnboardingModal";
 import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
+
+// Code-split: most page loads are returning merchants who've already
+// completed onboarding, so this shouldn't bloat everyone's initial bundle.
+const IntastellarOnboardingModal = lazy(() =>
+  import("../components/IntastellarOnboardingModal").then((mod) => ({
+    default: mod.IntastellarOnboardingModal,
+  })),
+);
 
 const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js?utm_source=shopify&utm_medium=app&utm_campaign=shopify_app";
 const DOCS_URL = SHOPIFY_APP_IDENTITY.developerDocsUrl;
@@ -70,19 +79,25 @@ function buildPreviewSrcDoc(config: IntaConfig): string {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
 
-  const shopRes = await admin.graphql(
-    `#graphql
-    query IntaBannerLoader {
-      shop {
-        id
-        name
-        myshopifyDomain
-        primaryDomain {
-          host
+  // The installation query doesn't depend on shop data for its own request
+  // (only for parsing a fallback default afterward), so run both network
+  // calls concurrently instead of awaiting them back-to-back.
+  const [shopRes, homeDataRaw] = await Promise.all([
+    admin.graphql(
+      `#graphql
+      query IntaBannerLoader {
+        shop {
+          id
+          name
+          myshopifyDomain
+          primaryDomain {
+            host
+          }
         }
-      }
-    }`,
-  );
+      }`,
+    ),
+    fetchAppInstallationHomeRaw(admin),
+  ]);
   const shopJson = (await shopRes.json()) as {
     data?: {
       shop?: {
@@ -108,10 +123,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     primaryDomainHost,
   };
 
-  const { config, onboarding } = await loadAppInstallationHomeData(
-    admin,
+  const config = parseIntaConfigFromMetafieldValue(
+    homeDataRaw.bannerRaw,
     shopCtx,
   );
+  const onboarding = parseOnboardingState(homeDataRaw.onboardingRaw);
 
   const themeEditorEmbedUrl =
     buildThemeEditorAppEmbedUrl(
@@ -421,11 +437,13 @@ export default function Index() {
   return (
     <Page fullWidth>
       <TitleBar title="Intastellar Consents" />
-      <IntastellarOnboardingModal
-        themeEditorEmbedUrl={themeEditorEmbedUrl}
-        docsUrl={DOCS_URL}
-        onboardingCompleted={onboardingCompleted}
-      />
+      <Suspense fallback={null}>
+        <IntastellarOnboardingModal
+          themeEditorEmbedUrl={themeEditorEmbedUrl}
+          docsUrl={DOCS_URL}
+          onboardingCompleted={onboardingCompleted}
+        />
+      </Suspense>
       <BlockStack gap="500">
         <Banner tone="info">
           <BlockStack gap="200">
