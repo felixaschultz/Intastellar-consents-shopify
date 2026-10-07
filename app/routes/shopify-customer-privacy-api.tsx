@@ -71,7 +71,7 @@ export const links = () => {
 /* Info page for Shopify Customer Privacy API */
 export default function ShopifyCustomerPrivacyApi() {
   return (
-    <LegalDocumentLayout title="Your Shopify consent data and your analytics don't agree. Here's why — and how to fix it." supplementalNotice={false} relatedLinks={[
+    <LegalDocumentLayout title="Your Shopify consent data and your analytics don't agree. Here's why — and how to fix it." docLabel="Guide" supplementalNotice={false} relatedLinks={[
       {
         href: "https://help.shopify.com/en/manual/privacy/shopify-customer-privacy-api",
         label: "Shopify Customer Privacy API Documentation",

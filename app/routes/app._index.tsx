@@ -83,7 +83,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       }
     }`,
   );
-  const shopJson = await shopRes.json();
+  const shopJson = (await shopRes.json()) as {
+    data?: {
+      shop?: {
+        id: string;
+        name?: string;
+        myshopifyDomain?: string;
+        primaryDomain?: { host?: string };
+      };
+    };
+    errors?: { message?: string }[];
+  };
   if (shopJson.errors?.length) {
     throwGraphqlFailure("Shop query failed", shopJson);
   }
@@ -654,7 +664,6 @@ export default function Index() {
                       ) : null}
                       <InlineStack gap="200" blockAlign="center">
                         <Button
-                          type="button"
                           loading={logoFetcher.state !== "idle"}
                           onClick={() => {
                             setLogoLoadError(null);
