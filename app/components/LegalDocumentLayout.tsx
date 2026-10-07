@@ -7,10 +7,8 @@ import {
   LEGAL_COMPANY,
   LEGAL_LAST_UPDATED,
 } from "../lib/legal-content";
-import { INTASTELLAR_SUPPORT_LINKS, SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
+import { INTASTELLAR_SUPPORT_LINKS } from "../lib/shopify-app-seo";
 import styles from "../routes/legal/styles.module.css";
-import { Image } from "@shopify/polaris";
-import logo from "../assets/combined-intastellar-shopify.svg";
 
 type Props = {
   title: string;
@@ -56,12 +54,9 @@ export function LegalDocumentLayout({
           </Link>
         </div>
         {docLabel && <span className={styles.docType}>{docLabel}</span>}
-        {/* Logo in header */}
-        <Image
-          source={logo}
-          alt="Intastellar Consents for Shopify"
-          width={350}
-          height={100}
+        <img
+          src="https://intastellar.eu/assets/logos/intastellar-consents-logo.svg"
+          alt="Intastellar Consents"
           className={styles.logo}
         />
       </header>

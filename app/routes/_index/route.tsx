@@ -654,11 +654,7 @@ export default function App() {
               {INTASTELLAR_SUPPORT_LINKS.developerDocs.label}
             </a>
             <Link to="/shopify-customer-privacy-api">Customer Privacy API</Link>
-            <Link
-              to="https://www.intastellarsolutions.com/solutions/cookie-consents"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link to="https://intastellar.eu" target="_blank" rel="noopener noreferrer">
               intastellar.eu
             </Link>
           </nav>

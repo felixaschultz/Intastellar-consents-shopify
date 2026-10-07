@@ -1,26 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
-import {
-  Page,
-  Layout,
-  Text,
-  Card,
-  Button,
-  BlockStack,
-  Box,
-  TextField,
-  Select,
-  InlineStack,
-  Banner,
-  Image,
-} from "@shopify/polaris";
+import type { MetaFunction } from "@remix-run/node";
 import { LegalDocumentLayout } from "../components/LegalDocumentLayout";
-import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
-
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-    return true;
-}
 
 export const meta: MetaFunction = () => [
   {
@@ -52,6 +31,11 @@ export const links = () => {
       <link rel="icon" type="image/png" sizes="16x16" href="https://www.intastellarsolutions.com/assets/icons/fav/favicon-16x16.png">
   */
   return [
+    { rel: "preconnect", href: "https://fonts.googleapis.com" },
+    {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+    },
     { rel: "apple-touch-icon", sizes: "57x57", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-57x57.png" },
     { rel: "apple-touch-icon", sizes: "60x60", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-60x60.png" },
     { rel: "apple-touch-icon", sizes: "72x72", href: "https://www.intastellarsolutions.com/assets/icons/fav/apple-icon-72x72.png" },
