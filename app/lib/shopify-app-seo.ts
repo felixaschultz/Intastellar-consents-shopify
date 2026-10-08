@@ -45,7 +45,7 @@ export const SHOPIFY_APP_IDENTITY = {
   logoUrl: "/assets/combined-intastellar-shopify.svg",
   name: "Intastellar Consents",
   productType: "Shopify app",
-  fullTitle: "Intastellar Consents | Official Shopify App for Cookie Consent",
+  fullTitle: "Intastellar Consents for Shopify | Official App",
   shortTitle: "Intastellar Consents — Shopify App",
   legacyTitle: "Intastellar Consents: Consent management for your Shopify store",
   description:
