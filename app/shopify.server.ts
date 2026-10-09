@@ -28,7 +28,14 @@ const shopify = shopifyApp({
   scopes: scopesFromEnv.length > 0 ? scopesFromEnv : undefined,
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new PrismaSessionStorage(prisma),
+  // `db.prisma.io` scales to zero on idle; a cold wake-up can take longer
+  // than the library's 10s default retry budget (2 x 5s), which makes
+  // PrismaSessionStorage misreport a transient connection timeout as a
+  // "missing session table" error. Give it more room to survive that.
+  sessionStorage: new PrismaSessionStorage(prisma, {
+    connectionRetries: 5,
+    connectionRetryIntervalMs: 4000,
+  }),
   distribution: AppDistribution.AppStore,
   future: {
     unstable_newEmbeddedAuthStrategy: true,
