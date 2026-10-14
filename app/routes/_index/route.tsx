@@ -575,8 +575,15 @@ export default function App() {
           <div className={styles.sectionHeadCentered}>
             <span className={styles.sectionEyebrow}>Pricing</span>
             <h2 id="pricing-heading" className={styles.sectionTitle}>
-              Free to start. Upgrade when you need insight.
+              The Shopify app is free. Upgrade inside the app when you need insight.
             </h2>
+            <p>
+              Every store can install and use the banner with Shopify's own consent
+              log at no charge. A paid plan unlocks the Intastellar Consents
+              Platform — consent analytics and ad-platform reconciliation. Plans
+              are billed monthly through Shopify; subscribe from{" "}
+              <strong>Plans &amp; billing</strong> inside the app after install.
+            </p>
           </div>
           <div className={styles.pricingGrid}>
             <div className={styles.pricingCard}>
@@ -594,26 +601,56 @@ export default function App() {
                 Install free
               </a>
             </div>
-            <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
-              <span className={styles.pricingBadge}>Most popular</span>
-              <div className={styles.pricingName}>Pro</div>
+            <div className={styles.pricingCard}>
+              <div className={styles.pricingName}>Personal</div>
               <div>
-                <span className={styles.pricingPrice}>Pricing</span>
-                <span className={styles.pricingPriceUnit}> coming soon</span>
+                <span className={styles.pricingPrice}>€5</span>
+                <span className={styles.pricingPriceUnit}> / month</span>
               </div>
               <ul className={styles.pricingList}>
                 <li>✓ Everything in Free</li>
+                <li>✓ Intastellar Consents Platform access</li>
+              </ul>
+              <span className={styles.pricingCta}>Subscribe from the app</span>
+            </div>
+            <div className={`${styles.pricingCard} ${styles.pricingCardFeatured}`}>
+              <span className={styles.pricingBadge}>Most popular</span>
+              <div className={styles.pricingName}>Starter</div>
+              <div>
+                <span className={styles.pricingPrice}>€15</span>
+                <span className={styles.pricingPriceUnit}> / month</span>
+              </div>
+              <ul className={styles.pricingList}>
+                <li>✓ Everything in Personal</li>
                 <li>✓ Consent analytics dashboard</li>
+              </ul>
+              <span className={`${styles.pricingCta} ${styles.pricingCtaPrimary}`}>
+                Subscribe from the app
+              </span>
+            </div>
+            <div className={styles.pricingCard}>
+              <div className={styles.pricingName}>Growth</div>
+              <div>
+                <span className={styles.pricingPrice}>€30</span>
+                <span className={styles.pricingPriceUnit}> / month</span>
+              </div>
+              <ul className={styles.pricingList}>
+                <li>✓ Everything in Starter</li>
                 <li>✓ Ad-platform reconciliation</li>
               </ul>
-              <a
-                href={INTASTELLAR_SUPPORT_LINKS.helpCenter.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${styles.pricingCta} ${styles.pricingCtaPrimary}`}
-              >
-                Contact us
-              </a>
+              <span className={styles.pricingCta}>Subscribe from the app</span>
+            </div>
+            <div className={styles.pricingCard}>
+              <div className={styles.pricingName}>Agency Pro</div>
+              <div>
+                <span className={styles.pricingPrice}>€79</span>
+                <span className={styles.pricingPriceUnit}> / month</span>
+              </div>
+              <ul className={styles.pricingList}>
+                <li>✓ Everything in Growth</li>
+                <li>✓ Multi-client management</li>
+              </ul>
+              <span className={styles.pricingCta}>Subscribe from the app</span>
             </div>
           </div>
         </section>

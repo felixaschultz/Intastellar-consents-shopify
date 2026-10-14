@@ -20,6 +20,10 @@ topics = ["app/scopes_update"]
 uri = "/webhooks/app/scopes_update"
 
 [[webhooks.subscriptions]]
+topics = ["app_subscriptions/update"]
+uri = "/webhooks/app_subscriptions/update"
+
+[[webhooks.subscriptions]]
 compliance_topics = ["customers/data_request"]
 uri = "/webhooks/customers/data_request"
 

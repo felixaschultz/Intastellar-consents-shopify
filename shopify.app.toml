@@ -34,6 +34,13 @@ uri = "/webhooks/app/uninstalled"
 topics = ["app/scopes_update"]
 uri = "/webhooks/app/scopes_update"
 
+# Keeps Consents Platform access in sync when a subscription is cancelled,
+# frozen (payment failure), or otherwise changes outside of /app/billing.
+# Handled by: app/routes/webhooks.app_subscriptions.update.tsx
+[[webhooks.subscriptions]]
+topics = ["app_subscriptions/update"]
+uri = "/webhooks/app_subscriptions/update"
+
 # Mandatory compliance webhooks (App Store)
 # @see https://shopify.dev/docs/apps/build/compliance/privacy-law-compliance
 [[webhooks.subscriptions]]

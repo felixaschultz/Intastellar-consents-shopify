@@ -24,6 +24,7 @@ export default function App() {
         <Link to="/app" rel="home">
           Banner settings
         </Link>
+        <Link to="/app/billing">Plans & billing</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>
