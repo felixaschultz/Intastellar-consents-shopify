@@ -14,6 +14,13 @@ import { unauthenticated } from "../shopify.server";
 
 const MYSHOPIFY_DOMAIN_RE = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i;
 
+function json(data: unknown, init?: { status?: number }): Response {
+  return new Response(JSON.stringify(data), {
+    status: init?.status ?? 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
 function isAuthorized(request: Request): boolean {
   const expected = process.env.CONSENTS_PLATFORM_API_SECRET;
   if (!expected) return false;
@@ -38,12 +45,12 @@ interface ActiveSubscription {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   if (!isAuthorized(request)) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
+    return json({ error: "unauthorized" }, { status: 401 });
   }
 
   const shop = new URL(request.url).searchParams.get("shop")?.trim().toLowerCase() ?? "";
   if (!MYSHOPIFY_DOMAIN_RE.test(shop)) {
-    return Response.json({ error: "invalid_shop" }, { status: 400 });
+    return json({ error: "invalid_shop" }, { status: 400 });
   }
 
   let admin;
@@ -51,7 +58,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     ({ admin } = await unauthenticated.admin(shop));
   } catch {
     // No stored session: the shop never installed the app, or uninstalled it.
-    return Response.json({ error: "not_installed", shop }, { status: 404 });
+    return json({ error: "not_installed", shop }, { status: 404 });
   }
 
   const response = await admin.graphql(`
@@ -73,7 +80,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const subscriptions = data?.currentAppInstallation?.activeSubscriptions ?? [];
   const active = subscriptions.find((s) => s.status === "ACTIVE") ?? null;
 
-  return Response.json({
+  return json({
     shop,
     subscribed: Boolean(active),
     plan: active?.name ?? null,
