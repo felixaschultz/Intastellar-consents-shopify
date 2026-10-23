@@ -13,7 +13,8 @@ import {
   Box,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
-import { authenticate, isTestBillingMode } from "../shopify.server";
+import { authenticate } from "../shopify.server";
+import { isTestBillingMode } from "../lib/billing-test-mode.server";
 import { BILLING_PLANS, BILLING_PLAN_PRICES, type BillingPlanName } from "../lib/billing-plans";
 import { shopifyAppServerBase, SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
 import { syncConsentsPlatformAccess } from "../lib/consents-platform-billing.server";
@@ -33,8 +34,8 @@ function isBillingPlanName(value: unknown): value is BillingPlanName {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { billing } = await authenticate.admin(request);
-  const isTest = isTestBillingMode();
+  const { billing, admin } = await authenticate.admin(request);
+  const isTest = await isTestBillingMode(admin);
   const { appSubscriptions } = await billing.check({ isTest });
   const active = appSubscriptions[0];
 
@@ -46,10 +47,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { billing, session } = await authenticate.admin(request);
+  const { billing, session, admin } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
-  const isTest = isTestBillingMode();
+  const isTest = await isTestBillingMode(admin);
 
   if (intent === "subscribe") {
     const plan = formData.get("plan");

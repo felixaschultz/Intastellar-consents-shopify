@@ -92,12 +92,6 @@ const shopify = shopifyApp({
     : {}),
 });
 
-// Demo/development stores can't be charged for real, so requests made
-// outside of production must go through Shopify's test-charge path.
-export function isTestBillingMode() {
-  return process.env.NODE_ENV !== "production";
-}
-
 async function loginWithResolvedShopDomain(request: Request) {
   const url = new URL(request.url);
   const innerLogin = shopify.login.bind(shopify);
