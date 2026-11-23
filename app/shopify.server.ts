@@ -91,11 +91,32 @@ async function loginWithResolvedShopDomain(request: Request) {
   return innerLogin(request);
 }
 
+/**
+ * shopify-api's sanitizeHost() only checks that `host` looks like base64,
+ * then calls `new URL()` on the decoded value. A base64 string that decodes
+ * to garbage (App Store review fuzzes this) throws "Invalid URL" and turns
+ * into a 500. Reject those as a 400 before the library sees them.
+ */
+function rejectUndecodableHost(request: Request) {
+  const host = new URL(request.url).searchParams.get("host");
+  if (!host || !/^[0-9a-zA-Z+/]+={0,2}$/.test(host)) return;
+  try {
+    new URL(`https://${Buffer.from(host, "base64").toString("utf-8")}`);
+  } catch {
+    throw new Response("Invalid host parameter", { status: 400 });
+  }
+}
+
+const authenticateAdmin: typeof shopify.authenticate.admin = async (request) => {
+  rejectUndecodableHost(request);
+  return shopify.authenticate.admin(request);
+};
+
 export default shopify;
 export { ApiVersion };
 export const apiVersion = ApiVersion.January26;
 export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;
-export const authenticate = shopify.authenticate;
+export const authenticate = { ...shopify.authenticate, admin: authenticateAdmin };
 export const unauthenticated = shopify.unauthenticated;
 export const login = loginWithResolvedShopDomain;
 export const registerWebhooks = shopify.registerWebhooks;
