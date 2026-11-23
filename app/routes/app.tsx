@@ -1,5 +1,12 @@
 import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { isRouteErrorResponse, Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
+import {
+  isRouteErrorResponse,
+  Link,
+  Outlet,
+  useLoaderData,
+  useRouteError,
+  type ShouldRevalidateFunction,
+} from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { NavMenu } from "@shopify/app-bridge-react";
@@ -14,6 +21,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   return { apiKey: process.env.SHOPIFY_API_KEY || "" };
 };
+
+// The loader only authenticates and returns the (constant) API key; child
+// loaders authenticate their own requests. Re-running it after every form
+// submission just added another auth round-trip.
+export const shouldRevalidate: ShouldRevalidateFunction = () => false;
 
 export default function App() {
   const { apiKey } = useLoaderData<typeof loader>();

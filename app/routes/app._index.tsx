@@ -1,6 +1,10 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  useFetcher,
+  useLoaderData,
+  type ShouldRevalidateFunction,
+} from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -147,6 +151,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       process.env.NODE_ENV === "production" ? publicSiteBase() : ""
     }/banner-preview`,
   };
+};
+
+// "loadShopLogo" only reads brand assets, so there's nothing to refresh
+// afterwards. Revalidating re-ran this loader (auth + Admin API calls) and
+// re-rendered the whole form a few seconds into every page load.
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  formData,
+  defaultShouldRevalidate,
+}) => {
+  if (formData?.get("intent") === "loadShopLogo") return false;
+  return defaultShouldRevalidate;
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
