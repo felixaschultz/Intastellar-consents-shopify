@@ -6,6 +6,16 @@
  *   SHOPIFY_APP_URL     — app.consentsmanagement.com (Shopify OAuth / embedded app)
  */
 
+/**
+ * This module is also imported by route components that run in the browser,
+ * where `process` doesn't exist, and PUBLIC_SITE_URL below is evaluated at
+ * import time. Reading `process.env` directly threw "process is not defined"
+ * and broke client navigation to those routes, so fall back to the defaults.
+ */
+function readEnv(name: string): string | undefined {
+  return typeof process === "undefined" ? undefined : process.env[name];
+}
+
 function normalizeBase(url: string | undefined): string | null {
   const trimmed = url?.trim().replace(/\/$/, "");
   return trimmed || null;
@@ -14,14 +24,14 @@ function normalizeBase(url: string | undefined): string | null {
 /** Public marketing / install landing (consentsplatform.com). */
 export function publicSiteBase(): string {
   return (
-    normalizeBase(process.env.PUBLIC_SITE_URL) ?? "https://consentsplatform.com"
+    normalizeBase(readEnv("PUBLIC_SITE_URL")) ?? "https://consentsplatform.com"
   );
 }
 
 /** Shopify app server URL for OAuth callbacks (app.consentsmanagement.com). */
 export function shopifyAppServerBase(): string {
   return (
-    normalizeBase(process.env.SHOPIFY_APP_URL) ?? "https://app.consentsmanagement.com"
+    normalizeBase(readEnv("SHOPIFY_APP_URL")) ?? "https://app.consentsmanagement.com"
   );
 }
 
@@ -95,7 +105,7 @@ export function shopifyAppSameAsLinks(): string[] {
     SHOPIFY_APP_IDENTITY.githubUrl,
     SHOPIFY_APP_IDENTITY.githubUrl2
   ];
-  const appStore = process.env.SHOPIFY_APP_STORE_LISTING_URL?.trim();
+  const appStore = readEnv("SHOPIFY_APP_STORE_LISTING_URL")?.trim();
   if (appStore) links.unshift(appStore);
   const serverBase = shopifyAppServerBase();
   if (serverBase !== publicSiteBase()) {
