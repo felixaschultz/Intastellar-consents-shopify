@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import { syncConsentsPlatformAccess } from "../lib/consents-platform-billing.server";
+import { isPaidPlan } from "../lib/paid-plan";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { payload, topic, shop } = await authenticate.webhook(request);
@@ -13,7 +14,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (subscription?.status) {
     await syncConsentsPlatformAccess({
       shop,
-      plan: subscription.status === "ACTIVE" ? subscription.name ?? null : null,
+      plan:
+        subscription.status === "ACTIVE" && isPaidPlan(subscription.name)
+          ? subscription.name
+          : null,
       status: subscription.status as
         | "ACTIVE"
         | "CANCELLED"

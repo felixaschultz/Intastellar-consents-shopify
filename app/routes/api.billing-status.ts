@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import crypto from "node:crypto";
 import { unauthenticated } from "../shopify.server";
+import { isPaidPlan } from "../lib/paid-plan";
 
 /**
  * Server-to-server endpoint for intastellarconsents.com (a separate
@@ -78,7 +79,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     data?: { currentAppInstallation?: { activeSubscriptions: ActiveSubscription[] } };
   };
   const subscriptions = data?.currentAppInstallation?.activeSubscriptions ?? [];
-  const active = subscriptions.find((s) => s.status === "ACTIVE") ?? null;
+  // The free plan is an ACTIVE subscription too; only paid plans count.
+  const active =
+    subscriptions.find((s) => s.status === "ACTIVE" && isPaidPlan(s.name)) ?? null;
 
   return json({
     shop,

@@ -15,6 +15,7 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import { isTestBillingMode } from "../lib/billing-test-mode.server";
 import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
+import { isPaidPlan } from "../lib/paid-plan";
 
 /**
  * The app uses Shopify App Pricing (managed pricing): plans are defined in the
@@ -29,7 +30,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const { billing, admin, session } = await authenticate.admin(request);
   const isTest = await isTestBillingMode(admin);
   const { appSubscriptions } = await billing.check({ isTest });
-  const active = appSubscriptions[0];
+  // The free plan is an ACTIVE subscription too; only paid plans count.
+  const active = appSubscriptions.find((s) => isPaidPlan(s.name));
 
   const response = await admin.graphql(`
     query CurrentAppHandle {
