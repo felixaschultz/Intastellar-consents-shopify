@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { Form, Link } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 import appScreen from "../../assets/app-screen.png";
@@ -14,6 +14,7 @@ import {
 } from "../../lib/landing-content";
 import { APP_LEGAL_LINKS } from "../../lib/legal-content";
 import { SHOPIFY_APP_IDENTITY, INTASTELLAR_SUPPORT_LINKS } from "../../lib/shopify-app-seo";
+import { getPlatformStats, type PlatformStats } from "../../lib/platform-stats.server";
 
 /** JSON-LD for this landing route; root reads `handle.jsonLdSchema` into `<head>`. */
 const jsonLdSchema = buildLandingJsonLd();
@@ -73,7 +74,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw redirect("/auth/login");
   }
 
-  return null;
+  return { platformStats: await getPlatformStats() };
 };
 
 export const meta = () => {
@@ -230,7 +231,78 @@ const COMPARISON_ROWS = [
   },
 ];
 
+function formatAsOf(isoDate: string) {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  return Number.isNaN(date.getTime())
+    ? isoDate
+    : date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+/** Live, aggregated figures from intastellarconsents.com; hidden when unavailable. */
+function PlatformStatsSection({ stats }: { stats: PlatformStats }) {
+  // The headline figures (consents, countries, accept-all) live in the stats
+  // strip under the hero; these tiles cover the rest so nothing repeats.
+  const tiles = [
+    { value: stats.sitesScanned.toLocaleString("en-US"), label: "sites scanned for trackers" },
+    { value: String(stats.medianTrackingServices), label: "tracking services on the median site" },
+    { value: `${stats.declineAllPct}%`, label: "of visitors decline all" },
+    ...(stats.euAcceptPct !== null
+      ? [{ value: `${stats.euAcceptPct}%`, label: "of EU visitors accept all" }]
+      : []),
+  ];
+
+  return (
+    <section className={styles.section} aria-labelledby="platform-stats-heading">
+      <div className={styles.adSection}>
+        <div className={styles.adCopy}>
+          <span className={styles.sectionEyebrow}>Live platform data</span>
+          <h2 id="platform-stats-heading" className={styles.sectionTitle}>
+            What we see across the Intastellar Consents Platform
+          </h2>
+          <p className={styles.adLead}>
+            Aggregated, anonymous figures from every site running the banner,
+            plus what our tracker scanner finds across the web.
+          </p>
+          <div className={styles.liveStatGrid}>
+            {tiles.map((tile) => (
+              <div key={tile.label} className={styles.liveStatTile}>
+                <div className={styles.liveStatNumber}>{tile.value}</div>
+                <div className={styles.liveStatLabel}>{tile.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {stats.topTrackers.length > 0 ? (
+          <div className={styles.adCard}>
+            <div className={styles.adCardHead}>
+              <span>Most common trackers</span>
+              <span className={styles.adCardHeadNote}>As of {formatAsOf(stats.asOf)}</span>
+            </div>
+            <div className={styles.adBars}>
+              {stats.topTrackers.map((tracker) => (
+                <div key={tracker.name}>
+                  <div className={styles.adBarLabel}>
+                    <span>{tracker.name}</span>
+                    <span>{tracker.pct}% of sites</span>
+                  </div>
+                  <div className={styles.adBarTrack}>
+                    <div
+                      className={styles.adBarFill}
+                      style={{ width: `${Math.min(100, Math.max(0, tracker.pct))}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
+  const { platformStats } = useLoaderData<typeof loader>();
   return (
     <div className={styles.page}>
       <a href="#main-content" className={styles.skipLink}>
@@ -360,18 +432,24 @@ export default function App() {
 
         <section className={styles.sectionNavy} aria-label="Key numbers">
           <div className={styles.statsGrid}>
-            <div className={styles.statCell}>
-              <div className={styles.statNumber}>276K+</div>
-              <div className={styles.statLabel}>consent choices managed</div>
-            </div>
-            <div className={styles.statCell}>
-              <div className={styles.statNumber}>149</div>
-              <div className={styles.statLabel}>countries served automatically</div>
-            </div>
-            <div className={styles.statCell}>
-              <div className={styles.statNumber}>65%</div>
-              <div className={styles.statLabel}>avg. opt-in rate, no dark patterns</div>
-            </div>
+            {platformStats ? (
+              <>
+                <div className={styles.statCell}>
+                  <div className={styles.statNumber}>
+                    {platformStats.consentRecords30d.toLocaleString("en-US")}
+                  </div>
+                  <div className={styles.statLabel}>consent choices in the last 30 days</div>
+                </div>
+                <div className={styles.statCell}>
+                  <div className={styles.statNumber}>{platformStats.countries30d}</div>
+                  <div className={styles.statLabel}>visitor countries in the last 30 days</div>
+                </div>
+                <div className={styles.statCell}>
+                  <div className={styles.statNumber}>{platformStats.acceptAllPct}%</div>
+                  <div className={styles.statLabel}>of visitors accept all, no dark patterns</div>
+                </div>
+              </>
+            ) : null}
             <div className={styles.statCell}>
               <div className={styles.statNumber}>~2 min</div>
               <div className={styles.statLabel}>average time to go live</div>
@@ -495,6 +573,8 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {platformStats ? <PlatformStatsSection stats={platformStats} /> : null}
 
         <section id="how" className={styles.section} aria-labelledby="how-heading">
           <div className={styles.sectionHeadCentered}>

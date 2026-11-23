@@ -787,6 +787,34 @@ a:hover {
   background: var(--inta-gold);
 }
 
+.liveStatGrid {
+  margin-top: 1.75rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.liveStatTile {
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--inta-border);
+  border-radius: var(--inta-radius-sm);
+  background: var(--inta-surface);
+}
+
+.liveStatNumber {
+  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+  font-weight: 800;
+  color: var(--inta-gold-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.liveStatLabel {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--inta-text-muted);
+}
+
 .adCardFoot {
   margin-top: 1.5rem;
   padding-top: 1.125rem;
