@@ -16,14 +16,15 @@ export const links: LinksFunction = () => [
 
 /** Seconds into /proof/billing-fix.mp4 where each step of the flow starts. */
 const CHAPTERS = [
-  { at: 0, time: "0:00", what: "App opens on Banner settings — the banner app is free to use." },
-  { at: 9, time: "0:09", what: "Shopify's hosted plan page, with the Free plan active." },
-  { at: 16, time: "0:16", what: "Approve the Personal plan (test charge on a development store)." },
-  { at: 24, time: "0:24", what: "Merchant returns to the app inside Shopify admin." },
-  { at: 36, time: "0:36", what: "Plans & billing shows the Personal plan and the dashboard link." },
-  { at: 42, time: "0:42", what: "Change plan on Shopify's page: switch back to Free." },
-  { at: 60, time: "1:00", what: "Back in the app with no paid plan." },
-  { at: 70, time: "1:10", what: "View plans again from Plans & billing." },
+  { at: 0, time: "0:00", what: "Uninstall: the app is removed in Settings → Apps." },
+  { at: 10, time: "0:10", what: "Reinstall: the merchant installs the app again." },
+  { at: 15, time: "0:15", what: "The app opens on Banner settings — the banner app is free to use." },
+  { at: 40, time: "0:40", what: "Plans & billing: View plans opens Shopify's hosted plan page." },
+  { at: 47, time: "0:47", what: "Decline: choose Starter, then Cancel on Shopify's approval screen. Nothing is charged." },
+  { at: 58, time: "0:58", what: "Accept: choose Growth and approve it (test charge on a development store)." },
+  { at: 70, time: "1:10", what: "The merchant returns to the app inside Shopify admin." },
+  { at: 78, time: "1:18", what: "Plans & billing shows the Growth plan and the dashboard link." },
+  { at: 85, time: "1:25", what: "Change plan: switch back to Free, then return to the app." },
 ];
 
 export default function BillingFixProof() {
@@ -43,8 +44,9 @@ export default function BillingFixProof() {
         <h1 className={styles.title}>Billing now completes end to end</h1>
         <p className={styles.lede}>
           The subscribe flow could start but never finished. Intastellar Consents now uses
-          Shopify App Pricing: merchants choose, approve, change and cancel plans on
-          Shopify&rsquo;s own plan page, then return to the app with their plan applied. The
+          Shopify App Pricing: merchants accept, decline, change and cancel plans on
+          Shopify&rsquo;s own plan page, including after a reinstall, then return to the app
+          with their plan applied. The
           cookie banner app itself stays free; paid plans are optional and unlock the hosted
           Intastellar Consents Platform.
         </p>
@@ -131,8 +133,9 @@ export default function BillingFixProof() {
             <div className={styles.timelineRow}>
               <span className={styles.t}>Verified</span>
               <span className={styles.what}>
-                Approved a paid plan, returned to the app with the plan shown, then switched
-                back to Free, all on the test store in the recording above.
+                On the test store in the recording above: reinstalled the app, declined a paid
+                plan, approved another, returned to the app with the plan shown, then switched
+                back to Free.
               </span>
               <span className={`${styles.pill} ${styles.pillOk}`}>approved</span>
             </div>
