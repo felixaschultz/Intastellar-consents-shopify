@@ -16,7 +16,7 @@ import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import { isTestBillingMode } from "../lib/billing-test-mode.server";
 import { BILLING_PLANS, BILLING_PLAN_PRICES, type BillingPlanName } from "../lib/billing-plans";
-import { shopifyAppServerBase, SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
+import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
 import { syncConsentsPlatformAccess } from "../lib/consents-platform-billing.server";
 
 const PLAN_ORDER: BillingPlanName[] = [
@@ -60,10 +60,14 @@ export async function action({ request }: ActionFunctionArgs) {
 
     // Throws: redirects the merchant to Shopify's native billing
     // confirmation screen. Nothing past this line runs.
+    // The return URL must point back into the Shopify admin so the app
+    // reloads embedded; our bare server URL has no shop/host params, so
+    // authenticate.admin bounced approved merchants to the login page.
+    const storeHandle = session.shop.replace(".myshopify.com", "");
     await billing.request({
       plan,
       isTest,
-      returnUrl: `${shopifyAppServerBase()}/app/billing`,
+      returnUrl: `https://admin.shopify.com/store/${storeHandle}/apps/${process.env.SHOPIFY_API_KEY}/app/billing`,
     });
   }
 
