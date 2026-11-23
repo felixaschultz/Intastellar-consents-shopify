@@ -32,9 +32,13 @@ const shopify = shopifyApp({
   // than the library's 10s default retry budget (2 x 5s), which makes
   // PrismaSessionStorage misreport a transient connection timeout as a
   // "missing session table" error. Give it more room to survive that.
+  // Retry often, though: on most cold starts the first check fails within
+  // milliseconds ("Can't reach database server") and the next one succeeds,
+  // and every admin request waits on this check, so a long interval adds
+  // straight to page load (it was 4s). Same ~20s budget as before.
   sessionStorage: new PrismaSessionStorage(prisma, {
-    connectionRetries: 5,
-    connectionRetryIntervalMs: 4000,
+    connectionRetries: 80,
+    connectionRetryIntervalMs: 250,
   }),
   distribution: AppDistribution.AppStore,
   future: {
