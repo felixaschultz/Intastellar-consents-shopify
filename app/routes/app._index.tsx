@@ -35,7 +35,7 @@ import {
 import { fetchShopBrandAssets } from "../lib/shop-brand-logo.server";
 import { buildThemeEditorAppEmbedUrl } from "../lib/theme-app-extension.server";
 import { throwGraphqlFailure } from "../lib/admin-graphql.server";
-import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
+import { publicSiteBase, SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
 
 // Code-split: most page loads are returning merchants who've already
 // completed onboarding, so this shouldn't bloat everyone's initial bundle.
@@ -45,7 +45,6 @@ const IntastellarOnboardingModal = lazy(() =>
   })),
 );
 
-const UC_JS_URL = "https://consents.cdn.intastellarsolutions.com/uc.js?utm_source=shopify&utm_medium=app&utm_campaign=shopify_app";
 const DOCS_URL = SHOPIFY_APP_IDENTITY.developerDocsUrl;
 const HELP_URL = SHOPIFY_APP_IDENTITY.helpCenterUrl;
 
@@ -66,14 +65,8 @@ function parseStringArray(raw: string): string[] {
     .filter(Boolean);
 }
 
-function buildPreviewSrcDoc(config: IntaConfig): string {
-  const payload = JSON.stringify(config).replace(/</g, "\\u003c");
-  return `<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<script>window.INTA=${payload};</script>
-<script src="${UC_JS_URL}"></script>
-</head><body style="margin:0;background:#f1f1f1;min-height:360px;"></body></html>`;
+function buildPreviewSrc(previewUrl: string, config: IntaConfig): string {
+  return `${previewUrl}#${encodeURIComponent(JSON.stringify(config))}`;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -147,6 +140,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     themeEditorEmbedUrl,
     shopifyConsentLogOverviewUrl,
     onboardingCompleted: onboarding.completed,
+    // Must be a different site from the app so the preview runs in its own
+    // process (see routes/banner-preview.ts). In dev, PUBLIC_SITE_URL points
+    // at production, which doesn't know this route yet, so use the app itself.
+    bannerPreviewUrl: `${
+      process.env.NODE_ENV === "production" ? publicSiteBase() : ""
+    }/banner-preview`,
   };
 };
 
@@ -287,6 +286,7 @@ export default function Index() {
     shopifyConsentLogOverviewUrl,
     shop,
     onboardingCompleted,
+    bannerPreviewUrl,
   } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const logoFetcher = useFetcher<typeof action>();
@@ -420,10 +420,9 @@ export default function Index() {
     setRequiredCookiesRows((rows) => rows.filter((_, i) => i !== index));
   }, []);
 
-  // Changing an iframe's srcDoc forces the browser to tear down and reload
-  // that whole document (re-running the external uc.js banner script). Doing
-  // that synchronously on every keystroke is expensive and shows up as input
-  // lag, so only rebuild the preview after typing/edits pause for a moment.
+  // Each config change reloads the preview page (re-running uc.js). That runs
+  // in the preview's own process, but reloading on every keystroke still
+  // wastes work, so only update the preview after edits pause for a moment.
   const [debouncedPreviewConfig, setDebouncedPreviewConfig] =
     useState(previewConfig);
 
@@ -435,9 +434,9 @@ export default function Index() {
     return () => clearTimeout(timer);
   }, [previewConfig]);
 
-  const previewSrcDoc = useMemo(
-    () => buildPreviewSrcDoc(debouncedPreviewConfig),
-    [debouncedPreviewConfig],
+  const previewSrc = useMemo(
+    () => buildPreviewSrc(bannerPreviewUrl, debouncedPreviewConfig),
+    [bannerPreviewUrl, debouncedPreviewConfig],
   );
 
   const saving =
@@ -1100,7 +1099,7 @@ export default function Index() {
                       border: "none",
                       display: "block",
                     }}
-                    srcDoc={previewSrcDoc}
+                    src={previewSrc}
                   />
                 </Box>
               </BlockStack>
