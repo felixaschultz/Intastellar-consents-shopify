@@ -1,5 +1,5 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -10,95 +10,55 @@ import {
   Badge,
   Button,
   Banner,
-  Box,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import { isTestBillingMode } from "../lib/billing-test-mode.server";
-import { BILLING_PLANS, BILLING_PLAN_PRICES, type BillingPlanName } from "../lib/billing-plans";
 import { SHOPIFY_APP_IDENTITY } from "../lib/shopify-app-seo";
-import { syncConsentsPlatformAccess } from "../lib/consents-platform-billing.server";
 
-const PLAN_ORDER: BillingPlanName[] = [
-  BILLING_PLANS.PERSONAL,
-  BILLING_PLANS.STARTER,
-  BILLING_PLANS.GROWTH,
-  BILLING_PLANS.AGENCY_PRO,
-];
-
-function isBillingPlanName(value: unknown): value is BillingPlanName {
-  return (
-    typeof value === "string" &&
-    (Object.values(BILLING_PLANS) as string[]).includes(value)
-  );
-}
-
+/**
+ * The app uses Shopify App Pricing (managed pricing): plans are defined in the
+ * Partner Dashboard and Shopify hosts the plan selection page, including
+ * approval, decline, plan changes, cancellation and re-approval on reinstall.
+ * Creating charges ourselves via the Billing API is rejected for managed-
+ * pricing apps, so this page only reads the current subscription and links
+ * out. Consents Platform access is kept in sync by the
+ * app_subscriptions/update webhook.
+ */
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { billing, admin } = await authenticate.admin(request);
+  const { billing, admin, session } = await authenticate.admin(request);
   const isTest = await isTestBillingMode(admin);
   const { appSubscriptions } = await billing.check({ isTest });
   const active = appSubscriptions[0];
 
+  const response = await admin.graphql(`
+    query CurrentAppHandle {
+      currentAppInstallation {
+        app {
+          handle
+        }
+      }
+    }
+  `);
+  const { data } = (await response.json()) as {
+    data?: { currentAppInstallation?: { app?: { handle?: string } } };
+  };
+  const appHandle = data?.currentAppInstallation?.app?.handle;
+  const storeHandle = session.shop.replace(".myshopify.com", "");
+
   return {
-    activePlan: isBillingPlanName(active?.name) ? active.name : null,
+    activePlan: active?.name ?? null,
     isTest,
     platformUrl: SHOPIFY_APP_IDENTITY.platformUrl,
+    pricingPlansUrl: appHandle
+      ? `https://admin.shopify.com/store/${storeHandle}/charges/${appHandle}/pricing_plans`
+      : null,
   };
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  const { billing, session, admin } = await authenticate.admin(request);
-  const formData = await request.formData();
-  const intent = formData.get("intent");
-  const isTest = await isTestBillingMode(admin);
-
-  if (intent === "subscribe") {
-    const plan = formData.get("plan");
-    if (!isBillingPlanName(plan)) {
-      throw new Response("Invalid plan", { status: 400 });
-    }
-
-    // Throws: redirects the merchant to Shopify's native billing
-    // confirmation screen. Nothing past this line runs.
-    // The return URL must point back into the Shopify admin so the app
-    // reloads embedded; our bare server URL has no shop/host params, so
-    // authenticate.admin bounced approved merchants to the login page.
-    const storeHandle = session.shop.replace(".myshopify.com", "");
-    await billing.request({
-      plan,
-      isTest,
-      returnUrl: `https://admin.shopify.com/store/${storeHandle}/apps/${process.env.SHOPIFY_API_KEY}/app/billing`,
-    });
-  }
-
-  if (intent === "cancel") {
-    const { appSubscriptions } = await billing.check({ isTest });
-    const active = appSubscriptions[0];
-    if (active) {
-      await billing.cancel({
-        subscriptionId: active.id,
-        isTest,
-        prorate: true,
-      });
-      await syncConsentsPlatformAccess({
-        shop: session.shop,
-        plan: null,
-        status: "CANCELLED",
-      });
-    }
-  }
-
-  return null;
-}
-
 export default function BillingPage() {
-  const { activePlan, isTest, platformUrl } = useLoaderData<typeof loader>();
-  const subscribeFetcher = useFetcher();
-  const cancelFetcher = useFetcher();
-  const busyPlan =
-    subscribeFetcher.state !== "idle"
-      ? subscribeFetcher.formData?.get("plan")
-      : null;
+  const { activePlan, isTest, platformUrl, pricingPlansUrl } =
+    useLoaderData<typeof loader>();
 
   return (
     <Page>
@@ -108,8 +68,8 @@ export default function BillingPage() {
           <BlockStack gap="400">
             {isTest ? (
               <Banner tone="info">
-                Running in test mode — subscriptions made here won't charge a
-                real card.
+                This is a development store, so any plan you choose is a test
+                charge and won't bill a real card.
               </Banner>
             ) : null}
 
@@ -128,89 +88,45 @@ export default function BillingPage() {
             <Card>
               <BlockStack gap="300">
                 <BlockStack gap="100">
-                  <Text as="h2" variant="headingMd">
-                    Intastellar Consents Platform
-                  </Text>
+                  <InlineStack gap="200" blockAlign="center">
+                    <Text as="h2" variant="headingMd">
+                      Intastellar Consents Platform
+                    </Text>
+                    {activePlan ? (
+                      <Badge tone="success">{`${activePlan} plan`}</Badge>
+                    ) : null}
+                  </InlineStack>
                   <Text as="p" variant="bodyMd" tone="subdued">
                     A paid subscription unlocks the hosted CMP dashboard at
                     intastellarconsents.com — consent analytics and
-                    ad-platform reconciliation. Billed monthly through
-                    Shopify.
+                    ad-platform reconciliation. Plans are billed monthly
+                    through Shopify.
                   </Text>
                 </BlockStack>
 
-                {activePlan ? (
-                  <Banner tone="success">
-                    You're subscribed to the {activePlan} plan.
+                {pricingPlansUrl ? null : (
+                  <Banner tone="warning">
+                    We couldn't load Shopify's plan page right now. Reload this
+                    page to try again.
                   </Banner>
-                ) : null}
+                )}
 
-                <BlockStack gap="300">
-                  {PLAN_ORDER.map((plan) => {
-                    const isActive = activePlan === plan;
-                    return (
-                      <Box
-                        key={plan}
-                        padding="300"
-                        borderWidth="025"
-                        borderColor="border"
-                        borderRadius="200"
-                      >
-                        <InlineStack align="space-between" blockAlign="center">
-                          <BlockStack gap="050">
-                            <InlineStack gap="200" blockAlign="center">
-                              <Text as="span" variant="headingSm">
-                                {plan}
-                              </Text>
-                              {isActive ? (
-                                <Badge tone="success">Current plan</Badge>
-                              ) : null}
-                            </InlineStack>
-                            <Text as="span" variant="bodyMd" tone="subdued">
-                              €{BILLING_PLAN_PRICES[plan]} / month
-                            </Text>
-                          </BlockStack>
-
-                          {isActive ? (
-                            <Button
-                              url={platformUrl}
-                              target="_blank"
-                              variant="primary"
-                            >
-                              Open dashboard
-                            </Button>
-                          ) : (
-                            <subscribeFetcher.Form method="post">
-                              <input type="hidden" name="intent" value="subscribe" />
-                              <input type="hidden" name="plan" value={plan} />
-                              <Button
-                                submit
-                                variant={activePlan ? undefined : "primary"}
-                                loading={busyPlan === plan}
-                              >
-                                {activePlan ? "Switch to this plan" : "Subscribe"}
-                              </Button>
-                            </subscribeFetcher.Form>
-                          )}
-                        </InlineStack>
-                      </Box>
-                    );
-                  })}
-                </BlockStack>
-
-                {activePlan ? (
-                  <cancelFetcher.Form method="post">
-                    <input type="hidden" name="intent" value="cancel" />
+                <InlineStack gap="200">
+                  {pricingPlansUrl ? (
                     <Button
-                      submit
-                      variant="plain"
-                      tone="critical"
-                      loading={cancelFetcher.state !== "idle"}
+                      url={pricingPlansUrl}
+                      target="_top"
+                      variant={activePlan ? undefined : "primary"}
                     >
-                      Cancel subscription
+                      {activePlan ? "Change or cancel plan" : "View plans"}
                     </Button>
-                  </cancelFetcher.Form>
-                ) : null}
+                  ) : null}
+                  {activePlan ? (
+                    <Button url={platformUrl} target="_blank" variant="primary">
+                      Open dashboard
+                    </Button>
+                  ) : null}
+                </InlineStack>
               </BlockStack>
             </Card>
           </BlockStack>

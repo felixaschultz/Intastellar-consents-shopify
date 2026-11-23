@@ -2,19 +2,11 @@ import "@shopify/shopify-app-remix/adapters/node";
 import {
   ApiVersion,
   AppDistribution,
-  BillingInterval,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 import { resolveShopInputToMyshopifyHost } from "./resolve-shop-domain.server";
-// Plans for the Intastellar Consents Platform (intastellarconsents.com) — the
-// paid CMP dashboard add-on. The Shopify app itself stays free (merchants can
-// use Shopify's own consent log at no charge); a subscription here is what
-// unlocks the hosted platform. Per Shopify's app review requirement 1.2.1,
-// any charge tied to the app must go through Shopify's Billing API rather
-// than a checkout on our own site.
-import { BILLING_PLANS, BILLING_PLAN_PRICES } from "./lib/billing-plans";
 
 const scopesFromEnv = (process.env.SCOPES ?? "")
   .split(",")
@@ -45,44 +37,6 @@ const shopify = shopifyApp({
     connectionRetryIntervalMs: 4000,
   }),
   distribution: AppDistribution.AppStore,
-  billing: {
-    [BILLING_PLANS.PERSONAL]: {
-      lineItems: [
-        {
-          amount: BILLING_PLAN_PRICES[BILLING_PLANS.PERSONAL],
-          currencyCode: "EUR",
-          interval: BillingInterval.Every30Days,
-        },
-      ],
-    },
-    [BILLING_PLANS.STARTER]: {
-      lineItems: [
-        {
-          amount: BILLING_PLAN_PRICES[BILLING_PLANS.STARTER],
-          currencyCode: "EUR",
-          interval: BillingInterval.Every30Days,
-        },
-      ],
-    },
-    [BILLING_PLANS.GROWTH]: {
-      lineItems: [
-        {
-          amount: BILLING_PLAN_PRICES[BILLING_PLANS.GROWTH],
-          currencyCode: "EUR",
-          interval: BillingInterval.Every30Days,
-        },
-      ],
-    },
-    [BILLING_PLANS.AGENCY_PRO]: {
-      lineItems: [
-        {
-          amount: BILLING_PLAN_PRICES[BILLING_PLANS.AGENCY_PRO],
-          currencyCode: "EUR",
-          interval: BillingInterval.Every30Days,
-        },
-      ],
-    },
-  },
   future: {
     unstable_newEmbeddedAuthStrategy: true,
     expiringOfflineAccessTokens: true,
